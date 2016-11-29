@@ -250,6 +250,7 @@ module.exports = {
     OpHexlify: OpHexlify,
     OpSHA1: OpSHA1,
     OpRIPEMD160: OpRIPEMD160,
-    OpSHA256: OpSHA256
+    OpSHA256: OpSHA256,
+    CryptOp: CryptOp
 }
 

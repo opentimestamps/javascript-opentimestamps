@@ -59,6 +59,28 @@ class Timestamp {
         return self;
     };
 
+    serialize(){
+        //sort
+        var sorted_attestations=this.attestations;
+        for (var i=0;i<this.attestations.length;i++){
+            StreamSerializationContext.write_bytes({'\xff','\x00'});
+            sorted_attestations[i].serialize();
+        }
+        if (this.ops.length == 0) {
+            StreamSerializationContext.write_bytes('\x00')
+            sorted_attestations.last().serialize()
+        }else {
+            if (sorted_attestations.length > 0) {
+                StreamSerializationContext.write_bytes({'\xff', '\x00'});
+                sorted_attestations.last().serialize()
+            }
+            var sorted_ops = [];//sorted(self.ops.items(), key=lambda item: item[0])
+
+
+        }
+
+
+    }
 }
 
 module.exports = Timestamp;
