@@ -55,6 +55,9 @@ class OpBinary extends Op {
         super.serialize(tag);
         StreamSerializationContext.write_varbytes(this.arg[0]);
     }
+    toString() {
+        return "OpBinary";
+    }
 }
 
 
@@ -78,6 +81,9 @@ class OpAppend extends OpBinary {
     serialize() {
         return super.serialize(OpAppend.TAG());
     }
+    toString() {
+        return OpAppend.TAG_NAME();
+    }
 }
 
 class OpPrepend extends OpBinary {
@@ -97,6 +103,12 @@ class OpPrepend extends OpBinary {
     static deserialize_from_tag(tag) {
         return super.deserialize_from_tag(this, tag);
     }
+    toString() {
+        console.log(OpAppend.TAG_NAME());
+    }
+    toString() {
+        return OpAppend.TAG_NAME();
+    }
 }
 
 // UNARY SECTION
@@ -111,6 +123,9 @@ class OpUnary extends Op {
         } else {
             console.log("Unknown operation tag: ", Utils.bytesToHex([tag.charCodeAt()]));
         }
+    }
+    toString() {
+        return "OpUnary";
     }
 }
 
@@ -133,6 +148,9 @@ class OpReverse extends OpUnary {
     }
     static deserialize_from_tag(tag) {
         return super.deserialize_from_tag(this, tag);
+    }
+    toString() {
+        return OpAppend.TAG_NAME();
     }
 }
 
@@ -159,6 +177,9 @@ class OpHexlify extends OpUnary {
     static deserialize_from_tag(tag) {
         return super.deserialize_from_tag(this, tag);
     }
+    toString() {
+        return OpAppend.TAG_NAME();
+    }
 }
 
 class CryptOp extends OpUnary {
@@ -177,6 +198,9 @@ class CryptOp extends OpUnary {
     }
     static deserialize_from_tag(cls,tag) {
         return super.deserialize_from_tag(cls, tag);
+    }
+    toString() {
+        return OpAppend.TAG_NAME();
     }
 }
 
@@ -199,6 +223,9 @@ class OpSHA1 extends CryptOp{
     call(msg){
         return super.call(OpSHA1,msg);
     }
+    toString() {
+        return OpAppend.TAG_NAME();
+    }
 }
 
 class OpRIPEMD160 extends CryptOp{
@@ -219,6 +246,9 @@ class OpRIPEMD160 extends CryptOp{
     }
     call(msg){
         return super.call(OpRIPEMD160,msg);
+    }
+    toString() {
+        return OpAppend.TAG_NAME();
     }
 }
 
@@ -241,6 +271,9 @@ class OpSHA256 extends CryptOp{
     }
     call(msg){
         return super.call(OpSHA256,msg);
+    }
+    toString() {
+        return OpAppend.TAG_NAME();
     }
 }
 

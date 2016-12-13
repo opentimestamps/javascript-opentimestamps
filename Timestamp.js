@@ -4,7 +4,8 @@ var StreamDeserializationContext=require("./StreamDeserializationContext.js");
 var StreamSerializationContext=require("./StreamSerializationContext.js");
 var Utils=require("./Utils.js");
 var Notary=require("./Notary.js");
-var Ops=require("./Ops.js");
+var Ops=require("./Ops.js");;
+var Utils=require("./Utils.js");
 
 var msg = "";
 var attestations ={};
@@ -92,18 +93,39 @@ class Timestamp {
                 last_stamp=value;
             }
 
-            console.log("last_op: "+last_op);
-            console.log("last_stamp: "+last_stamp);
+            console.log("last_op: ")
+            console.log(last_op.toString());
+            console.log(last_stamp.toString());
 
             last_op.serialize();
             last_stamp.serialize();
-
-
 
         }
 
         StreamSerializationContext.toString();
 
+    }
+
+    toString(){
+        var output="";
+        output+="*** Timestamp ***\n";
+        output+="msg: "+Utils.bytesToHex(this.msg)+"\n";
+        output+=this.attestations.length+" attestations: \n";
+        var i=0;
+        for (var at of this.attestations) {
+            output+="["+i+"] "+Utils.bytesToHex(at.toString());
+            i++;
+        }
+
+        var i=0;
+        output+=this.ops.size+" ops: \n";
+        for (var [op, stamp] of this.ops) {
+            output+="["+i+"] op: "+op.toString()+"\n";
+            output+="["+i+"] stamp: "+stamp.toString()+"\n";
+            i++;
+        }
+        output+="\n";
+        return output;
     }
 }
 

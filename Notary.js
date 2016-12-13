@@ -67,6 +67,10 @@ class UnknownAttestation extends TimeAttestation {
     serialize_payload() {
         StreamSerializationContext.write_bytes(this.payload)
     }
+
+    toString(){
+        return this.TAG+" "+Utils.bytesToHex(this.payload);
+    }
 }
 
 class PendingAttestation extends TimeAttestation{
@@ -114,6 +118,9 @@ class PendingAttestation extends TimeAttestation{
     serialize_payload() {
         StreamSerializationContext.write_varbytes(this.uri)
     }
+    toString(){
+        return PendingAttestation.TAG()+" "+Utils.bytesToHex(this.uri);
+    }
 }
 
 
@@ -142,6 +149,9 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
 
     serialize_payload() {
         StreamSerializationContext.write_varuint(this.height)
+    }
+    toString(){
+        return BitcoinBlockHeaderAttestation.TAG()+" "+Utils.bytesToHex(this.height);
     }
 }
 

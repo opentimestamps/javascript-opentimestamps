@@ -45,4 +45,8 @@ class DetachedTimestampFile {
         StreamDeserializationContext.assert_eof();
         return DetachedTimestampFile(file_hash_op,timestamp);
     }
+
+    toString(){
+
+    }
 }
