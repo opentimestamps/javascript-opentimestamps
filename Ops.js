@@ -1,6 +1,7 @@
 'use strict';
 
 var StreamDeserializationContext=require("./StreamDeserializationContext.js");
+var StreamSerializationContext=require("./StreamSerializationContext.js");
 var Utils= require("./Utils.js");
 var crypto= require('crypto');
 
@@ -17,7 +18,7 @@ class Op{
     }
 
     static deserialize(){
-        var tag = StreamDeserializationContext.read_bytes(1);
+        this.tag = StreamDeserializationContext.read_bytes(1);
         return this.deserialize_from_tag(tag);
     };
 
@@ -27,6 +28,9 @@ class Op{
         }  else {
             console.log("Unknown operation tag: ", Utils.bytesToHex([tag.charCodeAt()]));
         }
+    };
+    serialize(tag){
+        StreamSerializationContext.write_bytes(tag);
     };
 }
 
@@ -47,6 +51,10 @@ class OpBinary extends Op {
             console.log("Unknown operation tag: ", Utils.bytesToHex([tag.charCodeAt()]));
         }
     }
+    serialize(tag){
+        super.serialize(tag);
+        StreamSerializationContext.write_varbytes(this.arg[0]);
+    }
 }
 
 
@@ -66,6 +74,9 @@ class OpAppend extends OpBinary {
     }
     static deserialize_from_tag(tag) {
         return super.deserialize_from_tag(this, tag);
+    }
+    serialize() {
+        return super.serialize(OpAppend.TAG());
     }
 }
 

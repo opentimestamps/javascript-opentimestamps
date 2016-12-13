@@ -40,7 +40,7 @@ class DetachedTimestampFile {
 
         var file_hash_op = Ops.CryptOp.deserialize(ctx);
         var file_hash = StreamDeserializationContext.read_bytes(this.file_hash_op.DIGEST_LENGTH)
-        var timestamp = Timestamp.deserialize( file_hash);
+        var timestamp = Timestamp.deserialize( file_hash );
 
         StreamDeserializationContext.assert_eof();
         return DetachedTimestampFile(file_hash_op,timestamp);

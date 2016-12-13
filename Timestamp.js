@@ -1,6 +1,7 @@
 'use strict';
 
 var StreamDeserializationContext=require("./StreamDeserializationContext.js");
+var StreamSerializationContext=require("./StreamSerializationContext.js");
 var Utils=require("./Utils.js");
 var Notary=require("./Notary.js");
 var Ops=require("./Ops.js");
@@ -16,7 +17,7 @@ class Timestamp {
     constructor(msg) {
         this.msg=msg;
         this.attestations=[];
-        this.ops=[];
+        this.ops= new Map();
     }
 
 
@@ -26,7 +27,7 @@ class Timestamp {
         var self= new Timestamp(initial_msg);
 
 
-        function do_tag_or_attestation (tag) {
+        function do_tag_or_attestation (tag,initial_msg) {
             console.log("do_tag_or_attestation: ", Utils.bytesToHex([tag.charCodeAt()]));
             if (tag == '\x00') {
                 var attestation = Notary.TimeAttestation.deserialize();
@@ -40,7 +41,7 @@ class Timestamp {
                 console.log("result: ",Utils.bytesToHex(result));
 
                 var stamp= Timestamp.deserialize(result)
-                self.ops[op] = stamp
+                self.ops.set(op, stamp);
 
                 console.log("OK");
 
@@ -56,29 +57,52 @@ class Timestamp {
             tag = StreamDeserializationContext.read_bytes(1);
         }
         do_tag_or_attestation(tag,initial_msg);
+
+
         return self;
     };
 
     serialize(){
+        console.log("serialize");
+
         //sort
         var sorted_attestations=this.attestations;
-        for (var i=0;i<this.attestations.length;i++){
-            StreamSerializationContext.write_bytes({'\xff','\x00'});
-            sorted_attestations[i].serialize();
-        }
-        if (this.ops.length == 0) {
-            StreamSerializationContext.write_bytes('\x00')
-            sorted_attestations.last().serialize()
-        }else {
-            if (sorted_attestations.length > 0) {
-                StreamSerializationContext.write_bytes({'\xff', '\x00'});
-                sorted_attestations.last().serialize()
+        if(sorted_attestations.length>1) {
+            for (var i = 0; i < sorted_attestations.length; i++) {
+                StreamSerializationContext.write_bytes(['\xff', '\x00']);
+                sorted_attestations[i].serialize();
             }
-            var sorted_ops = [];//sorted(self.ops.items(), key=lambda item: item[0])
+        }
+        if (this.ops.size == 0) {
+            StreamSerializationContext.write_bytes('\x00')
+            sorted_attestations[ sorted_attestations.length-1 ].serialize()
+        }else if (this.ops.size > 0) {
+            if (sorted_attestations.length > 0) {
+                StreamSerializationContext.write_bytes(['\xff', '\x00']);
+                sorted_attestations[ sorted_attestations.length-1 ].serialize()
+            }
+            //var sorted_ops = [];//sorted(self.ops.items(), key=lambda item: item[0])
+
+
+            var last_op;
+            var last_stamp;
+
+            for (var [key, value] of this.ops) {
+                last_op=key;
+                last_stamp=value;
+            }
+
+            console.log("last_op: "+last_op);
+            console.log("last_stamp: "+last_stamp);
+
+            last_op.serialize();
+            last_stamp.serialize();
+
 
 
         }
 
+        StreamSerializationContext.toString();
 
     }
 }

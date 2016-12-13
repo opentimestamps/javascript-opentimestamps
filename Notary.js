@@ -1,6 +1,7 @@
 'use strict'
 
 var StreamDeserializationContext=require("./StreamDeserializationContext.js");
+var StreamSerializationContext=require("./StreamSerializationContext.js");
 var Utils= require("./Utils.js");
 
 class TimeAttestation{
@@ -8,6 +9,7 @@ class TimeAttestation{
 
     constructor() {
     }
+
 
     static TAG_SIZE(){return 8;}
     static MAX_PAYLOAD_SIZE(){return 8192;}
@@ -44,6 +46,10 @@ class TimeAttestation{
         console.log();
         return;
     }
+
+    serialize(){
+        ;
+    }
 }
 
 
@@ -51,6 +57,15 @@ class UnknownAttestation extends TimeAttestation {
     constructor(tag,payload) {
         this.TAG=tag;
         this.payload=payload;
+    }
+
+    serialize() {
+        StreamSerializationContext.write_varbytes(UnknownAttestation.TAG());
+        this.serialize_payload();
+    }
+
+    serialize_payload() {
+        StreamSerializationContext.write_bytes(this.payload)
     }
 }
 
@@ -89,7 +104,15 @@ class PendingAttestation extends TimeAttestation{
         }
         var decode=new Buffer(utf8_uri).toString('ascii');
         return new PendingAttestation(decode)
+    }
 
+    serialize() {
+        StreamSerializationContext.write_varbytes(PendingAttestation.TAG());
+        this.serialize_payload();
+    }
+
+    serialize_payload() {
+        StreamSerializationContext.write_varbytes(this.uri)
     }
 }
 
@@ -109,6 +132,16 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
     static deserialize() {
         var height = StreamDeserializationContext.read_varuint()
         return new BitcoinBlockHeaderAttestation(height)
+    }
+
+
+    serialize() {
+        StreamSerializationContext.write_varbytes(BitcoinBlockHeaderAttestation.TAG());
+        this.serialize_payload();
+    }
+
+    serialize_payload() {
+        StreamSerializationContext.write_varuint(this.height)
     }
 }
 

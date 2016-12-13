@@ -14,6 +14,10 @@ console.log("resp_bytes: ",resp);
 console.log("digest_bytes: ",digest);
 
 var Timestamp=require("./Timestamp.js");
-Timestamp.deserialize(digest_bytes);
+var timestamp=Timestamp.deserialize(digest_bytes);
 
+var StreamSerializationContext=require("./StreamSerializationContext.js");
+StreamSerializationContext.open();
+
+timestamp.serialize();
 
