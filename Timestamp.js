@@ -1,6 +1,5 @@
 'use strict';
 
-var StreamDeserializationContext=require("./StreamDeserializationContext.js");
 var StreamSerializationContext=require("./StreamSerializationContext.js");
 var Utils=require("./Utils.js");
 var Notary=require("./Notary.js");
@@ -22,7 +21,7 @@ class Timestamp {
     }
 
 
-    static deserialize  (initial_msg){
+    static deserialize  (ctx,initial_msg){
 
         console.log("deserialize: ",Utils.bytesToHex(initial_msg))
         var self= new Timestamp(initial_msg);
@@ -31,17 +30,17 @@ class Timestamp {
         function do_tag_or_attestation (tag,initial_msg) {
             console.log("do_tag_or_attestation: ", tag);
             if (tag == '\x00') {
-                var attestation = Notary.TimeAttestation.deserialize();
+                var attestation = Notary.TimeAttestation.deserialize(ctx);
                 self.attestations.push(attestation);
                 console.log("attestation ",attestation);
             } else {
 
-                var op = Ops.Op.deserialize_from_tag(tag);
+                var op = Ops.Op.deserialize_from_tag(ctx,tag);
 
                 var result = op.call(initial_msg);
                 console.log("result: ",Utils.bytesToHex(result));
 
-                var stamp= Timestamp.deserialize(result)
+                var stamp= Timestamp.deserialize(ctx,result)
                 self.ops.set(op, stamp);
 
                 console.log("OK");
@@ -49,14 +48,14 @@ class Timestamp {
             }
         };
 
-        var tag = StreamDeserializationContext.read_bytes(1);
+        var tag = ctx.read_bytes(1);
         var tag = String.fromCharCode(tag[0])[0];
 
         while(tag=='\xff'){
-            var current= StreamDeserializationContext.read_bytes(1);
+            var current= ctx.read_bytes(1);
             current = String.fromCharCode(current[0])[0];
             do_tag_or_attestation(current,initial_msg);
-            tag = StreamDeserializationContext.read_bytes(1);
+            tag = ctx.read_bytes(1);
             tag = String.fromCharCode(tag[0])[0];
         }
         do_tag_or_attestation(tag,initial_msg);

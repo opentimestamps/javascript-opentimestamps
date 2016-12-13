@@ -1,6 +1,5 @@
 'use strict';
 
-var StreamDeserializationContext=require("./StreamDeserializationContext.js");
 var StreamSerializationContext=require("./StreamSerializationContext.js");
 var Utils=require("./Utils.js");
 var Notary=require("./Notary.js");
@@ -35,15 +34,15 @@ class DetachedTimestampFile {
         this.timestamp.serialize();
     }
 
-    static deserialize(){
-        StreamDeserializationContext.assert_magic(HEADER_MAGIC);
-        StreamDeserializationContext.read_varuint();
+    static deserialize(ctx){
+        ctx.assert_magic(HEADER_MAGIC);
+        ctx.read_varuint();
 
-        var file_hash_op = Ops.CryptOp.deserialize();
-        var file_hash = StreamDeserializationContext.read_bytes(file_hash_op.DIGEST_LENGTH())
-        var timestamp = Timestamp.deserialize( file_hash );
+        var file_hash_op = Ops.CryptOp.deserialize(ctx);
+        var file_hash = ctx.read_bytes(file_hash_op.DIGEST_LENGTH())
+        var timestamp = Timestamp.deserialize( ctx, file_hash );
 
-        StreamDeserializationContext.assert_eof();
+        ctx.assert_eof();
         return new DetachedTimestampFile(file_hash_op,timestamp);
     }
 }

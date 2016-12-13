@@ -1,6 +1,5 @@
 'use strict';
 
-var StreamDeserializationContext=require("./StreamDeserializationContext.js");
 var StreamSerializationContext=require("./StreamSerializationContext.js");
 var Utils= require("./Utils.js");
 var crypto= require('crypto');
@@ -37,15 +36,15 @@ class Op{
         return 4096;
     }
 
-    static deserialize(){
-        this.tag = StreamDeserializationContext.read_bytes(1);
+    static deserialize(ctx){
+        this.tag = ctx.read_bytes(1);
         this.tag=String.fromCharCode(this.tag[0]);
-        return Op.deserialize_from_tag(this.tag);
+        return Op.deserialize_from_tag(ctx,this.tag);
     };
 
-    static deserialize_from_tag(tag) {
+    static deserialize_from_tag(ctx,tag) {
         if (Object.keys(SUBCLS_BY_TAG).indexOf(tag) != -1) {
-            return SUBCLS_BY_TAG[tag].deserialize_from_tag(tag);
+            return SUBCLS_BY_TAG[tag].deserialize_from_tag(ctx,tag);
         }  else {
             console.log("Unknown operation tag: ", Utils.bytesToHex([tag]));
         }
@@ -67,10 +66,10 @@ class OpBinary extends Op {
         }
     }
 
-    static deserialize_from_tag(cls, tag) {
+    static deserialize_from_tag(cls,ctx, tag) {
         //tag=String.fromCharCode(tag);
         if (Object.keys(SUBCLS_BY_TAG).indexOf(tag) != -1) {
-            var arg = StreamDeserializationContext.read_varbytes(cls.MAX_RESULT_LENGTH(), 1)
+            var arg = ctx.read_varbytes(cls.MAX_RESULT_LENGTH(), 1)
             console.log("read: "+Utils.bytesToHex(arg));
             return new SUBCLS_BY_TAG[tag](arg);
         } else {
@@ -105,8 +104,8 @@ class OpAppend extends OpBinary {
     call(msg) {
         return msg.concat(this.arg)
     }
-    static deserialize_from_tag(tag) {
-        return super.deserialize_from_tag(this, tag);
+    static deserialize_from_tag(ctx,tag) {
+        return super.deserialize_from_tag(this,ctx, tag);
     }
     serialize() {
         return super.serialize(OpAppend.TAG());
@@ -131,8 +130,8 @@ class OpPrepend extends OpBinary {
     call(msg) {
         return this.arg.concat(msg)
     }
-    static deserialize_from_tag(tag) {
-        return super.deserialize_from_tag(this, tag);
+    static deserialize_from_tag(ctx,tag) {
+        return super.deserialize_from_tag(this,ctx, tag);
     }
 }
 
@@ -146,11 +145,9 @@ class OpUnary extends Op {
             this.arg = arg_;
         }
     }
-    static deserialize_from_tag( tag) {
+    static deserialize_from_tag(ctx, tag) {
         if (Object.keys(SUBCLS_BY_TAG).indexOf(tag) != -1) {
-
             return new SUBCLS_BY_TAG[tag]();
-            //return (new SUBCLS_BY_TAG[tag](  (new SUBCLS_BY_TAG[tag]()).call()   ));
         } else {
             console.log("Unknown operation tag: ", Utils.bytesToHex([tag]));
         }
@@ -181,8 +178,8 @@ class OpReverse extends OpUnary {
         }
         //return msg;//[::-1];
     }
-    static deserialize_from_tag(tag) {
-        return super.deserialize_from_tag( tag);
+    static deserialize_from_tag(ctx,tag) {
+        return super.deserialize_from_tag(ctx, tag);
     }
 }
 
@@ -209,8 +206,8 @@ class OpHexlify extends OpUnary {
             console.log("Can't hexlify an empty message")
         }
     }
-    static deserialize_from_tag(tag) {
-        return super.deserialize_from_tag(this, tag);
+    static deserialize_from_tag(ctx,tag) {
+        return super.deserialize_from_tag(this,ctx, tag);
     }
 }
 
@@ -229,8 +226,8 @@ class CryptOp extends OpUnary {
         }
         return output;
     }
-    static deserialize_from_tag(tag) {
-        return super.deserialize_from_tag( tag);
+    static deserialize_from_tag(ctx,tag) {
+        return super.deserialize_from_tag(ctx, tag);
     }
 }
 
@@ -247,8 +244,8 @@ class OpSHA1 extends CryptOp{
     DIGEST_LENGTH(){
         return  20;
     }
-    static deserialize_from_tag(tag) {
-        return super.deserialize_from_tag(this, tag);
+    static deserialize_from_tag(ctx,tag) {
+        return super.deserialize_from_tag(this,ctx, tag);
     }
     call(msg){
         return super.call(msg);
@@ -268,8 +265,8 @@ class OpRIPEMD160 extends CryptOp{
     DIGEST_LENGTH(){
         return 20;
     }
-    static deserialize_from_tag(tag) {
-        return super.deserialize_from_tag(this, tag);
+    static deserialize_from_tag(ctx,tag) {
+        return super.deserialize_from_tag(this,ctx, tag);
     }
     call(msg){
         return super.call(msg);
@@ -291,8 +288,8 @@ class OpSHA256 extends CryptOp{
     DIGEST_LENGTH(){
         return 32;
     }
-    static deserialize_from_tag(tag) {
-        return super.deserialize_from_tag( tag);
+    static deserialize_from_tag(ctx,tag) {
+        return super.deserialize_from_tag(ctx, tag);
     }
     call(msg){
         return super.call(msg);

@@ -25,9 +25,17 @@ console.log("ots_bytes: ",file_ots);
 
 var ots_bytes=Utils.hexToBytes(file_ots);
 StreamDeserializationContext.open(ots_bytes);
+/*
+
+*/
+
+var Context=require("./Context.js");
+var ctx= new Context.StreamDeserialization();
+ctx.open(ots_bytes);
 
 var DetachedTimestampFile=require("./DetachedTimestampFile.js");
-var detachedTimestampFile=DetachedTimestampFile.DetachedTimestampFile.deserialize();
+var detachedTimestampFile=DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+
 
 
 console.log("File");
@@ -40,7 +48,6 @@ console.log(Utils.bytesToHex(detachedTimestampFile.file_digest()));
 var Timestamp=require("./Timestamp.js");
 console.log("Timestamp");
 console.log(Timestamp.str_tree_extended( detachedTimestampFile.timestamp,0 ));
-
 
 
 

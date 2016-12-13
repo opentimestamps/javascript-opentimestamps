@@ -1,7 +1,8 @@
 'use strict'
 
-var StreamDeserializationContext=require("./StreamDeserializationContext.js");
 var StreamSerializationContext=require("./StreamSerializationContext.js");
+var Context=require("./Context.js");
+
 var Utils= require("./Utils.js");
 
 class TimeAttestation{
@@ -15,33 +16,34 @@ class TimeAttestation{
     static MAX_PAYLOAD_SIZE(){return 8192;}
 
 
-    static deserialize  (){
+    static deserialize  (ctx){
         console.log("attestation deserialize");
 
-        var tag = StreamDeserializationContext.read_bytes(this.TAG_SIZE());
+        var tag = ctx.read_bytes(this.TAG_SIZE());
         console.log("tag: ",Utils.bytesToHex(tag));
 
         console.log("tag(PendingAttestation): ",Utils.bytesToHex(PendingAttestation.TAG()));
         console.log("tag(BitcoinBlockHeaderAttestation): ",Utils.bytesToHex(BitcoinBlockHeaderAttestation.TAG()));
-        /*
-         var serialized_attestation = StreamDeserializationContext.read_varbytes(this.MAX_PAYLOAD_SIZE())
+
+
+
+         var serialized_attestation = ctx.read_varbytes(this.MAX_PAYLOAD_SIZE())
          console.log("serialized_attestation: ",Utils.bytesToHex(serialized_attestation));
 
-         // Fake object
-         var payload_ctx = serialized_attestation;//opentimestamps.core.serialize.BytesDeserializationContext(serialized_attestation)
-         console.log("payload_ctx: ",Utils.bytesToHex(payload_ctx));
-         */
+
+        var ctx_payload= new Context.StreamDeserialization();
+        ctx_payload.open(serialized_attestation);
 
         if (Utils.arrEq(tag, PendingAttestation.TAG()) == true){
             console.log("PendingAttestation: ");
-            return PendingAttestation.deserialize()
+            return PendingAttestation.deserialize(ctx_payload)
         }else if (Utils.arrEq(tag, BitcoinBlockHeaderAttestation.TAG()) == true){
             console.log("BitcoinBlockHeaderAttestation: ");
-            return BitcoinBlockHeaderAttestation.deserialize()
+            return BitcoinBlockHeaderAttestation.deserialize(ctx_payload)
         }else {
             console.log("UnknownAttestation: ");
-            var serialized_attestation = StreamDeserializationContext.read_varbytes(this.MAX_PAYLOAD_SIZE())
-            return UnknownAttestation(tag,serialized_attestation);
+            var serialized_attestation = ctx_payload.read_varbytes(this.MAX_PAYLOAD_SIZE())
+            return new UnknownAttestation(tag,serialized_attestation);
         }
         console.log();
         return;
@@ -100,8 +102,8 @@ class PendingAttestation extends TimeAttestation{
         return true;
     }
 
-    static deserialize(){
-        var utf8_uri = StreamDeserializationContext.read_varbytes(this.MAX_URI_LENGTH())
+    static deserialize(ctx_payload){
+        var utf8_uri = ctx_payload.read_varbytes(this.MAX_URI_LENGTH())
         if( this.check_uri(utf8_uri) == false ){
             console.log("Invalid URI: ");
             return;
@@ -136,8 +138,8 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
         this.height = height_;
     }
 
-    static deserialize() {
-        var height = StreamDeserializationContext.read_varuint()
+    static deserialize(ctx_payload) {
+        var height = ctx_payload.read_varuint()
         return new BitcoinBlockHeaderAttestation(height)
     }
 

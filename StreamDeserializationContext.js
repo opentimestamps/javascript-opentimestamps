@@ -6,25 +6,22 @@ var Utils=require("./Utils.js");
 var fileName = "1.ots";
 var fd = undefined;
 */
-var resp_bytes=[];
-var counter=0;
-
 
 module.exports = {
 
     getOutput: function (){
-        return resp_bytes;
+        return this.resp_bytes;
     },
     getCounter: function(){
-        return counter;
+        return this.counter;
     },
     open: function (stream_bytes) {
-        resp_bytes = stream_bytes;
-        counter = 0;
+        this.resp_bytes = stream_bytes;
+        this.counter = 0;
     },
     read: function (l) {
-        var output = resp_bytes.slice(counter, counter + l);
-        counter += l;
+        var output = this.resp_bytes.slice(this.counter, this.counter + l);
+        this.counter += l;
         return output;
     },
     read_bool: function () {
