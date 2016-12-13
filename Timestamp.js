@@ -29,7 +29,7 @@ class Timestamp {
 
 
         function do_tag_or_attestation (tag,initial_msg) {
-            console.log("do_tag_or_attestation: ", Utils.bytesToHex([tag.charCodeAt()]));
+            console.log("do_tag_or_attestation: ", tag);
             if (tag == '\x00') {
                 var attestation = Notary.TimeAttestation.deserialize();
                 self.attestations.push(attestation);
@@ -54,8 +54,10 @@ class Timestamp {
 
         while(tag=='\xff'){
             var current= StreamDeserializationContext.read_bytes(1);
+            current = String.fromCharCode(current[0])[0];
             do_tag_or_attestation(current,initial_msg);
             tag = StreamDeserializationContext.read_bytes(1);
+            tag = String.fromCharCode(tag[0])[0];
         }
         do_tag_or_attestation(tag,initial_msg);
 
@@ -126,6 +128,43 @@ class Timestamp {
         }
         output+="\n";
         return output;
+    }
+
+    str_tree(indent=0){
+        var output="";
+        if(this.attestations.length>0){
+            for (var attestation of this.attestations) {
+                for (i=0;i<indent;i++){
+                    output+="\t";
+                }
+                output += "verify " + attestation.toString() + "\n";
+            }
+        }
+
+        if (this.ops.size>1){
+            for (var [op, timestamp] of this.ops) {
+                for (i = 0; i < indent; i++) {
+                    output += "\t";
+                }
+                output += " -> ";
+                output += op.toString() + "\n";
+                output += timestamp.str_tree(indent + 1) + "\n";
+            }
+        } else if (this.ops.size>0){
+            for (var i = 0; i < indent; i++) {
+                output += "\t";
+            }
+            for (var [op, timestamp] of this.ops) {
+                for (i = 0; i < indent; i++) {
+                    output += "\t";
+                }
+                output += op.toString() + "\n";
+                output += timestamp.str_tree(indent) + "\n";
+            }
+        }
+        return output;
+
+
     }
 }
 

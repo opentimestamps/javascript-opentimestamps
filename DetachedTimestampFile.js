@@ -5,6 +5,7 @@ var StreamSerializationContext=require("./StreamSerializationContext.js");
 var Utils=require("./Utils.js");
 var Notary=require("./Notary.js");
 var Ops=require("./Ops.js");
+var Timestamp=require("./Timestamp.js");
 
 var msg = "";
 var attestations ={};
@@ -26,7 +27,7 @@ class DetachedTimestampFile {
         return this.timestamp.msg;
     }
 
-    static serialize(){
+    serialize(){
         StreamSerializationContext.write_bytes(HEADER_MAGIC);
         StreamSerializationContext.write_varuint(MAJOR_VERSION);
         this.file_hash_op.serialize();
@@ -38,15 +39,16 @@ class DetachedTimestampFile {
         StreamDeserializationContext.assert_magic(HEADER_MAGIC);
         StreamDeserializationContext.read_varuint();
 
-        var file_hash_op = Ops.CryptOp.deserialize(ctx);
-        var file_hash = StreamDeserializationContext.read_bytes(this.file_hash_op.DIGEST_LENGTH)
+        var file_hash_op = Ops.CryptOp.deserialize();
+        var file_hash = StreamDeserializationContext.read_bytes(file_hash_op.DIGEST_LENGTH())
         var timestamp = Timestamp.deserialize( file_hash );
 
         StreamDeserializationContext.assert_eof();
-        return DetachedTimestampFile(file_hash_op,timestamp);
+        return new DetachedTimestampFile(file_hash_op,timestamp);
     }
+}
 
-    toString(){
 
-    }
+module.exports = {
+    DetachedTimestampFile : DetachedTimestampFile
 }

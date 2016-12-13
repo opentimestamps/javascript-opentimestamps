@@ -2,19 +2,18 @@
 
 var fs = require("fs");
 var Utils=require("./Utils.js");
-
+/*
 var fileName = "1.ots";
 var fd = undefined;
-
-var resp="f010f393dbe2ddb8353c1c20026d9afd551708f104583574c8f008260721746284f7c60083dfe30d2ef90c8e2e2d68747470733a2f2f616c6963652e6274632e63616c656e6461722e6f70656e74696d657374616d70732e6f7267";
+*/
 var resp_bytes=[];
 var counter=0;
 
 
 module.exports = {
 
-    open: function () {
-        resp_bytes = Utils.hexToBytes(resp);
+    open: function (stream_bytes) {
+        resp_bytes = stream_bytes;
         counter = 0;
     },
     read: function (l) {
@@ -68,7 +67,7 @@ module.exports = {
         return true;
     },
     assert_eof: function () {
-        var excess = this.read(l);
+        var excess = this.read();
         if (excess != undefined)
             return true
         return false;

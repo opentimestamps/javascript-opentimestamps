@@ -17,6 +17,15 @@ exports.bytesToHex=function(bytes) {
     }
     return hex.join("");
 };
+exports.charsToHex=function(bytes) {
+    for (var hex = [], i = 0; i < bytes.length; i++) {
+        var b=bytes[i].charCodeAt();
+        hex.push((b >>> 4).toString(16));
+        hex.push((b & 0xF).toString(16));
+    }
+    return hex.join("");
+};
+
 
 exports.arrEq=function(arr1, arr2) {
     for (var i = 0; i < arr1.length; i++)
