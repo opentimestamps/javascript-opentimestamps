@@ -159,7 +159,60 @@ class Timestamp {
                     output += "\t";
                 }
                 output += op.toString() + "\n";
+
+                output += " ( "+Utils.bytesToHex(this.msg)+" ) ";
+                output += "\n";
                 output += timestamp.str_tree(indent) + "\n";
+            }
+        }
+        return output;
+
+
+    }
+
+    static indention(pos){
+        var output="";
+        for (var i=0;i<pos;i++){
+            output+="\t";
+        }
+        return output;
+    }
+
+    static str_tree_extended(timestamp,indent=0){
+        var output="";
+        var x="";
+        if(timestamp.attestations.length>0){
+            for (var attestation of timestamp.attestations) {
+                if(attestation instanceof Notary.BitcoinBlockHeaderAttestation)
+                    x=" BLOCK MERKLE ROOT";
+
+                output += Timestamp.indention(indent);
+                output += "verify " + attestation.toString();
+                output += " ("+Utils.bytesToHex(timestamp.msg)+") ";
+                //output += " ["+Utils.bytesToHex(timestamp.msg)+"] ";
+                output += "\n";
+            }
+        }
+
+        if (timestamp.ops.size>1){
+            for (var [op, t] of timestamp.ops) {
+                output += Timestamp.indention(indent);
+                output += " -> ";
+                output += op.toString();
+                output += " ("+Utils.bytesToHex(timestamp.msg)+") ";
+                output += "\n";
+                output += Timestamp.str_tree_extended(ts,indent+1);
+            }
+        } else if (timestamp.ops.size>0){
+
+            output += Timestamp.indention(indent);
+            for (var [op, ts] of timestamp.ops) {
+                output += Timestamp.indention(indent);
+                output += op.toString() ;
+
+                output += " ( "+Utils.bytesToHex(timestamp.msg)+" ) ";
+                output += "\n";
+                output += Timestamp.str_tree_extended(ts,indent);
             }
         }
         return output;

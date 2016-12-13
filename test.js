@@ -37,9 +37,10 @@ console.log("hash");
 console.log(Utils.bytesToHex(detachedTimestampFile.file_digest()));
 
 
+var Timestamp=require("./Timestamp.js");
 console.log("Timestamp");
+console.log(Timestamp.str_tree_extended( detachedTimestampFile.timestamp,0 ));
 
-console.log(detachedTimestampFile.timestamp.str_tree());
 
 
 

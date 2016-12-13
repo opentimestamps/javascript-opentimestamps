@@ -12,6 +12,12 @@ var counter=0;
 
 module.exports = {
 
+    getOutput: function (){
+        return resp_bytes;
+    },
+    getCounter: function(){
+        return counter;
+    },
     open: function (stream_bytes) {
         resp_bytes = stream_bytes;
         counter = 0;
@@ -67,7 +73,7 @@ module.exports = {
         return true;
     },
     assert_eof: function () {
-        var excess = this.read();
+        var excess = this.read(1);
         if (excess != undefined)
             return true
         return false;

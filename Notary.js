@@ -69,7 +69,7 @@ class UnknownAttestation extends TimeAttestation {
     }
 
     toString(){
-        return  "UnknownAttestation "+this.TAG+" "+Utils.bytesToHex(this.payload);
+        return  "UnknownAttestation "+Utils.bytesToHex(this.TAG)+" "+Utils.bytesToHex(this.payload);
     }
 }
 
@@ -119,7 +119,7 @@ class PendingAttestation extends TimeAttestation{
         StreamSerializationContext.write_varbytes(this.uri)
     }
     toString(){
-        return "PendingAttestation "+PendingAttestation.TAG()+" "+Utils.charsToHex(this.uri);
+        return "PendingAttestation('"+this.uri+"')";
     }
 }
 
@@ -151,7 +151,7 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
         StreamSerializationContext.write_varuint(this.height)
     }
     toString(){
-        return "BitcoinBlockHeaderAttestation "+BitcoinBlockHeaderAttestation.TAG()+" "+Utils.bytesToHex([this.height]);
+        return "BitcoinBlockHeaderAttestation "+Utils.bytesToHex(BitcoinBlockHeaderAttestation.TAG())+" "+Utils.bytesToHex([this.height]);
     }
 }
 

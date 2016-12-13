@@ -45,7 +45,7 @@ class Op{
 
     static deserialize_from_tag(tag) {
         if (Object.keys(SUBCLS_BY_TAG).indexOf(tag) != -1) {
-            return SUBCLS_BY_TAG[tag].deserialize_from_tag(tag)
+            return SUBCLS_BY_TAG[tag].deserialize_from_tag(tag);
         }  else {
             console.log("Unknown operation tag: ", Utils.bytesToHex([tag]));
         }
@@ -58,9 +58,13 @@ class Op{
 // BINARY SECTION
 class OpBinary extends Op {
 
-    constructor(arg) {
+    constructor(arg_) {
         super();
-        this.arg = arg;
+        if(arg_==undefined){
+            this.arg=[];
+        }else {
+            this.arg = arg_;
+        }
     }
 
     static deserialize_from_tag(cls, tag) {
@@ -78,7 +82,7 @@ class OpBinary extends Op {
         StreamSerializationContext.write_varbytes(this.arg[0]);
     }
     toString() {
-        return "OpBinary";
+        return this.TAG_NAME() + " " + Utils.bytesToHex(this.arg);
     }
 }
 
@@ -86,12 +90,16 @@ class OpBinary extends Op {
 class OpAppend extends OpBinary {
     constructor(arg_) {
         super(arg_);
-        this.arg = arg_;
+        if(arg_==undefined){
+            this.arg=[];
+        }else {
+            this.arg = arg_;
+        }
     }
     static TAG(){
         return '\xf0';
     }
-    static TAG_NAME(){
+    TAG_NAME(){
         return 'append';
     }
     call(msg) {
@@ -103,20 +111,21 @@ class OpAppend extends OpBinary {
     serialize() {
         return super.serialize(OpAppend.TAG());
     }
-    toString() {
-        return OpAppend.TAG_NAME() + " " + Utils.bytesToHex(this.arg);
-    }
 }
 
 class OpPrepend extends OpBinary {
     constructor(arg_) {
         super(arg_);
-        this.arg = arg_;
+        if(arg_==undefined){
+            this.arg=[];
+        }else {
+            this.arg = arg_;
+        }
     }
     static TAG(){
         return '\xf1';
     }
-    static TAG_NAME(){
+    TAG_NAME(){
         return 'prepend';
     }
     call(msg) {
@@ -125,41 +134,45 @@ class OpPrepend extends OpBinary {
     static deserialize_from_tag(tag) {
         return super.deserialize_from_tag(this, tag);
     }
-    toString() {
-        console.log(OpAppend.TAG_NAME());
-    }
-    toString() {
-        return OpPrepend.TAG_NAME() + " " + Utils.bytesToHex(this.arg);
-    }
 }
 
 // UNARY SECTION
 class OpUnary extends Op {
-    constructor(arg) {
+    constructor(arg_) {
         super();
-        this.arg = arg;
+        if(arg_==undefined){
+            this.arg=[];
+        }else {
+            this.arg = arg_;
+        }
     }
     static deserialize_from_tag( tag) {
         if (Object.keys(SUBCLS_BY_TAG).indexOf(tag) != -1) {
-            return (new SUBCLS_BY_TAG[tag](  new SUBCLS_BY_TAG[tag]().call()   ));
+
+            return new SUBCLS_BY_TAG[tag]();
+            //return (new SUBCLS_BY_TAG[tag](  (new SUBCLS_BY_TAG[tag]()).call()   ));
         } else {
             console.log("Unknown operation tag: ", Utils.bytesToHex([tag]));
         }
     }
     toString() {
-        return "OpUnary";
+        return this.TAG_NAME()+" "+Utils.bytesToHex(this.arg);
     }
 }
 
 class OpReverse extends OpUnary {
     constructor(arg_) {
         super(arg_);
-        this.arg = arg_;
+        if(arg_==undefined){
+            this.arg=[];
+        }else {
+            this.arg = arg_;
+        }
     }
     static TAG(){
         return '\xf2';
     }
-    static TAG_NAME(){
+    TAG_NAME(){
         return 'reverse';
     }
     call(msg) {
@@ -171,20 +184,21 @@ class OpReverse extends OpUnary {
     static deserialize_from_tag(tag) {
         return super.deserialize_from_tag( tag);
     }
-    toString() {
-        return OpReverse.TAG_NAME();
-    }
 }
 
 class OpHexlify extends OpUnary {
     constructor(arg_) {
         super(arg_);
-        this.arg = arg_;
+        if(arg_==undefined){
+            this.arg=[];
+        }else {
+            this.arg = arg_;
+        }
     }
     static TAG(){
         return '\xf3';
     }
-    static TAG_NAME(){
+    TAG_NAME(){
         return 'hexlify';
     }
     static MAX_MSG_LENGTH() {
@@ -197,9 +211,6 @@ class OpHexlify extends OpUnary {
     }
     static deserialize_from_tag(tag) {
         return super.deserialize_from_tag(this, tag);
-    }
-    toString() {
-        return OpAppend.TAG_NAME();
     }
 }
 
@@ -221,16 +232,13 @@ class CryptOp extends OpUnary {
     static deserialize_from_tag(tag) {
         return super.deserialize_from_tag( tag);
     }
-    toString() {
-        return HASHLIB_NAME();
-    }
 }
 
 class OpSHA1 extends CryptOp{
     static TAG(){
         return '\x02';
     }
-    static TAG_NAME(){
+    TAG_NAME(){
         return 'sha1';
     }
     HASHLIB_NAME(){
@@ -243,18 +251,15 @@ class OpSHA1 extends CryptOp{
         return super.deserialize_from_tag(this, tag);
     }
     call(msg){
-        return super.call(OpSHA1,msg);
-    }
-    toString() {
-        return OpSHA1.TAG_NAME();
+        return super.call(msg);
     }
 }
 
 class OpRIPEMD160 extends CryptOp{
     static TAG(){
-        return '\x02';
+        return '\x03';
     }
-    static TAG_NAME(){
+    TAG_NAME(){
         return 'ripemd160';
     }
     HASHLIB_NAME(){
@@ -267,19 +272,17 @@ class OpRIPEMD160 extends CryptOp{
         return super.deserialize_from_tag(this, tag);
     }
     call(msg){
-        return super.call(OpRIPEMD160,msg);
-    }
-    toString() {
-        return OpRIPEMD160.TAG_NAME();
+        return super.call(msg);
     }
 }
 
 
 class OpSHA256 extends CryptOp{
+
     static TAG(){
         return '\x08';
     }
-    static TAG_NAME(){
+    TAG_NAME(){
         return 'sha256';
     }
     HASHLIB_NAME(){
@@ -292,10 +295,7 @@ class OpSHA256 extends CryptOp{
         return super.deserialize_from_tag( tag);
     }
     call(msg){
-        return super.call(OpSHA256,msg);
-    }
-    toString() {
-        return OpSHA256.TAG_NAME();
+        return super.call(msg);
     }
 }
 
