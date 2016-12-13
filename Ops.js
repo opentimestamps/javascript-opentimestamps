@@ -82,7 +82,7 @@ class OpAppend extends OpBinary {
         return super.serialize(OpAppend.TAG());
     }
     toString() {
-        return OpAppend.TAG_NAME();
+        return OpAppend.TAG_NAME() + " " + Utils.bytesToHex(this.arg);
     }
 }
 
@@ -107,7 +107,7 @@ class OpPrepend extends OpBinary {
         console.log(OpAppend.TAG_NAME());
     }
     toString() {
-        return OpAppend.TAG_NAME();
+        return OpPrepend.TAG_NAME() + " " + Utils.bytesToHex(this.arg);
     }
 }
 
@@ -150,7 +150,7 @@ class OpReverse extends OpUnary {
         return super.deserialize_from_tag(this, tag);
     }
     toString() {
-        return OpAppend.TAG_NAME();
+        return OpReverse.TAG_NAME();
     }
 }
 
@@ -200,7 +200,7 @@ class CryptOp extends OpUnary {
         return super.deserialize_from_tag(cls, tag);
     }
     toString() {
-        return OpAppend.TAG_NAME();
+        return HASHLIB_NAME();
     }
 }
 
@@ -224,7 +224,7 @@ class OpSHA1 extends CryptOp{
         return super.call(OpSHA1,msg);
     }
     toString() {
-        return OpAppend.TAG_NAME();
+        return OpSHA1.TAG_NAME();
     }
 }
 
@@ -248,7 +248,7 @@ class OpRIPEMD160 extends CryptOp{
         return super.call(OpRIPEMD160,msg);
     }
     toString() {
-        return OpAppend.TAG_NAME();
+        return OpRIPEMD160.TAG_NAME();
     }
 }
 
@@ -273,7 +273,7 @@ class OpSHA256 extends CryptOp{
         return super.call(OpSHA256,msg);
     }
     toString() {
-        return OpAppend.TAG_NAME();
+        return OpSHA256.TAG_NAME();
     }
 }
 
