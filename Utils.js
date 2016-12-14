@@ -2,6 +2,8 @@
  * Created by luca on 23/11/16.
  */
 
+var crypto= require('crypto');
+
 // Convert a hex string to a byte array
 exports.hexToBytes= function(hex) {
     for (var bytes = [], c = 0; c < hex.length; c += 2)
