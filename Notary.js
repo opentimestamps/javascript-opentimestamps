@@ -1,6 +1,5 @@
 'use strict'
 
-var StreamSerializationContext=require("./StreamSerializationContext.js");
 var Context=require("./Context.js");
 
 var Utils= require("./Utils.js");

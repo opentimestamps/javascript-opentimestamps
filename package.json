@@ -1,0 +1,25 @@
+{
+  "name": "javascript-opentimestamps",
+  "version": "1.0.0",
+  "description": "JS Porting of OpenTimestamps",
+  "main": "test.js",
+  "dependencies": {
+    "crypto": "0.0.3",
+    "fs": "0.0.1-security",
+    "request": "^2.79.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eternitywall/javascript-opentimestamps.git"
+  },
+  "author": "Luca Vaccaro",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/eternitywall/javascript-opentimestamps/issues"
+  },
+  "homepage": "https://github.com/eternitywall/javascript-opentimestamps#readme"
+}

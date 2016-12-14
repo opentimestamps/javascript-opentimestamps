@@ -1,6 +1,5 @@
 'use strict';
 
-var StreamSerializationContext=require("./StreamSerializationContext.js");
 var Utils= require("./Utils.js");
 var crypto= require('crypto');
 
@@ -220,6 +219,7 @@ class CryptOp extends OpUnary {
     call(msg){
         var shasum = crypto.createHash( this.HASHLIB_NAME() ).update(new Buffer(msg));
         var hashDigest = shasum.digest();
+        // from buffer to array
         var output=[hashDigest.length];
         for (var i=0;i<hashDigest.length;i++){
             output[i]=hashDigest[i];
@@ -228,6 +228,25 @@ class CryptOp extends OpUnary {
     }
     static deserialize_from_tag(ctx,tag) {
         return super.deserialize_from_tag(ctx, tag);
+    }
+
+    hash_fd(ctx){
+        var hasher = crypto.createHash( this.HASHLIB_NAME() );
+        while (true){
+            var chuck = ctx.read(1048576); //(2**20) = 1MB chunks
+            if (chuck != undefined && chuck.length > 0) {
+                hasher.update((new Buffer(chuck)));
+            }else {
+                break;
+            }
+        }
+        // from buffer to array
+        var hashDigest=hasher.digest()
+        var output=[hashDigest.length];
+        for (var i=0;i<hashDigest.length;i++){
+            output[i]=hashDigest[i];
+        }
+        return output;
     }
 }
 

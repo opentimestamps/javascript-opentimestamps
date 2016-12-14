@@ -1,6 +1,5 @@
 'use strict';
 
-var StreamSerializationContext=require("./StreamSerializationContext.js");
 var Utils=require("./Utils.js");
 var Notary=require("./Notary.js");
 var Ops=require("./Ops.js");;

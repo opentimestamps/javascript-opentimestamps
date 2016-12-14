@@ -1,6 +1,5 @@
 'use strict';
 
-var StreamSerializationContext=require("./StreamSerializationContext.js");
 var Utils=require("./Utils.js");
 var Notary=require("./Notary.js");
 var Ops=require("./Ops.js");
@@ -45,6 +44,12 @@ class DetachedTimestampFile {
         ctx.assert_eof();
         return new DetachedTimestampFile(file_hash_op,timestamp);
     }
+
+    static from_bytes (file_hash_op,ctx){
+        var fd_hash = file_hash_op.hash_fd(ctx)
+        return new DetachedTimestampFile(file_hash_op, new Timestamp(fd_hash))
+    }
+
 }
 
 
