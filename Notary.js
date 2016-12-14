@@ -61,13 +61,13 @@ class UnknownAttestation extends TimeAttestation {
         this.payload=payload;
     }
 
-    serialize() {
-        StreamSerializationContext.write_varbytes(UnknownAttestation.TAG());
-        this.serialize_payload();
+    serialize(ctx) {
+        ctx.write_varbytes(UnknownAttestation.TAG());
+        this.serialize_payload(ctx);
     }
 
-    serialize_payload() {
-        StreamSerializationContext.write_bytes(this.payload)
+    serialize_payload(ctx) {
+        ctx.write_bytes(this.payload)
     }
 
     toString(){
@@ -112,13 +112,13 @@ class PendingAttestation extends TimeAttestation{
         return new PendingAttestation(decode)
     }
 
-    serialize() {
-        StreamSerializationContext.write_varbytes(PendingAttestation.TAG());
-        this.serialize_payload();
+    serialize(ctx) {
+        ctx.write_varbytes(PendingAttestation.TAG());
+        this.serialize_payload(ctx);
     }
 
-    serialize_payload() {
-        StreamSerializationContext.write_varbytes(this.uri)
+    serialize_payload(ctx) {
+        ctx.write_varbytes(this.uri)
     }
     toString(){
         return "PendingAttestation('"+this.uri+"')";
@@ -144,13 +144,13 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
     }
 
 
-    serialize() {
-        StreamSerializationContext.write_varbytes(BitcoinBlockHeaderAttestation.TAG());
-        this.serialize_payload();
+    serialize(ctx) {
+        ctx.write_varbytes(BitcoinBlockHeaderAttestation.TAG());
+        this.serialize_payload(ctx);
     }
 
-    serialize_payload() {
-        StreamSerializationContext.write_varuint(this.height)
+    serialize_payload(ctx) {
+        ctx.write_varuint(this.height)
     }
     toString(){
         return "BitcoinBlockHeaderAttestation "+Utils.bytesToHex(BitcoinBlockHeaderAttestation.TAG())+" "+Utils.bytesToHex([this.height]);

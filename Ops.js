@@ -49,8 +49,8 @@ class Op{
             console.log("Unknown operation tag: ", Utils.bytesToHex([tag]));
         }
     };
-    serialize(tag){
-        StreamSerializationContext.write_bytes(tag);
+    serialize(ctx,tag){
+        ctx.write_bytes(tag);
     };
 }
 
@@ -76,9 +76,9 @@ class OpBinary extends Op {
             console.log("Unknown operation tag: ", Utils.bytesToHex([tag.charCodeAt()]));
         }
     }
-    serialize(tag){
-        super.serialize(tag);
-        StreamSerializationContext.write_varbytes(this.arg[0]);
+    serialize(ctx,tag){
+        super.serialize(ctx,tag);
+        ctx.write_varbytes(this.arg[0]);
     }
     toString() {
         return this.TAG_NAME() + " " + Utils.bytesToHex(this.arg);
@@ -107,8 +107,8 @@ class OpAppend extends OpBinary {
     static deserialize_from_tag(ctx,tag) {
         return super.deserialize_from_tag(this,ctx, tag);
     }
-    serialize() {
-        return super.serialize(OpAppend.TAG());
+    serialize(ctx) {
+        return super.serialize(ctx,OpAppend.TAG());
     }
 }
 

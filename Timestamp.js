@@ -64,24 +64,24 @@ class Timestamp {
         return self;
     };
 
-    serialize(){
+    serialize(ctx){
         console.log("serialize");
 
         //sort
         var sorted_attestations=this.attestations;
         if(sorted_attestations.length>1) {
             for (var i = 0; i < sorted_attestations.length; i++) {
-                StreamSerializationContext.write_bytes(['\xff', '\x00']);
-                sorted_attestations[i].serialize();
+                ctx.write_bytes(['\xff', '\x00']);
+                sorted_attestations[i].serialize(ctx);
             }
         }
         if (this.ops.size == 0) {
-            StreamSerializationContext.write_bytes('\x00')
-            sorted_attestations[ sorted_attestations.length-1 ].serialize()
+            ctx.write_bytes('\x00')
+            sorted_attestations[ sorted_attestations.length-1 ].serialize(ctx)
         }else if (this.ops.size > 0) {
             if (sorted_attestations.length > 0) {
-                StreamSerializationContext.write_bytes(['\xff', '\x00']);
-                sorted_attestations[ sorted_attestations.length-1 ].serialize()
+                ctx.write_bytes(['\xff', '\x00']);
+                sorted_attestations[ sorted_attestations.length-1 ].serialize(ctx)
             }
             //var sorted_ops = [];//sorted(self.ops.items(), key=lambda item: item[0])
 
@@ -98,12 +98,11 @@ class Timestamp {
             console.log(last_op.toString());
             console.log(last_stamp.toString());
 
-            last_op.serialize();
-            last_stamp.serialize();
+            last_op.serialize(ctx);
+            last_stamp.serialize(ctx);
 
         }
 
-        StreamSerializationContext.toString();
 
     }
 

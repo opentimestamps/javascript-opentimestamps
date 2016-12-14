@@ -26,12 +26,12 @@ class DetachedTimestampFile {
         return this.timestamp.msg;
     }
 
-    serialize(){
-        StreamSerializationContext.write_bytes(HEADER_MAGIC);
-        StreamSerializationContext.write_varuint(MAJOR_VERSION);
-        this.file_hash_op.serialize();
-        StreamSerializationContext.write_bytes(this.timestamp.msg);
-        this.timestamp.serialize();
+    serialize(ctx){
+        ctx.write_bytes(HEADER_MAGIC);
+        ctx.write_varuint(MAJOR_VERSION);
+        this.file_hash_op.serialize(ctx);
+        ctx.write_bytes(this.timestamp.msg);
+        this.timestamp.serialize(ctx);
     }
 
     static deserialize(ctx){
