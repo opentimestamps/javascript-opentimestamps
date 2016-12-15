@@ -1,13 +1,7 @@
 'use strict';
 
-const Utils = require('./utils.js');
-const Notary = require('./notary.js');
 const Ops = require('./ops.js');
 const Timestamp = require('./timestamp.js');
-
-const msg = '';
-const attestations = {};
-const ops = [];
 
 const HEADER_MAGIC = '\x00OpenTimestamps\x00\x00Proof\x00\xbf\x89\xe2\xe8\x84\xe8\x92\x94';
 const MIN_FILE_DIGEST_LENGTH = 20;
@@ -16,38 +10,38 @@ const MAJOR_VERSION = 1;
 
 class DetachedTimestampFile {
 
-  constructor(file_hash_op, timestamp) {
-    this.file_hash_op = file_hash_op;
+  constructor(fileHashOp, timestamp) {
+    this.fileHashOp = fileHashOp;
     this.timestamp = timestamp;
   }
 
-  file_digest() {
+  fileDigest() {
     return this.timestamp.msg;
   }
 
   serialize(ctx) {
-    ctx.write_bytes(HEADER_MAGIC);
-    ctx.write_varuint(MAJOR_VERSION);
-    this.file_hash_op.serialize(ctx);
-    ctx.write_bytes(this.timestamp.msg);
+    ctx.writeBytes(HEADER_MAGIC);
+    ctx.writeVaruint(MAJOR_VERSION);
+    this.fileHashOp.serialize(ctx);
+    ctx.writeBytes(this.timestamp.msg);
     this.timestamp.serialize(ctx);
   }
 
   static deserialize(ctx) {
-    ctx.assert_magic(HEADER_MAGIC);
-    ctx.read_varuint();
+    ctx.assertMagic(HEADER_MAGIC);
+    ctx.readVaruint();
 
-    const file_hash_op = Ops.CryptOp.deserialize(ctx);
-    const file_hash = ctx.read_bytes(file_hash_op.DIGEST_LENGTH());
-    const timestamp = Timestamp.deserialize(ctx, file_hash);
+    const fileHashOp = Ops.CryptOp.deserialize(ctx);
+    const fileHash = ctx.readBytes(fileHashOp._DIGEST_LENGTH());
+    const timestamp = Timestamp.deserialize(ctx, fileHash);
 
-    ctx.assert_eof();
-    return new DetachedTimestampFile(file_hash_op, timestamp);
+    ctx.assertEof();
+    return new DetachedTimestampFile(fileHashOp, timestamp);
   }
 
-  static from_bytes(file_hash_op, ctx) {
-    const fd_hash = file_hash_op.hash_fd(ctx);
-    return new DetachedTimestampFile(file_hash_op, new Timestamp(fd_hash));
+  static fromBytes(fileHashOp, ctx) {
+    const fdHash = fileHashOp.hashFd(ctx);
+    return new DetachedTimestampFile(fileHashOp, new Timestamp(fdHash));
   }
 
 }

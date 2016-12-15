@@ -24,10 +24,10 @@ module.exports = {
     const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
 
     console.log('File');
-    console.log(detachedTimestampFile.file_hash_op.HASHLIB_NAME());
+    console.log(detachedTimestampFile.file_hash_op._HASHLIB_NAME());
 
     console.log('hash');
-    console.log(Utils.bytesToHex(detachedTimestampFile.file_digest()));
+    console.log(Utils.bytesToHex(detachedTimestampFile.fileDigest()));
 
     console.log('Timestamp');
     console.log(Timestamp.str_tree_extended(detachedTimestampFile.timestamp, 0));
@@ -44,7 +44,7 @@ module.exports = {
     const bytes = Utils.hexToBytes(file);
     ctx.open(bytes);
 
-    const file_timestamp = DetachedTimestampFile.DetachedTimestampFile.from_bytes(new Ops.OpSHA256(), ctx);
+    const file_timestamp = DetachedTimestampFile.DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
 
         /* Add nonce
 
@@ -105,11 +105,11 @@ module.exports = {
     console.log('Hashing file, algorithm ' + detached_timestamp.file_hash_op.TAG_NAME());
 
     const file_bytes = Utils.hexToBytes(file);
-    const actual_file_digest = detached_timestamp.file_hash_op.hash_fd(file_bytes);
+    const actual_file_digest = detached_timestamp.file_hash_op.hashFd(file_bytes);
     console.log('Got digest ' + Utils.bytesToHex(actual_file_digest));
 
     if (actual_file_digest != detached_timestamp.file_digest) {
-      console.log('Expected digest ' + Utils.bytesToHex(detached_timestamp.file_digest));
+      console.log('Expected digest ' + Utils.bytesToHex(detached_timestamp.fileDigest()));
       console.log('File does not match original!');
       return;
     }

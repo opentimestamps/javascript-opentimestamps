@@ -21,9 +21,9 @@ class Timestamp {
     console.log('deserialize: ', Utils.bytesToHex(initial_msg));
     const self = new Timestamp(initial_msg);
 
-    function do_tag_or_attestation(tag, initial_msg) {
-      console.log('do_tag_or_attestation: ', tag);
-      if (tag == '\x00') {
+    function doTagOrAttestation(tag, initial_msg) {
+      console.log('doTagOrAttestation: ', tag);
+      if (tag === '\x00') {
         const attestation = Notary.TimeAttestation.deserialize(ctx);
         self.attestations.push(attestation);
         console.log('attestation ', attestation);
@@ -40,17 +40,17 @@ class Timestamp {
       }
     }
 
-    var tag = ctx.read_bytes(1);
+    var tag = ctx.readBytes(1);
     var tag = String.fromCharCode(tag[0])[0];
 
-    while (tag == '\xff') {
-      let current = ctx.read_bytes(1);
+    while (tag === '\xff') {
+      let current = ctx.readBytes(1);
       current = String.fromCharCode(current[0])[0];
-      do_tag_or_attestation(current, initial_msg);
-      tag = ctx.read_bytes(1);
+      doTagOrAttestation(current, initial_msg);
+      tag = ctx.readBytes(1);
       tag = String.fromCharCode(tag[0])[0];
     }
-    do_tag_or_attestation(tag, initial_msg);
+    doTagOrAttestation(tag, initial_msg);
 
     return self;
   }
@@ -59,20 +59,20 @@ class Timestamp {
     console.log('serialize');
 
         // sort
-    const sorted_attestations = this.attestations;
-    if (sorted_attestations.length > 1) {
-      for (let i = 0; i < sorted_attestations.length; i++) {
-        ctx.write_bytes(['\xff', '\x00']);
-        sorted_attestations[i].serialize(ctx);
+    const sortedAttestations = this.attestations;
+    if (sortedAttestations.length > 1) {
+      for (let i = 0; i < sortedAttestations.length; i++) {
+        ctx.writeBytes(['\xff', '\x00']);
+        sortedAttestations[i].serialize(ctx);
       }
     }
-    if (this.ops.size == 0) {
-      ctx.write_bytes('\x00');
-      sorted_attestations[sorted_attestations.length - 1].serialize(ctx);
+    if (this.ops.size === 0) {
+      ctx.writeBytes('\x00');
+      sortedAttestations[sortedAttestations.length - 1].serialize(ctx);
     } else if (this.ops.size > 0) {
-      if (sorted_attestations.length > 0) {
-        ctx.write_bytes(['\xff', '\x00']);
-        sorted_attestations[sorted_attestations.length - 1].serialize(ctx);
+      if (sortedAttestations.length > 0) {
+        ctx.writeBytes(['\xff', '\x00']);
+        sortedAttestations[sortedAttestations.length - 1].serialize(ctx);
       }
             // var sorted_ops = [];//sorted(self.ops.items(), key=lambda item: item[0])
 

@@ -1,12 +1,12 @@
+'use strict';
 /**
  * Created by luca on 14/12/16.
  */
-
-const Utils = require('./utils.js');
-// var querystring = require('querystring');
-// var http = require('http');
 const request = require('request');
-const fs = require('fs');
+const Utils = require('./utils.js');
+// const querystring = require('querystring');
+// const http = require('http');
+// const fs = require('fs');
 
 class RemoteCalendar {
     // Remote calendar server interface

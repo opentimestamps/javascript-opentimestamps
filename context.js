@@ -1,7 +1,5 @@
 'use strict';
 
-const fs = require('fs');
-const Utils = require('./utils.js');
 /*
 var fileName = "1.ots";
 var fd = undefined;
@@ -10,34 +8,34 @@ var fd = undefined;
 class StreamDeserializationContext {
 
   getOutput() {
-    return this.resp_bytes;
+    return this.respBytes;
   }
 
   getCounter() {
     return this.counter;
   }
 
-  open(stream_bytes) {
-    this.resp_bytes = stream_bytes;
+  open(streamBytes) {
+    this.respBytes = streamBytes;
     this.counter = 0;
   }
   read(l) {
-    if (l > this.resp_bytes.length) {
-      l = this.resp_bytes.length;
+    if (l > this.respBytes.length) {
+      l = this.respBytes.length;
     }
-    const output = this.resp_bytes.slice(this.counter, this.counter + l);
+    const output = this.respBytes.slice(this.counter, this.counter + l);
     this.counter += l;
     return output;
   }
-  read_bool() {
+  readBool() {
     const b = this.read(1)[0];
-    if (b == 0xff) {
+    if (b === 0xff) {
       return true;
-    } else if (b == 0x00) {
+    } else if (b === 0x00) {
       return false;
     }
   }
-  read_varuint() {
+  readVaruint() {
     let value = 0;
     let shift = 0;
     while (true) {
@@ -50,39 +48,39 @@ class StreamDeserializationContext {
     }
     return value;
   }
-  read_bytes() {
-    return this.read_bytes(undefined);
+  readBytes() {
+    return this.readBytes(undefined);
   }
-  read_bytes(expected_length) {
-    if (expected_length == undefined) {
-      expected_length = this.read_varuint();
+  readBytes(expectedLength) {
+    if (expectedLength === undefined) {
+      expectedLength = this.read_varuint();
     }
-    return this.read(expected_length);
+    return this.read(expectedLength);
   }
-  read_varbytes(max_len) {
-    return this.read_varbytes(max_len, 0);
+  readVarbytes(maxLen) {
+    return this.readVarbytes(maxLen, 0);
   }
-  read_varbytes(max_len, min_len = 0) {
-    const l = this.read_varuint();
-    if (l > max_len) {
+  readVarbytes(maxLen, minLen = 0) {
+    const l = this.readVaruint();
+    if (l > maxLen) {
       console.log('varbytes max length exceeded;');
       return;
-    } else if (l < min_len) {
+    } else if (l < minLen) {
       console.log('varbytes min length not met;');
       return;
     }
     return this.read(l);
   }
-  assert_magic(expected_magic) {
-    const actual_magic = this.read(expected_magic.length);
-    if (expected_magic != actual_magic) {
+  assertMagic(expectedMagic) {
+    const actualMagic = this.read(expectedMagic.length);
+    if (expectedMagic !== actualMagic) {
       return false;
     }
     return true;
   }
-  assert_eof() {
+  assertEof() {
     const excess = this.read(1);
-    if (excess != undefined) {
+    if (excess !== undefined) {
       return true;
     }
     return false;
@@ -100,22 +98,22 @@ class StreamSerializationContext {
   }
 
   open() {
-        // resp_bytes = Utils.hexToBytes(resp);
+        // respBytes = Utils.hexToBytes(resp);
     this.output = [];
     this.counter = 0;
   }
-  write_bool(value) {
-    if (value == true) {
+  writeBool(value) {
+    if (value === true) {
       this.output.push('\xff');
     } else {
       this.output.push('\x00');
     }
   }
-  write_varuint(value) {
-    if (value == 0) {
+  writeVaruint(value) {
+    if (value === 0) {
       this.output.push('\x00');
     } else {
-      while (value != 0) {
+      while (value !== 0) {
         let b = value & 0b01111111;
         if (value > 0b01111111) {
           b |= 0b10000000;
@@ -128,18 +126,18 @@ class StreamSerializationContext {
       }
     }
   }
-  write_byte(value) {
+  writeByte(value) {
     this.output.push(value);
   }
 
-  write_bytes(value) {
+  writeBytes(value) {
     for (const x in value) {
-      this.write_byte(x);
+      this.writeByte(x);
     }
   }
-  write_varbytes(value) {
-    this.write_varuint(value.length);
-    this.write_bytes(value);
+  writeVarbytes(value) {
+    this.writeVaruint(value.length);
+    this.writeBytes(value);
   }
   toString() {
     console.log('output: ' + this.output);

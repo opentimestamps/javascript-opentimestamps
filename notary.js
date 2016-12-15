@@ -6,44 +6,39 @@ const Utils = require('./utils.js');
 
 class TimeAttestation {
 
-  constructor() {
-  }
-
-  static TAG_SIZE() {
+  static _TAG_SIZE() {
     return 8;
   }
-  static MAX_PAYLOAD_SIZE() {
+  static _MAX_PAYLOAD_SIZE() {
     return 8192;
   }
 
   static deserialize(ctx) {
     console.log('attestation deserialize');
 
-    const tag = ctx.read_bytes(this.TAG_SIZE());
+    const tag = ctx.readBytes(this._TAG_SIZE());
     console.log('tag: ', Utils.bytesToHex(tag));
 
-    console.log('tag(PendingAttestation): ', Utils.bytesToHex(PendingAttestation.TAG()));
-    console.log('tag(BitcoinBlockHeaderAttestation): ', Utils.bytesToHex(BitcoinBlockHeaderAttestation.TAG()));
+    console.log('tag(PendingAttestation): ', Utils.bytesToHex(PendingAttestation._TAG()));
+    console.log('tag(BitcoinBlockHeaderAttestation): ', Utils.bytesToHex(BitcoinBlockHeaderAttestation._TAG()));
 
-    var serialized_attestation = ctx.read_varbytes(this.MAX_PAYLOAD_SIZE());
-    console.log('serialized_attestation: ', Utils.bytesToHex(serialized_attestation));
+    let serializedAttestation = ctx.readVarbytes(this._MAX_PAYLOAD_SIZE());
+    console.log('serializedAttestation: ', Utils.bytesToHex(serializedAttestation));
 
-    const ctx_payload = new Context.StreamDeserialization();
-    ctx_payload.open(serialized_attestation);
+    const ctxPayload = new Context.StreamDeserialization();
+    ctxPayload.open(serializedAttestation);
 
-    if (Utils.arrEq(tag, PendingAttestation.TAG()) == true) {
+    if (Utils.arrEq(tag, PendingAttestation._TAG()) === true) {
       console.log('PendingAttestation: ');
-      return PendingAttestation.deserialize(ctx_payload);
-    } else if (Utils.arrEq(tag, BitcoinBlockHeaderAttestation.TAG()) == true) {
-      console.log('BitcoinBlockHeaderAttestation: ');
-      return BitcoinBlockHeaderAttestation.deserialize(ctx_payload);
-    } else {
-      console.log('UnknownAttestation: ');
-      var serialized_attestation = ctx_payload.read_varbytes(this.MAX_PAYLOAD_SIZE());
-      return new UnknownAttestation(tag, serialized_attestation);
+      return PendingAttestation.deserialize(ctxPayload);
     }
-    console.log();
-    return;
+    if (Utils.arrEq(tag, BitcoinBlockHeaderAttestation._TAG()) === true) {
+      console.log('BitcoinBlockHeaderAttestation: ');
+      return BitcoinBlockHeaderAttestation.deserialize(ctxPayload);
+    }
+    console.log('UnknownAttestation: ');
+    serializedAttestation = ctxPayload.readVarbytes(this._MAX_PAYLOAD_SIZE());
+    return new UnknownAttestation(tag, serializedAttestation);
   }
 
   serialize() {
@@ -52,74 +47,75 @@ class TimeAttestation {
 }
 
 class UnknownAttestation extends TimeAttestation {
+
   constructor(tag, payload) {
-    this.TAG = tag;
+    super();
+    this._TAG = tag;
     this.payload = payload;
   }
 
   serialize(ctx) {
-    ctx.write_varbytes(UnknownAttestation.TAG());
-    this.serialize_payload(ctx);
+    ctx.writeVarbytes(UnknownAttestation._TAG());
+    this.serializePayload(ctx);
   }
 
-  serialize_payload(ctx) {
-    ctx.write_bytes(this.payload);
+  serializePayload(ctx) {
+    ctx.writeBytes(this.payload);
   }
 
   toString() {
-    return 'UnknownAttestation ' + Utils.bytesToHex(this.TAG) + ' ' + Utils.bytesToHex(this.payload);
+    return 'UnknownAttestation ' + Utils.bytesToHex(this._TAG) + ' ' + Utils.bytesToHex(this.payload);
   }
 }
 
 class PendingAttestation extends TimeAttestation {
-  static TAG() {
+  static _TAG() {
     return [0x83, 0xdf, 0xe3, 0x0d, 0x2e, 0xf9, 0x0c, 0x8e];
   }
-  static MAX_URI_LENGTH() {
+  static _MAX_URI_LENGTH() {
     return 1000;
   }
-  static ALLOWED_URI_CHARS() {
+  static _ALLOWED_URI_CHARS() {
     return 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._/:';
   }
 
   constructor(uri_) {
     super();
-        // this.check_uri(uri_);
     this.uri = uri_;
   }
 
-  static check_uri(uri) {
-    if (uri.length > this.MAX_URI_LENGTH()) {
+  static checkUri(uri) {
+    if (uri.length > this._MAX_URI_LENGTH()) {
       console.log('URI exceeds maximum length');
       return false;
     }
     for (let i = 0; i < uri.length; i++) {
       const char = uri[i];
-            /* if (!this.ALLOWED_URI_CHARS().contains(char)){
-             console.log("URI contains invalid character ");
-             return false;
-             } */
+      if (this._ALLOWED_URI_CHARS().indexOf(char) < 0) {
+        console.log('URI contains invalid character ');
+        return false;
+      }
     }
     return true;
   }
 
-  static deserialize(ctx_payload) {
-    const utf8_uri = ctx_payload.read_varbytes(this.MAX_URI_LENGTH());
-    if (this.check_uri(utf8_uri) == false) {
+  static deserialize(ctxPayload) {
+    const utf8Uri = ctxPayload.readVarbytes(this._MAX_URI_LENGTH());
+    if (this.checkUri(utf8Uri) === false) {
       console.log('Invalid URI: ');
       return;
     }
-    const decode = new Buffer(utf8_uri).toString('ascii');
+    const decode = new Buffer(utf8Uri).toString('ascii');
     return new PendingAttestation(decode);
   }
 
   serialize(ctx) {
-    ctx.write_varbytes(PendingAttestation.TAG());
-    this.serialize_payload(ctx);
+    ctx.writeVarbytes(PendingAttestation._TAG());
+    this.serializePayload(ctx);
   }
 
-  serialize_payload(ctx) {
-    ctx.write_varbytes(this.uri);
+  serializePayload(ctx) {
+    ctx.writeVarbytes(this.uri);
   }
   toString() {
     return 'PendingAttestation(\'' + this.uri + '\')';
@@ -128,7 +124,7 @@ class PendingAttestation extends TimeAttestation {
 
 class BitcoinBlockHeaderAttestation extends TimeAttestation {
 
-  static TAG() {
+  static _TAG() {
     return [0x05, 0x88, 0x96, 0x0d, 0x73, 0xd7, 0x19, 0x01];
   }
 
@@ -137,21 +133,21 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
     this.height = height_;
   }
 
-  static deserialize(ctx_payload) {
-    const height = ctx_payload.read_varuint();
+  static deserialize(ctxPayload) {
+    const height = ctxPayload.readVaruint();
     return new BitcoinBlockHeaderAttestation(height);
   }
 
   serialize(ctx) {
-    ctx.write_varbytes(BitcoinBlockHeaderAttestation.TAG());
-    this.serialize_payload(ctx);
+    ctx.writeVarbytes(BitcoinBlockHeaderAttestation._TAG());
+    this.serializePayload(ctx);
   }
 
-  serialize_payload(ctx) {
-    ctx.write_varuint(this.height);
+  serializePayload(ctx) {
+    ctx.writeVaruint(this.height);
   }
   toString() {
-    return 'BitcoinBlockHeaderAttestation ' + Utils.bytesToHex(BitcoinBlockHeaderAttestation.TAG()) + ' ' + Utils.bytesToHex([this.height]);
+    return 'BitcoinBlockHeaderAttestation ' + Utils.bytesToHex(BitcoinBlockHeaderAttestation._TAG()) + ' ' + Utils.bytesToHex([this.height]);
   }
 }
 
