@@ -2,44 +2,43 @@
  * Created by luca on 14/12/16.
  */
 
-var Utils=require("./Utils.js");
-//var querystring = require('querystring');
-//var http = require('http');
-var request = require('request');
-var fs = require('fs');
+const Utils = require('./Utils.js');
+// var querystring = require('querystring');
+// var http = require('http');
+const request = require('request');
+const fs = require('fs');
 
-class RemoteCalendar{
-    //Remote calendar server interface
+class RemoteCalendar {
+    // Remote calendar server interface
 
-    constructor(url){
-        this.url=url;
-    }
+  constructor(url) {
+    this.url = url;
+  }
 
-    submit(digest) {
-        //Submit a digest to the calendar
-        //Returns a Timestamp committing to that digest
+  submit(digest) {
+        // Submit a digest to the calendar
+        // Returns a Timestamp committing to that digest
 
+    console.log('digest ', Utils.bytesToHex(digest));
 
-        console.log("digest ",Utils.bytesToHex(digest));
+    request({
+      url: this.url + '/digest',
+      method: 'POST',
+      headers: {
+                // "content-type": "application/xml",  // <--Very important!!!
+        Accept: 'application/vnd.opentimestamps.v1',
+        'User-Agent': 'javascript-opentimestamps',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: digest
+    }, (error, response, body) => {
+      console.log('error ', error);
+      console.log('response ', response);
+      console.log('body ', body);
+    });
 
-        request({
-            url: this.url+"/digest",
-            method: "POST",
-            headers: {
-                //"content-type": "application/xml",  // <--Very important!!!
-                "Accept": "application/vnd.opentimestamps.v1",
-                "User-Agent": "javascript-opentimestamps",
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: digest
-        }, function (error, response, body){
-            console.log("error ",error);
-            console.log("response ",response);
-            console.log("body ",body);
-        });
-
-        //var post_data = querystring.stringify({});
-        /*var post_data = digest;
+        // var post_data = querystring.stringify({});
+        /* var post_data = digest;
 
         var post_options = {
             host: this.url,
@@ -64,12 +63,10 @@ class RemoteCalendar{
 
         // post the data
         post_req.write(post_data);
-        post_req.end();*/
-
-
-    }
+        post_req.end(); */
+  }
 }
 
-module.exports={
-    RemoteCalendar : RemoteCalendar
-}
+module.exports = {
+  RemoteCalendar
+};
