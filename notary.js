@@ -1,8 +1,8 @@
 'use strict';
 
-const Context = require('./Context.js');
+const Context = require('./context.js');
 
-const Utils = require('./Utils.js');
+const Utils = require('./utils.js');
 
 class TimeAttestation {
 

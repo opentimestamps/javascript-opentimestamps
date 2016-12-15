@@ -1,7 +1,7 @@
 'use strict';
 
 const fs = require('fs');
-const Utils = require('./Utils.js');
+const Utils = require('./utils.js');
 /*
 var fileName = "1.ots";
 var fd = undefined;

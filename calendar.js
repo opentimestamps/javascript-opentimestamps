@@ -2,7 +2,7 @@
  * Created by luca on 14/12/16.
  */
 
-const Utils = require('./Utils.js');
+const Utils = require('./utils.js');
 // var querystring = require('querystring');
 // var http = require('http');
 const request = require('request');

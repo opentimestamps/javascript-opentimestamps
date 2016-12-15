@@ -1,10 +1,10 @@
 
-const Context = require('./Context.js');
-const DetachedTimestampFile = require('./DetachedTimestampFile.js');
-const Timestamp = require('./Timestamp.js');
-const Utils = require('./Utils.js');
-const Calendar = require('./Calendar.js');
-const Ops = require('./Ops.js');
+const Context = require('./context.js');
+const DetachedTimestampFile = require('./detached-timestamp-file.js');
+const Timestamp = require('./timestamp.js');
+const Utils = require('./utils.js');
+const Calendar = require('./calendar.js');
+const Ops = require('./ops.js');
 
 module.exports = {
 

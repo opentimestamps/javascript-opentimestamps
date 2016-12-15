@@ -1,9 +1,9 @@
 'use strict';
 
-var Utils = require('./Utils.js');
-const Notary = require('./Notary.js');
-const Ops = require('./Ops.js');
-var Utils = require('./Utils.js');
+var Utils = require('./utils.js');
+const Notary = require('./notary.js');
+const Ops = require('./ops.js');
+var Utils = require('./utils.js');
 
 const msg = '';
 const attestations = {};

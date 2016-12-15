@@ -1,6 +1,6 @@
 'use strict';
 
-const Utils = require('./Utils.js');
+const Utils = require('./utils.js');
 const crypto = require('crypto');
 
 class Op {
