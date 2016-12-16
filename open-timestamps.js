@@ -24,7 +24,7 @@ module.exports = {
     const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
 
     console.log('File');
-    console.log(detachedTimestampFile.file_hash_op._HASHLIB_NAME());
+    //console.log(detachedTimestampFile.fileHashOp._HASHLIB_NAME());
 
     console.log('hash');
     console.log(Utils.bytesToHex(detachedTimestampFile.fileDigest()));

@@ -19,9 +19,6 @@ class TimeAttestation {
     const tag = ctx.readBytes(new TimeAttestation()._TAG_SIZE());
     console.log('tag: ', Utils.bytesToHex(tag));
 
-    console.log('tag(PendingAttestation): ', Utils.bytesToHex(PendingAttestation._TAG()));
-    console.log('tag(BitcoinBlockHeaderAttestation): ', Utils.bytesToHex(BitcoinBlockHeaderAttestation._TAG()));
-
     let serializedAttestation = ctx.readVarbytes(new TimeAttestation()._MAX_PAYLOAD_SIZE());
     console.log('serializedAttestation: ', Utils.bytesToHex(serializedAttestation));
 
@@ -29,11 +26,14 @@ class TimeAttestation {
     ctxPayload.open(serializedAttestation);
 
 
-    if (Utils.arrEq(tag, this._TAG()) === true) {
-        return deserialize(ctxPayload);
-    } else {
-        return UnknownAttestation.deserialize(ctxPayload, tag)
+    if (Utils.arrEq(tag, new PendingAttestation()._TAG()) === true) {
+        console.log('tag(PendingAttestation)');
+        return PendingAttestation.deserialize(ctxPayload);
+    } else if (Utils.arrEq(tag, new BitcoinBlockHeaderAttestation()._TAG()) === true) {
+        console.log('tag(BitcoinBlockHeaderAttestation)');
+        return BitcoinBlockHeaderAttestation.deserialize(ctxPayload);
     }
+    return UnknownAttestation.deserialize(ctxPayload, tag);
   }
 
   serialize() {
@@ -85,13 +85,13 @@ class PendingAttestation extends TimeAttestation {
   }
 
   static checkUri(uri) {
-    if (uri.length > this._MAX_URI_LENGTH()) {
+    if (uri.length > new PendingAttestation()._MAX_URI_LENGTH()) {
       console.log('URI exceeds maximum length');
       return false;
     }
     for (let i = 0; i < uri.length; i++) {
-      const char = uri[i];
-      if (this._ALLOWED_URI_CHARS().indexOf(char) < 0) {
+      const char = String.fromCharCode(uri[i]);
+      if (new PendingAttestation()._ALLOWED_URI_CHARS().indexOf(char) < 0) {
         console.log('URI contains invalid character ');
         return false;
       }
@@ -100,7 +100,7 @@ class PendingAttestation extends TimeAttestation {
   }
 
   static deserialize(ctxPayload) {
-    const utf8Uri = ctxPayload.readVarbytes(this._MAX_URI_LENGTH());
+    const utf8Uri = ctxPayload.readVarbytes(new PendingAttestation()._MAX_URI_LENGTH());
     if (this.checkUri(utf8Uri) === false) {
       console.log('Invalid URI: ');
       return;
@@ -147,7 +147,7 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
     ctx.writeVaruint(this.height);
   }
   toString() {
-    return 'BitcoinBlockHeaderAttestation ' + Utils.bytesToHex(BitcoinBlockHeaderAttestation._TAG()) + ' ' + Utils.bytesToHex([this.height]);
+    return 'BitcoinBlockHeaderAttestation ' + Utils.bytesToHex(new BitcoinBlockHeaderAttestation()._TAG()) + ' ' + Utils.bytesToHex([this.height]);
   }
 }
 
