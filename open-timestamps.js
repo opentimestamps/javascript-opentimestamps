@@ -9,7 +9,7 @@ const Ops = require('./ops.js');
 module.exports = {
 
   info(fileOts) {
-    if (typeof (fileOts) === 'undefined') {
+    if (fileOts === undefined) {
       console.log('No ots file');
       return;
     }
