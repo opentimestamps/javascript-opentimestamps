@@ -1,13 +1,8 @@
 'use strict';
 
-var Utils = require('./utils.js');
+const Utils = require('./utils.js');
 const Notary = require('./notary.js');
 const Ops = require('./ops.js');
-var Utils = require('./utils.js');
-
-const msg = '';
-const attestations = {};
-const ops = [];
 
 class Timestamp {
 
@@ -17,11 +12,11 @@ class Timestamp {
     this.ops = new Map();
   }
 
-  static deserialize(ctx, initial_msg) {
-    console.log('deserialize: ', Utils.bytesToHex(initial_msg));
-    const self = new Timestamp(initial_msg);
+  static deserialize(ctx, initialMsg) {
+    console.log('deserialize: ', Utils.bytesToHex(initialMsg));
+    const self = new Timestamp(initialMsg);
 
-    function doTagOrAttestation(tag, initial_msg) {
+    function doTagOrAttestation(tag, initialMsg) {
       console.log('doTagOrAttestation: ', tag);
       if (tag === '\x00') {
         const attestation = Notary.TimeAttestation.deserialize(ctx);
@@ -30,7 +25,7 @@ class Timestamp {
       } else {
         const op = Ops.Op.deserializeFromTag(ctx, tag);
 
-        const result = op.call(initial_msg);
+        const result = op.call(initialMsg);
         console.log('result: ', Utils.bytesToHex(result));
 
         const stamp = Timestamp.deserialize(ctx, result);
@@ -40,17 +35,16 @@ class Timestamp {
       }
     }
 
-    var tag = ctx.readBytes(1);
-    var tag = String.fromCharCode(tag[0])[0];
+    let tag = String.fromCharCode(ctx.readBytes(1)[0])[0];
 
     while (tag === '\xff') {
       let current = ctx.readBytes(1);
       current = String.fromCharCode(current[0])[0];
-      doTagOrAttestation(current, initial_msg);
+      doTagOrAttestation(current, initialMsg);
       tag = ctx.readBytes(1);
       tag = String.fromCharCode(tag[0])[0];
     }
-    doTagOrAttestation(tag, initial_msg);
+    doTagOrAttestation(tag, initialMsg);
 
     return self;
   }
@@ -76,20 +70,20 @@ class Timestamp {
       }
             // var sorted_ops = [];//sorted(self.ops.items(), key=lambda item: item[0])
 
-      let last_op;
-      let last_stamp;
+      let lastOp;
+      let lastStamp;
 
       for (const [key, value] of this.ops) {
-        last_op = key;
-        last_stamp = value;
+        lastOp = key;
+        lastStamp = value;
       }
 
-      console.log('last_op: ');
-      console.log(last_op.toString());
-      console.log(last_stamp.toString());
+      console.log('lastOp : ');
+      console.log(lastOp.toString());
+      console.log(lastStamp.toString());
 
-      last_op.serialize(ctx);
-      last_stamp.serialize(ctx);
+      lastOp.serialize(ctx);
+      lastStamp.serialize(ctx);
     }
   }
 
@@ -98,13 +92,13 @@ class Timestamp {
     output += '*** Timestamp ***\n';
     output += 'msg: ' + Utils.bytesToHex(this.msg) + '\n';
     output += this.attestations.length + ' attestations: \n';
-    var i = 0;
+    let i = 0;
     for (const at of this.attestations) {
       output += '[' + i + '] ' + Utils.bytesToHex(at.toString());
       i++;
     }
 
-    var i = 0;
+    i = 0;
     output += this.ops.size + ' ops: \n';
     for (const [op, stamp] of this.ops) {
       output += '[' + i + '] op: ' + op.toString() + '\n';
@@ -115,11 +109,11 @@ class Timestamp {
     return output;
   }
 
-  str_tree(indent = 0) {
+  strTree(indent = 0) {
     let output = '';
     if (this.attestations.length > 0) {
       for (const attestation of this.attestations) {
-        for (i = 0; i < indent; i++) {
+        for (let i = 0; i < indent; i++) {
           output += '\t';
         }
         output += 'verify ' + attestation.toString() + '\n';
@@ -127,27 +121,27 @@ class Timestamp {
     }
 
     if (this.ops.size > 1) {
-      for (var [op, timestamp] of this.ops) {
-        for (i = 0; i < indent; i++) {
+      for (const [op, timestamp] of this.ops) {
+        for (let i = 0; i < indent; i++) {
           output += '\t';
         }
         output += ' -> ';
         output += op.toString() + '\n';
-        output += timestamp.str_tree(indent + 1) + '\n';
+        output += timestamp.strTree(indent + 1) + '\n';
       }
     } else if (this.ops.size > 0) {
-      for (var i = 0; i < indent; i++) {
+      for (let i = 0; i < indent; i++) {
         output += '\t';
       }
-      for (var [op, timestamp] of this.ops) {
-        for (i = 0; i < indent; i++) {
+      for (const [op, timestamp] of this.ops) {
+        for (let i = 0; i < indent; i++) {
           output += '\t';
         }
         output += op.toString() + '\n';
 
         output += ' ( ' + Utils.bytesToHex(this.msg) + ' ) ';
         output += '\n';
-        output += timestamp.str_tree(indent) + '\n';
+        output += timestamp.strTree(indent) + '\n';
       }
     }
     return output;
@@ -161,15 +155,10 @@ class Timestamp {
     return output;
   }
 
-  static str_tree_extended(timestamp, indent = 0) {
+  static strTreeExtended(timestamp, indent = 0) {
     let output = '';
-    let x = '';
     if (timestamp.attestations.length > 0) {
       for (const attestation of timestamp.attestations) {
-        if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-          x = ' BLOCK MERKLE ROOT';
-        }
-
         output += Timestamp.indention(indent);
         output += 'verify ' + attestation.toString();
         output += ' (' + Utils.bytesToHex(timestamp.msg) + ') ';
@@ -179,23 +168,23 @@ class Timestamp {
     }
 
     if (timestamp.ops.size > 1) {
-      for (var [op, t] of timestamp.ops) {
+      for (const [op, ts] of timestamp.ops) {
         output += Timestamp.indention(indent);
         output += ' -> ';
         output += op.toString();
         output += ' (' + Utils.bytesToHex(timestamp.msg) + ') ';
         output += '\n';
-        output += Timestamp.str_tree_extended(ts, indent + 1);
+        output += Timestamp.strTreeExtended(ts, indent + 1);
       }
     } else if (timestamp.ops.size > 0) {
       output += Timestamp.indention(indent);
-      for (var [op, ts] of timestamp.ops) {
+      for (const [op, ts] of timestamp.ops) {
         output += Timestamp.indention(indent);
         output += op.toString();
 
         output += ' ( ' + Utils.bytesToHex(timestamp.msg) + ' ) ';
         output += '\n';
-        output += Timestamp.str_tree_extended(ts, indent);
+        output += Timestamp.strTreeExtended(ts, indent);
       }
     }
     return output;
