@@ -48,7 +48,7 @@ module.exports = {
         # Remember that the files - and their timestamps - might get separated
         # later, so if we didn't use a nonce for every file, the timestamp
         # would leak information on the digests of adjacent files. */
-    const random16 = Utils.rand_string(16);
+    const random16 = Utils.randString(16);
 
     const nonceAppendedStamp = fileTimestamp.timestamp.ops.set(0, new Ops.OpAppend(random16));// <--? on generation
     const merkleRoot = nonceAppendedStamp.ops.set(0, new Ops.OpSHA256());

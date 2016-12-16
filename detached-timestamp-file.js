@@ -4,9 +4,9 @@ const Ops = require('./ops.js');
 const Timestamp = require('./timestamp.js');
 
 const HEADER_MAGIC = '\x00OpenTimestamps\x00\x00Proof\x00\xbf\x89\xe2\xe8\x84\xe8\x92\x94';
-const MIN_FILE_DIGEST_LENGTH = 20;
-const MAX_FILE_DIGEST_LENGTH = 32;
 const MAJOR_VERSION = 1;
+// const MIN_FILE_DIGEST_LENGTH = 20;
+// const MAX_FILE_DIGEST_LENGTH = 32;
 
 class DetachedTimestampFile {
 

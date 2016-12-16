@@ -97,7 +97,7 @@ class OpAppend extends OpBinary {
     return super.deserializeFromTag(ctx, tag);
   }
   serialize(ctx) {
-    return super.serialize(ctx, OpAppend()._TAG());
+    return super.serialize(ctx, new OpAppend()._TAG());
   }
 }
 
