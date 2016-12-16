@@ -60,7 +60,7 @@ class OpBinary extends Op {
 
   static deserializeFromTag(cls, ctx, tag) {
         // tag=String.fromCharCode(tag);
-    if (Object.keys(_SUBCLS_BY_TAG).indexOf(tag) < 0) {
+    if (Object.keys(_SUBCLS_BY_TAG).indexOf(tag) >= 0) {
       const arg = ctx.readVarbytes(cls._MAX_RESULT_LENGTH(), 1);
       console.log('read: ' + Utils.bytesToHex(arg));
       return new _SUBCLS_BY_TAG[tag](arg);
@@ -136,7 +136,7 @@ class OpUnary extends Op {
     }
   }
   static deserializeFromTag(ctx, tag) {
-    if (Object.keys(_SUBCLS_BY_TAG).indexOf(tag) < 0) {
+    if (Object.keys(_SUBCLS_BY_TAG).indexOf(tag) >= 0) {
       return new _SUBCLS_BY_TAG[tag]();
     }
     console.log('Unknown operation tag: ', Utils.bytesToHex([tag]));

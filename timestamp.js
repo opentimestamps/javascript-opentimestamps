@@ -28,7 +28,7 @@ class Timestamp {
         self.attestations.push(attestation);
         console.log('attestation ', attestation);
       } else {
-        const op = Ops.Op.deserialize_from_tag(ctx, tag);
+        const op = Ops.Op.deserializeFromTag(ctx, tag);
 
         const result = op.call(initial_msg);
         console.log('result: ', Utils.bytesToHex(result));
