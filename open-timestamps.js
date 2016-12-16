@@ -68,21 +68,21 @@ module.exports = {
     console.log('TODO');
         // setup_bitcoin : not used
 
-    const n = calendarUrls.length; // =1
+    // const n = calendarUrls.length; // =1
 
         // for all calendars
-    for (calendar_url in calendarUrls) {
-      this.submit_async(calendar_url, timestamp.msg);
+    for (const calendarUrl in calendarUrls) {
+      this.submitAsync(calendarUrl, timestamp.msg);
     }
   },
-  submit_async(calendar_url, msg) {
+  submitAsync(calendarUrl, msg) {
     console.log('TODO');
 
-    console.log('Submitting to remote calendar ', calendar_url);
-    const remote = new Calendar.RemoteCalendar(calendar_url);
+    console.log('Submitting to remote calendar ', calendarUrl);
+    const remote = new Calendar.RemoteCalendar(calendarUrl);
     remote.submit(msg);
 
-        // t = threading.Thread(target=submit_async_thread, args=(remote, msg, q))
+        // t = threading.Thread(target=submitAsync_thread, args=(remote, msg, q))
         // calendar_timestamp = remote.submit(msg)
 
     return '';
@@ -99,22 +99,22 @@ module.exports = {
     ctx.open(otsBytes);
 
     const detachedTimestamp = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-    console.log('Hashing file, algorithm ' + detachedTimestamp.file_hash_op.TAG_NAME());
+    console.log('Hashing file, algorithm ' + detachedTimestamp.fileHashOp._TAG_NAME());
 
-    const file_bytes = Utils.hexToBytes(file);
-    const actual_file_digest = detachedTimestamp.file_hash_op.hashFd(file_bytes);
-    console.log('Got digest ' + Utils.bytesToHex(actual_file_digest));
+    const fileBytes = Utils.hexToBytes(file);
+    const actualFileDigest = detachedTimestamp.fileHashOp.hashFd(fileBytes);
+    console.log('Got digest ' + Utils.bytesToHex(actualFileDigest));
 
-    if (actual_file_digest != detachedTimestamp.file_digest) {
+    if (actualFileDigest !== detachedTimestamp.file_digest) {
       console.log('Expected digest ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
       console.log('File does not match original!');
       return;
     }
 
-    this.verify_timestamp(detachedTimestamp.timestamp, args);
+    this.verifyTimestamp(detachedTimestamp.timestamp);
   },
-  verify_timestamp(timestamp, args) {
-    console.log('TODO');
+  verifyTimestamp(timestamp) {
+    console.log('TODO ' + timestamp);
         // upgrade_timestamp(timestamp, args);
   }
 
