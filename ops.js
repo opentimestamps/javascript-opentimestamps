@@ -21,10 +21,10 @@ class Op {
     return r;
   }
 
-  static _MAX_RESULT_LENGTH() {
+  _MAX_RESULT_LENGTH() {
     return 4096;
   }
-  static _MAX_MSG_LENGTH() {
+  _MAX_MSG_LENGTH() {
     return 4096;
   }
 
@@ -85,7 +85,7 @@ class OpAppend extends OpBinary {
       this.arg = arg_;
     }
   }
-  static _TAG() {
+  _TAG() {
     return '\xf0';
   }
   _TAG_NAME() {
@@ -98,7 +98,7 @@ class OpAppend extends OpBinary {
     return super.deserializeFromTag(this, ctx, tag);
   }
   serialize(ctx) {
-    return super.serialize(ctx, OpAppend._TAG());
+    return super.serialize(ctx, OpAppend()._TAG());
   }
 }
 
@@ -111,7 +111,7 @@ class OpPrepend extends OpBinary {
       this.arg = arg_;
     }
   }
-  static _TAG() {
+  _TAG() {
     return '\xf1';
   }
   _TAG_NAME() {
@@ -155,7 +155,7 @@ class OpReverse extends OpUnary {
       this.arg = arg_;
     }
   }
-  static _TAG() {
+  _TAG() {
     return '\xf2';
   }
   _TAG_NAME() {
@@ -181,13 +181,13 @@ class OpHexlify extends OpUnary {
       this.arg = arg_;
     }
   }
-  static _TAG() {
+  _TAG() {
     return '\xf3';
   }
   _TAG_NAME() {
     return 'hexlify';
   }
-  static MAX_MSG_LENGTH() {
+  _MAX_MSG_LENGTH() {
     return OpUnary._MAX_RESULT_LENGTH(); // 2
   }
   call(msg) {
@@ -241,7 +241,7 @@ class CryptOp extends OpUnary {
 }
 
 class OpSHA1 extends CryptOp {
-  static _TAG() {
+  _TAG() {
     return '\x02';
   }
   _TAG_NAME() {
@@ -262,7 +262,7 @@ class OpSHA1 extends CryptOp {
 }
 
 class OpRIPEMD160 extends CryptOp {
-  static _TAG() {
+  _TAG() {
     return '\x03';
   }
   _TAG_NAME() {
@@ -284,7 +284,7 @@ class OpRIPEMD160 extends CryptOp {
 
 class OpSHA256 extends CryptOp {
 
-  static _TAG() {
+  _TAG() {
     return '\x08';
   }
   _TAG_NAME() {
@@ -304,13 +304,13 @@ class OpSHA256 extends CryptOp {
   }
 }
 
-_SUBCLS_BY_TAG[OpAppend._TAG()] = OpAppend;
-_SUBCLS_BY_TAG[OpPrepend._TAG()] = OpPrepend;
-_SUBCLS_BY_TAG[OpReverse._TAG()] = OpReverse;
-_SUBCLS_BY_TAG[OpHexlify._TAG()] = OpHexlify;
-_SUBCLS_BY_TAG[OpSHA1._TAG()] = OpSHA1;
-_SUBCLS_BY_TAG[OpRIPEMD160._TAG()] = OpRIPEMD160;
-_SUBCLS_BY_TAG[OpSHA256._TAG()] = OpSHA256;
+_SUBCLS_BY_TAG[new OpAppend()._TAG()] = OpAppend;
+_SUBCLS_BY_TAG[new OpPrepend()._TAG()] = OpPrepend;
+_SUBCLS_BY_TAG[new OpReverse()._TAG()] = OpReverse;
+_SUBCLS_BY_TAG[new OpHexlify()._TAG()] = OpHexlify;
+_SUBCLS_BY_TAG[new OpSHA1()._TAG()] = OpSHA1;
+_SUBCLS_BY_TAG[new OpRIPEMD160()._TAG()] = OpRIPEMD160;
+_SUBCLS_BY_TAG[new OpSHA256()._TAG()] = OpSHA256;
 
 module.exports = {
   Op,

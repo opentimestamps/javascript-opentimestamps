@@ -6,10 +6,10 @@ const Utils = require('./utils.js');
 
 class TimeAttestation {
 
-  static _TAG_SIZE() {
+  _TAG_SIZE() {
     return 8;
   }
-  static _MAX_PAYLOAD_SIZE() {
+  _MAX_PAYLOAD_SIZE() {
     return 8192;
   }
 
@@ -28,17 +28,12 @@ class TimeAttestation {
     const ctxPayload = new Context.StreamDeserialization();
     ctxPayload.open(serializedAttestation);
 
-    if (Utils.arrEq(tag, PendingAttestation._TAG()) === true) {
-      console.log('PendingAttestation: ');
-      return PendingAttestation.deserialize(ctxPayload);
+
+    if (Utils.arrEq(tag, this._TAG()) === true) {
+        return this.deserialize(ctxPayload);
+    } else {
+        return this.deserialize(ctxPayload, tag)
     }
-    if (Utils.arrEq(tag, BitcoinBlockHeaderAttestation._TAG()) === true) {
-      console.log('BitcoinBlockHeaderAttestation: ');
-      return BitcoinBlockHeaderAttestation.deserialize(ctxPayload);
-    }
-    console.log('UnknownAttestation: ');
-    serializedAttestation = ctxPayload.readVarbytes(this._MAX_PAYLOAD_SIZE());
-    return new UnknownAttestation(tag, serializedAttestation);
   }
 
   serialize() {
@@ -63,19 +58,24 @@ class UnknownAttestation extends TimeAttestation {
     ctx.writeBytes(this.payload);
   }
 
+  static deserialize(ctxPayload, tag) {
+    const payload = ctxPayload.readVarbytes(this._MAX_PAYLOAD_SIZE());
+    return new UnknownAttestation(tag, payload);
+  }
+
   toString() {
     return 'UnknownAttestation ' + Utils.bytesToHex(this._TAG) + ' ' + Utils.bytesToHex(this.payload);
   }
 }
 
 class PendingAttestation extends TimeAttestation {
-  static _TAG() {
+  _TAG() {
     return [0x83, 0xdf, 0xe3, 0x0d, 0x2e, 0xf9, 0x0c, 0x8e];
   }
-  static _MAX_URI_LENGTH() {
+  _MAX_URI_LENGTH() {
     return 1000;
   }
-  static _ALLOWED_URI_CHARS() {
+  _ALLOWED_URI_CHARS() {
     return 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._/:';
   }
 
@@ -124,7 +124,7 @@ class PendingAttestation extends TimeAttestation {
 
 class BitcoinBlockHeaderAttestation extends TimeAttestation {
 
-  static _TAG() {
+  _TAG() {
     return [0x05, 0x88, 0x96, 0x0d, 0x73, 0xd7, 0x19, 0x01];
   }
 
