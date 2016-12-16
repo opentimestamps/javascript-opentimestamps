@@ -58,14 +58,13 @@ class OpBinary extends Op {
     }
   }
 
-  static deserializeFromTag(cls, ctx, tag) {
+  static deserializeFromTag(ctx, tag) {
         // tag=String.fromCharCode(tag);
     if (Object.keys(_SUBCLS_BY_TAG).indexOf(tag) >= 0) {
-      const arg = ctx.readVarbytes(cls._MAX_RESULT_LENGTH(), 1);
+      const arg = ctx.readVarbytes( new Op()._MAX_RESULT_LENGTH(), 1);
       console.log('read: ' + Utils.bytesToHex(arg));
       return new _SUBCLS_BY_TAG[tag](arg);
     }
-    console.log('Unknown operation tag: ', Utils.bytesToHex([tag.charCodeAt()]));
   }
   serialize(ctx, tag) {
     super.serialize(ctx, tag);
@@ -95,7 +94,7 @@ class OpAppend extends OpBinary {
     return msg.concat(this.arg);
   }
   static deserializeFromTag(ctx, tag) {
-    return super.deserializeFromTag(this, ctx, tag);
+    return super.deserializeFromTag( ctx, tag);
   }
   serialize(ctx) {
     return super.serialize(ctx, OpAppend()._TAG());
@@ -121,7 +120,7 @@ class OpPrepend extends OpBinary {
     return this.arg.concat(msg);
   }
   static deserializeFromTag(ctx, tag) {
-    return super.deserializeFromTag(this, ctx, tag);
+    return super.deserializeFromTag( ctx, tag);
   }
 }
 
@@ -196,7 +195,7 @@ class OpHexlify extends OpUnary {
     }
   }
   static deserializeFromTag(ctx, tag) {
-    return super.deserializeFromTag(this, ctx, tag);
+    return super.deserializeFromTag( ctx, tag);
   }
 }
 

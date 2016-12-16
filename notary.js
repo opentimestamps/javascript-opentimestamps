@@ -16,13 +16,13 @@ class TimeAttestation {
   static deserialize(ctx) {
     console.log('attestation deserialize');
 
-    const tag = ctx.readBytes(this._TAG_SIZE());
+    const tag = ctx.readBytes(new TimeAttestation()._TAG_SIZE());
     console.log('tag: ', Utils.bytesToHex(tag));
 
     console.log('tag(PendingAttestation): ', Utils.bytesToHex(PendingAttestation._TAG()));
     console.log('tag(BitcoinBlockHeaderAttestation): ', Utils.bytesToHex(BitcoinBlockHeaderAttestation._TAG()));
 
-    let serializedAttestation = ctx.readVarbytes(this._MAX_PAYLOAD_SIZE());
+    let serializedAttestation = ctx.readVarbytes(new TimeAttestation()._MAX_PAYLOAD_SIZE());
     console.log('serializedAttestation: ', Utils.bytesToHex(serializedAttestation));
 
     const ctxPayload = new Context.StreamDeserialization();
@@ -30,9 +30,9 @@ class TimeAttestation {
 
 
     if (Utils.arrEq(tag, this._TAG()) === true) {
-        return this.deserialize(ctxPayload);
+        return deserialize(ctxPayload);
     } else {
-        return this.deserialize(ctxPayload, tag)
+        return UnknownAttestation.deserialize(ctxPayload, tag)
     }
   }
 
