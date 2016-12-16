@@ -19,19 +19,18 @@ class TimeAttestation {
     const tag = ctx.readBytes(new TimeAttestation()._TAG_SIZE());
     console.log('tag: ', Utils.bytesToHex(tag));
 
-    let serializedAttestation = ctx.readVarbytes(new TimeAttestation()._MAX_PAYLOAD_SIZE());
+    const serializedAttestation = ctx.readVarbytes(new TimeAttestation()._MAX_PAYLOAD_SIZE());
     console.log('serializedAttestation: ', Utils.bytesToHex(serializedAttestation));
 
     const ctxPayload = new Context.StreamDeserialization();
     ctxPayload.open(serializedAttestation);
 
-
     if (Utils.arrEq(tag, new PendingAttestation()._TAG()) === true) {
-        console.log('tag(PendingAttestation)');
-        return PendingAttestation.deserialize(ctxPayload);
+      console.log('tag(PendingAttestation)');
+      return PendingAttestation.deserialize(ctxPayload);
     } else if (Utils.arrEq(tag, new BitcoinBlockHeaderAttestation()._TAG()) === true) {
-        console.log('tag(BitcoinBlockHeaderAttestation)');
-        return BitcoinBlockHeaderAttestation.deserialize(ctxPayload);
+      console.log('tag(BitcoinBlockHeaderAttestation)');
+      return BitcoinBlockHeaderAttestation.deserialize(ctxPayload);
     }
     return UnknownAttestation.deserialize(ctxPayload, tag);
   }
