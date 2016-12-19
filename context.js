@@ -48,17 +48,11 @@ class StreamDeserializationContext {
     }
     return value;
   }
-  readBytes() {
-    return this.readBytes(undefined);
-  }
   readBytes(expectedLength) {
     if (expectedLength === undefined) {
       expectedLength = this.read_varuint();
     }
     return this.read(expectedLength);
-  }
-  readVarbytes(maxLen) {
-    return this.readVarbytes(maxLen, 0);
   }
   readVarbytes(maxLen, minLen = 0) {
     const l = this.readVaruint();
@@ -132,7 +126,9 @@ class StreamSerializationContext {
 
   writeBytes(value) {
     for (const x in value) {
-      this.writeByte(x);
+      if ({}.hasOwnProperty.call(value, x)) {
+        this.writeByte(x);
+      }
     }
   }
   writeVarbytes(value) {
