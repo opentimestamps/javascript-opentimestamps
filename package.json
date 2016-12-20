@@ -6,6 +6,7 @@
   "dependencies": {
     "crypto": "0.0.3",
     "fs": "0.0.1-security",
+    "randomstring": "^1.1.5",
     "request": "^2.79.0"
   },
   "devDependencies": {},
