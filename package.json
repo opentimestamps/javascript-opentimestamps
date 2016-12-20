@@ -12,10 +12,15 @@
   "devDependencies": {
     "tape": "^4.6.3",
     "tap": "~8.0.1",
-    "tap-parser": "~3.0.4"
+    "tap-parser": "~3.0.4",
+    "xo": "^0.17.0"
   },
   "scripts": {
-    "test": "tap test/*.js"
+    "test": "tap test/*.js && xo"
+  },
+  "xo": {
+    "esnext": true,
+    "space": true
   },
   "repository": {
     "type": "git",
