@@ -1,3 +1,4 @@
+'use strict';
 
 const Context = require('./context.js');
 const DetachedTimestampFile = require('./detached-timestamp-file.js');
