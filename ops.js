@@ -221,12 +221,10 @@ class CryptOp extends OpUnary {
 
   hashFd(ctx) {
     const hasher = crypto.createHash(this._HASHLIB_NAME());
-    while (true) {
-      const chunk = ctx.read(1048576); // (2**20) = 1MB chunks
-      if (chunk === undefined || chunk.length === 0) {
-        break;
-      }
+    let chunk = ctx.read(1048576);
+    while (chunk !== undefined && chunk.length > 0) {
       hasher.update(new Buffer(chunk));
+      chunk = ctx.read(1048576); // (2**20) = 1MB chunks
     }
 
     // from buffer to array

@@ -38,14 +38,12 @@ class StreamDeserializationContext {
   readVaruint() {
     let value = 0;
     let shift = 0;
-    while (true) {
-      const b = this.read(1)[0];
+    let b;
+    do {
+      b = this.read(1)[0];
       value |= (b & 0b01111111) << shift;
-      if (!(b & 0b10000000)) {
-        break;
-      }
       shift += 7;
-    }
+    } while (b & 0b10000000);
     return value;
   }
   readBytes(expectedLength) {
