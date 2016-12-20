@@ -228,7 +228,8 @@ class CryptOp extends OpUnary {
       }
       hasher.update(new Buffer(chunk));
     }
-        // from buffer to array
+
+    // from buffer to array
     const hashDigest = hasher.digest();
     const output = [hashDigest.length];
     for (let i = 0; i < hashDigest.length; i++) {
@@ -321,4 +322,3 @@ module.exports = {
   OpSHA256,
   CryptOp
 };
-
