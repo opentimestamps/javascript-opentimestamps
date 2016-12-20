@@ -44,6 +44,10 @@ exports.arrEq = function (arr1, arr2) {
   return i === arr2.length;
 };
 
+exports.randBytes = function (n) {
+  return crypto.randomBytes(n);
+};
+
 exports.randString = function (n) {
   if (n <= 0) {
     return '';

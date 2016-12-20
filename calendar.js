@@ -32,10 +32,11 @@ class RemoteCalendar {
       },
       data: digest
     }, (error, response, body) => {
-      //console.log('error ', error);
-      //console.log('response ', response);
-        let output=response.body;
-      console.log('body ',output);
+      // console.log('error ', error);
+      // console.log('response ', response);
+      const output = response.body;
+      console.log('body ', output);
+      console.log('body ', body);
     });
   }
 }

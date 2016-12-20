@@ -6,7 +6,6 @@ const Timestamp = require('./timestamp.js');
 const Utils = require('./utils.js');
 const Calendar = require('./calendar.js');
 const Ops = require('./ops.js');
-const Randomstring = require('randomstring');
 
 module.exports = {
 
@@ -50,30 +49,27 @@ module.exports = {
         # Remember that the files - and their timestamps - might get separated
         # later, so if we didn't use a nonce for every file, the timestamp
         # would leak information on the digests of adjacent files. */
-    const random16 = Randomstring.generate({
-          charset: 'hex'
-        });
-    var bytes_random16=Utils.hexToBytes(random16);
 
+    const bytesRandom16 = Utils.randBytes(16);
 
-    //nonce_appended_stamp = file_timestamp.timestamp.ops.add(OpAppend(os.urandom(16)))
-    const opAppend=new Ops.OpAppend(bytes_random16);
-    var nonceAppendedStamp=fileTimestamp.timestamp.ops.get(opAppend);
-    if(nonceAppendedStamp==undefined){
-      nonceAppendedStamp=new Timestamp( opAppend.call(fileTimestamp.timestamp.msg) );
+    // nonce_appended_stamp = file_timestamp.timestamp.ops.add(OpAppend(os.urandom(16)))
+    const opAppend = new Ops.OpAppend(bytesRandom16);
+    let nonceAppendedStamp = fileTimestamp.timestamp.ops.get(opAppend);
+    if (nonceAppendedStamp === undefined) {
+      nonceAppendedStamp = new Timestamp(opAppend.call(fileTimestamp.timestamp.msg));
       fileTimestamp.timestamp.ops.set(opAppend, nonceAppendedStamp);
 
-      console.log (Timestamp.strTreeExtended(fileTimestamp.timestamp));
+      console.log(Timestamp.strTreeExtended(fileTimestamp.timestamp));
     }
 
-    //merkle_root = nonce_appended_stamp.ops.add(OpSHA256())
-    const opSHA256=new Ops.OpSHA256();
-    let merkleRoot=nonceAppendedStamp.ops.get(opSHA256);
-    if(merkleRoot==undefined){
-      merkleRoot=new Timestamp( opSHA256.call(nonceAppendedStamp.msg));
-      nonceAppendedStamp.ops.set(opSHA256,merkleRoot);
+    // merkle_root = nonce_appended_stamp.ops.add(OpSHA256())
+    const opSHA256 = new Ops.OpSHA256();
+    let merkleRoot = nonceAppendedStamp.ops.get(opSHA256);
+    if (merkleRoot === undefined) {
+      merkleRoot = new Timestamp(opSHA256.call(nonceAppendedStamp.msg));
+      nonceAppendedStamp.ops.set(opSHA256, merkleRoot);
 
-      console.log (Timestamp.strTreeExtended(fileTimestamp.timestamp));
+      console.log(Timestamp.strTreeExtended(fileTimestamp.timestamp));
     }
 
     // merkleTip  = make_merkle_tree(merkle_roots)
