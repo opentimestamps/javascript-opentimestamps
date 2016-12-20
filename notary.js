@@ -25,6 +25,7 @@ class TimeAttestation {
     const ctxPayload = new Context.StreamDeserialization();
     ctxPayload.open(serializedAttestation);
 
+    // FIXME The following code cause `no-use-before-define` eslint warnings however we don't find a solution cause it's a chicken-egg problem
     if (Utils.arrEq(tag, new PendingAttestation()._TAG()) === true) {
       console.log('tag(PendingAttestation)');
       return PendingAttestation.deserialize(ctxPayload);
