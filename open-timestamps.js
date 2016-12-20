@@ -93,10 +93,8 @@ module.exports = {
     // const n = calendarUrls.length; // =1
 
         // for all calendars
-    for (const calendarUrl in calendarUrls) {
-      if ({}.hasOwnProperty.call(calendarUrls, calendarUrl)) {
-        this.submitAsync(calendarUrl, timestamp.msg);
-      }
+    for (const calendarUrl of calendarUrls) {
+      this.submitAsync(calendarUrl, timestamp.msg);
     }
   },
   submitAsync(calendarUrl, msg) {
