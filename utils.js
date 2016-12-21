@@ -34,6 +34,14 @@ exports.charsToHex = function (bytes) {
   return hex.join('');
 };
 
+exports.arrayToBytes = function (buffer) {
+  const bytes = [];
+  for (let c = 0; c < buffer.length; c ++) {
+    bytes.push(parseInt(buffer[c]));
+  }
+  return bytes;
+};
+
 exports.arrEq = function (arr1, arr2) {
   let i;
   for (i = 0; i < arr1.length; i++) {

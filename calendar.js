@@ -4,6 +4,8 @@
  */
 const request = require('request');
 const Utils = require('./utils.js');
+const Context = require('./context.js');
+const Timestamp = require('./timestamp.js');
 // const querystring = require('querystring');
 // const http = require('http');
 // const fs = require('fs');
@@ -19,24 +21,41 @@ class RemoteCalendar {
         // Submit a digest to the calendar
         // Returns a Timestamp committing to that digest
 
-    console.log('digest ', Utils.bytesToHex(digest));
+    //let test='96f4e14889c69ddfb3dca5c59516b12530ab54e04f7b134e1a9c2b1f215b647b';
+    //digest = new Buffer(test, 'hex');
+
+
+    console.log('digest ', Utils.bytesToHex(digest) );
 
     request({
       url: this.url + '/digest',
       method: 'POST',
       headers: {
-                // "content-type": "application/xml",  // <--Very important!!!
-        Accept: 'application/vnd.opentimestamps.v1',
+        'Accept': 'application/vnd.opentimestamps.v1',
         'User-Agent': 'javascript-opentimestamps',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      data: digest
+      encoding: null,
+      body: new Buffer(digest)
     }, (error, response, body) => {
-      // console.log('error ', error);
-      // console.log('response ', response);
-      const output = response.body;
-      console.log('body ', output);
+      if(error!=undefined){
+        console.log("Calendar response error: "+error);
+        return;
+      }
       console.log('body ', body);
+
+      if (body.size > 10000){
+        console.log("Calendar response exceeded size limit");
+        return;
+      }
+
+      const ctx = new Context.StreamDeserialization();
+      ctx.open(Utils.arrayToBytes(body));
+
+
+      let timestamp = Timestamp.deserialize(ctx, digest);
+      return timestamp;
+
     });
   }
 }

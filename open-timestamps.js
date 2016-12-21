@@ -76,8 +76,9 @@ module.exports = {
     const merkleTip = merkleRoot;
 
     const calendarUrls = [];
-    calendarUrls.push('https://a.pool.opentimestamps.org');
+    //calendarUrls.push('https://a.pool.opentimestamps.org');
         // calendarUrls.append('https://b.pool.opentimestamps.org');
+    calendarUrls.push('https://ots.eternitywall.it');
 
     this.createTimestamp(merkleTip, calendarUrls);
 
