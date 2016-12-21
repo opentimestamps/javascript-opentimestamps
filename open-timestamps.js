@@ -76,7 +76,7 @@ module.exports = {
     const merkleTip = merkleRoot;
 
     const calendarUrls = [];
-    //calendarUrls.push('https://a.pool.opentimestamps.org');
+    // calendarUrls.push('https://a.pool.opentimestamps.org');
         // calendarUrls.append('https://b.pool.opentimestamps.org');
     calendarUrls.push('https://ots.eternitywall.it');
 
@@ -100,11 +100,11 @@ module.exports = {
 
     console.log('Submitting to remote calendar ', calendarUrl);
     const remote = new Calendar.RemoteCalendar(calendarUrl);
-    remote.submit(msg).then(function (timestamp) {
-      console.log("OK");
+    remote.submit(msg).then(timestamp => {
+      console.log('OK');
       console.log(Timestamp.strTreeExtended(timestamp));
-    }, function (error) {
-      console.log("KO");
+    }, error => {
+      console.log('KO');
     });
 
         // t = threading.Thread(target=submitAsync_thread, args=(remote, msg, q))
