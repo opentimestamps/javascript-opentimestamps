@@ -2,10 +2,12 @@
 /**
  * Created by luca on 14/12/16.
  */
-const request = require('request');
+const Request = require('request');
 const Utils = require('./utils.js');
 const Context = require('./context.js');
 const Timestamp = require('./timestamp.js');
+const RequestPromise = require('request-promise');
+var Promise = require("promise");
 // const querystring = require('querystring');
 // const http = require('http');
 // const fs = require('fs');
@@ -27,7 +29,7 @@ class RemoteCalendar {
 
     console.log('digest ', Utils.bytesToHex(digest) );
 
-    request({
+    let options = {
       url: this.url + '/digest',
       method: 'POST',
       headers: {
@@ -37,26 +39,35 @@ class RemoteCalendar {
       },
       encoding: null,
       body: new Buffer(digest)
-    }, (error, response, body) => {
-      if(error!=undefined){
-        console.log("Calendar response error: "+error);
-        return;
-      }
-      console.log('body ', body);
-
-      if (body.size > 10000){
-        console.log("Calendar response exceeded size limit");
-        return;
-      }
-
-      const ctx = new Context.StreamDeserialization();
-      ctx.open(Utils.arrayToBytes(body));
+    };
 
 
-      let timestamp = Timestamp.deserialize(ctx, digest);
-      return timestamp;
 
-    });
+      return new Promise(function (resolve, reject) {
+
+          RequestPromise(options)
+              .then(function (body) {
+                  console.log('body ', body);
+                  if (body.size > 10000){
+                      console.log("Calendar response exceeded size limit");
+                      return;
+                  }
+
+                  const ctx = new Context.StreamDeserialization();
+                  ctx.open(Utils.arrayToBytes(body));
+
+
+                  let timestamp = Timestamp.deserialize(ctx, digest);
+                  resolve(timestamp);
+
+              })
+              .catch(function (error) {
+                  console.log("Calendar response error: " + error);
+                  resolve();
+              });
+      });
+
+
   }
 }
 
