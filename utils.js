@@ -37,7 +37,7 @@ exports.charsToHex = function (bytes) {
 exports.arrayToBytes = function (buffer) {
   const bytes = [];
   for (let c = 0; c < buffer.length; c++) {
-    bytes.push(parseInt(buffer[c]));
+    bytes.push(parseInt(buffer[c], 16));
   }
   return bytes;
 };

@@ -101,10 +101,10 @@ module.exports = {
     console.log('Submitting to remote calendar ', calendarUrl);
     const remote = new Calendar.RemoteCalendar(calendarUrl);
     remote.submit(msg).then(timestamp => {
-      console.log('OK');
+      console.log('Built timestamp:');
       console.log(Timestamp.strTreeExtended(timestamp));
     }, error => {
-      console.log('KO');
+      console.log('Error: ' + error);
     });
 
         // t = threading.Thread(target=submitAsync_thread, args=(remote, msg, q))

@@ -2,15 +2,11 @@
 /**
  * Created by luca on 14/12/16.
  */
-const Request = require('request');
+const requestPromise = require('request-promise');
+const Promise = require('promise');
 const Utils = require('./utils.js');
 const Context = require('./context.js');
 const Timestamp = require('./timestamp.js');
-const RequestPromise = require('request-promise');
-const Promise = require('promise');
-// const querystring = require('querystring');
-// const http = require('http');
-// const fs = require('fs');
 
 class RemoteCalendar {
     // Remote calendar server interface
@@ -41,7 +37,7 @@ class RemoteCalendar {
     };
 
     return new Promise((resolve, reject) => {
-      RequestPromise(options)
+      requestPromise(options)
               .then(body => {
                 console.log('body ', body);
                 if (body.size > 10000) {
@@ -55,9 +51,9 @@ class RemoteCalendar {
                 const timestamp = Timestamp.deserialize(ctx, digest);
                 resolve(timestamp);
               })
-              .catch(error => {
-                console.log('Calendar response error: ' + error);
-                resolve();
+              .catch(err => {
+                console.log('Calendar response error: ' + err);
+                reject();
               });
     });
   }
