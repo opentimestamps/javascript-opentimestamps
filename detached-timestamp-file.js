@@ -2,6 +2,7 @@
 
 const Ops = require('./ops.js');
 const Timestamp = require('./timestamp.js');
+const Utils = require('./utils.js');
 
 const HEADER_MAGIC = '\x00OpenTimestamps\x00\x00Proof\x00\xbf\x89\xe2\xe8\x84\xe8\x92\x94';
 const MAJOR_VERSION = 1;
@@ -20,7 +21,7 @@ class DetachedTimestampFile {
   }
 
   serialize(ctx) {
-    ctx.writeBytes(HEADER_MAGIC);
+    ctx.writeBytes(Utils.charsToBytes(HEADER_MAGIC));
     ctx.writeVaruint(MAJOR_VERSION);
     this.fileHashOp.serialize(ctx);
     ctx.writeBytes(this.timestamp.msg);
@@ -42,6 +43,13 @@ class DetachedTimestampFile {
   static fromBytes(fileHashOp, ctx) {
     const fdHash = fileHashOp.hashFd(ctx);
     return new DetachedTimestampFile(fileHashOp, new Timestamp(fdHash));
+  }
+
+  toString() {
+    let output = 'DetachedTimestampFile\n';
+    output += 'fileHashOp: ' + this.fileHashOp.toString() + '\n';
+    output += 'timestamp: ' + this.timestamp.toString() + '\n';
+    return output;
   }
 
 }

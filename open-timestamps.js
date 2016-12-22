@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require('fs');
 const Context = require('./context.js');
 const DetachedTimestampFile = require('./detached-timestamp-file.js');
 const Timestamp = require('./timestamp.js');
@@ -53,7 +54,7 @@ module.exports = {
     const bytesRandom16 = Utils.randBytes(16);
 
     // nonce_appended_stamp = file_timestamp.timestamp.ops.add(OpAppend(os.urandom(16)))
-    const opAppend = new Ops.OpAppend(bytesRandom16);
+    const opAppend = new Ops.OpAppend(Utils.arrayToBytes(bytesRandom16));
     let nonceAppendedStamp = fileTimestamp.timestamp.ops.get(opAppend);
     if (nonceAppendedStamp === undefined) {
       nonceAppendedStamp = new Timestamp(opAppend.call(fileTimestamp.timestamp.msg));
@@ -72,45 +73,76 @@ module.exports = {
       console.log(Timestamp.strTreeExtended(fileTimestamp.timestamp));
     }
 
+    console.log('fileTimestamp:');
+    console.log(fileTimestamp.toString());
+
+    console.log('merkleRoot:');
+    console.log(merkleRoot.toString());
+
     // merkleTip  = make_merkle_tree(merkle_roots)
     const merkleTip = merkleRoot;
 
     const calendarUrls = [];
-    // calendarUrls.push('https://a.pool.opentimestamps.org');
-        // calendarUrls.append('https://b.pool.opentimestamps.org');
+    // calendarUrls.push('https://alice.btc.calendar.opentimestamps.org');
+    // calendarUrls.append('https://b.pool.opentimestamps.org');
     calendarUrls.push('https://ots.eternitywall.it');
 
-    this.createTimestamp(merkleTip, calendarUrls);
+    this.createTimestamp(merkleTip, calendarUrls).then(timestamp => {
+      console.log('Result Timestamp:');
+      console.log(Timestamp.strTreeExtended(timestamp));
 
-        // serialization
+      console.log('Complete Timestamp:');
+      console.log(Timestamp.strTreeExtended(fileTimestamp.timestamp));
+
+      // serialization
+      const css = new Context.StreamSerialization();
+      css.open();
+      fileTimestamp.serialize(css);
+
+      console.log('SERIALIZATION');
+      console.log(Utils.bytesToHex(css.getOutput()));
+
+      // WRITE
+      const path = 'output.txt';
+      const buffer = new Buffer(css.getOutput());
+
+      fs.open(path, 'w', (err, fd) => {
+        if (err) {
+          console.error('error opening file: ' + err);
+        }
+
+        fs.write(fd, buffer, 0, buffer.length, null, err => {
+          if (err) {
+            console.error('error writing file: ' + err);
+          }
+          fs.close(fd, () => {
+            console.log('file written');
+          });
+        });
+      });
+    });
   },
   createTimestamp(timestamp, calendarUrls) {
-    console.log('TODO');
-        // setup_bitcoin : not used
+    // setup_bitcoin : not used
 
     // const n = calendarUrls.length; // =1
 
-        // for all calendars
-    for (const calendarUrl of calendarUrls) {
-      this.submitAsync(calendarUrl, timestamp.msg);
-    }
-  },
-  submitAsync(calendarUrl, msg) {
-    console.log('TODO');
+    // only support 1 calendar
+    const calendarUrl = calendarUrls[0];
 
-    console.log('Submitting to remote calendar ', calendarUrl);
-    const remote = new Calendar.RemoteCalendar(calendarUrl);
-    remote.submit(msg).then(timestamp => {
-      console.log('Built timestamp:');
-      console.log(Timestamp.strTreeExtended(timestamp));
-    }, error => {
-      console.log('Error: ' + error);
+    return new Promise((resolve, reject) => {
+      console.log('Submitting to remote calendar ', calendarUrl);
+      const remote = new Calendar.RemoteCalendar(calendarUrl);
+      remote.submit(timestamp.msg).then(resultTimestamp => {
+        timestamp.merge(resultTimestamp);
+
+        resolve(timestamp);
+      }, err => {
+        console.log('Error: ' + err);
+
+        reject(err);
+      });
     });
-
-        // t = threading.Thread(target=submitAsync_thread, args=(remote, msg, q))
-        // calendar_timestamp = remote.submit(msg)
-
-    return '';
   },
 
     /* VERIFY COMMAND */

@@ -36,8 +36,12 @@ class TimeAttestation {
     return UnknownAttestation.deserialize(ctxPayload, tag);
   }
 
-  serialize() {
-
+  serialize(ctx) {
+    ctx.writeBytes(this._TAG());
+    const ctxPayload = new Context.StreamSerialization();
+    ctxPayload.open();
+    this.serializePayload(ctxPayload);
+    ctx.writeVarbytes(ctxPayload.getOutput());
   }
 }
 
@@ -47,11 +51,6 @@ class UnknownAttestation extends TimeAttestation {
     super();
     this._TAG = tag;
     this.payload = payload;
-  }
-
-  serialize(ctx) {
-    ctx.writeVarbytes(UnknownAttestation._TAG());
-    this.serializePayload(ctx);
   }
 
   serializePayload(ctx) {
@@ -109,13 +108,8 @@ class PendingAttestation extends TimeAttestation {
     return new PendingAttestation(decode);
   }
 
-  serialize(ctx) {
-    ctx.writeVarbytes(PendingAttestation._TAG());
-    this.serializePayload(ctx);
-  }
-
   serializePayload(ctx) {
-    ctx.writeVarbytes(this.uri);
+    ctx.writeVarbytes(Utils.charsToBytes(this.uri));
   }
   toString() {
     return 'PendingAttestation(\'' + this.uri + '\')';
@@ -136,11 +130,6 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
   static deserialize(ctxPayload) {
     const height = ctxPayload.readVaruint();
     return new BitcoinBlockHeaderAttestation(height);
-  }
-
-  serialize(ctx) {
-    ctx.writeVarbytes(BitcoinBlockHeaderAttestation._TAG());
-    this.serializePayload(ctx);
   }
 
   serializePayload(ctx) {

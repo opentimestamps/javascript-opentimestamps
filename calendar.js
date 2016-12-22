@@ -19,9 +19,6 @@ class RemoteCalendar {
         // Submit a digest to the calendar
         // Returns a Timestamp committing to that digest
 
-    // let test='96f4e14889c69ddfb3dca5c59516b12530ab54e04f7b134e1a9c2b1f215b647b';
-    // digest = new Buffer(test, 'hex');
-
     console.log('digest ', Utils.bytesToHex(digest));
 
     const options = {
