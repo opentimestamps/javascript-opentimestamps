@@ -14,23 +14,23 @@ class TimeAttestation {
   }
 
   static deserialize(ctx) {
-    console.log('attestation deserialize');
+    // console.log('attestation deserialize');
 
     const tag = ctx.readBytes(new TimeAttestation()._TAG_SIZE());
-    console.log('tag: ', Utils.bytesToHex(tag));
+    // console.log('tag: ', Utils.bytesToHex(tag));
 
     const serializedAttestation = ctx.readVarbytes(new TimeAttestation()._MAX_PAYLOAD_SIZE());
-    console.log('serializedAttestation: ', Utils.bytesToHex(serializedAttestation));
+    // console.log('serializedAttestation: ', Utils.bytesToHex(serializedAttestation));
 
     const ctxPayload = new Context.StreamDeserialization();
     ctxPayload.open(serializedAttestation);
 
     /* eslint no-use-before-define: ["error", { "classes": false }] */
     if (Utils.arrEq(tag, new PendingAttestation()._TAG()) === true) {
-      console.log('tag(PendingAttestation)');
+      // console.log('tag(PendingAttestation)');
       return PendingAttestation.deserialize(ctxPayload);
     } else if (Utils.arrEq(tag, new BitcoinBlockHeaderAttestation()._TAG()) === true) {
-      console.log('tag(BitcoinBlockHeaderAttestation)');
+      // console.log('tag(BitcoinBlockHeaderAttestation)');
       return BitcoinBlockHeaderAttestation.deserialize(ctxPayload);
     }
     return UnknownAttestation.deserialize(ctxPayload, tag);
@@ -147,7 +147,7 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
     ctx.writeVaruint(this.height);
   }
   toString() {
-    return 'BitcoinBlockHeaderAttestation ' + Utils.bytesToHex(new BitcoinBlockHeaderAttestation()._TAG()) + ' ' + Utils.bytesToHex([this.height]);
+    return 'BitcoinBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')';
   }
 }
 

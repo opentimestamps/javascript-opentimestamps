@@ -13,25 +13,23 @@ class Timestamp {
   }
 
   static deserialize(ctx, initialMsg) {
-    console.log('deserialize: ', Utils.bytesToHex(initialMsg));
+    // console.log('deserialize: ', Utils.bytesToHex(initialMsg));
     const self = new Timestamp(initialMsg);
 
     function doTagOrAttestation(tag, initialMsg) {
-      console.log('doTagOrAttestation: ', tag);
+      // console.log('doTagOrAttestation: ', tag);
       if (tag === '\x00') {
         const attestation = Notary.TimeAttestation.deserialize(ctx);
         self.attestations.push(attestation);
-        console.log('attestation ', attestation);
+        // console.log('attestation ', attestation);
       } else {
         const op = Ops.Op.deserializeFromTag(ctx, tag);
 
         const result = op.call(initialMsg);
-        console.log('result: ', Utils.bytesToHex(result));
+        // console.log('result: ', Utils.bytesToHex(result));
 
         const stamp = Timestamp.deserialize(ctx, result);
         self.ops.set(op, stamp);
-
-        console.log('OK');
       }
     }
 
@@ -50,7 +48,7 @@ class Timestamp {
   }
 
   serialize(ctx) {
-    console.log('serialize');
+    // console.log('serialize');
 
         // sort
     const sortedAttestations = this.attestations;
@@ -78,9 +76,9 @@ class Timestamp {
         lastStamp = value;
       }
 
-      console.log('lastOp : ');
-      console.log(lastOp.toString());
-      console.log(lastStamp.toString());
+      // console.log('lastOp : ');
+      // console.log(lastOp.toString());
+      // console.log(lastStamp.toString());
 
       lastOp.serialize(ctx);
       lastStamp.serialize(ctx);
@@ -139,9 +137,9 @@ class Timestamp {
         }
         output += op.toString() + '\n';
 
-        output += ' ( ' + Utils.bytesToHex(this.msg) + ' ) ';
-        output += '\n';
-        output += timestamp.strTree(indent) + '\n';
+        // output += ' ( ' + Utils.bytesToHex(this.msg) + ' ) ';
+        // output += '\n';
+        output += timestamp.strTree(indent);
       }
     }
     return output;

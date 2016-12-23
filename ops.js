@@ -62,7 +62,7 @@ class OpBinary extends Op {
         // tag=String.fromCharCode(tag);
     if (Object.keys(_SUBCLS_BY_TAG).indexOf(tag) >= 0) {
       const arg = ctx.readVarbytes(new Op()._MAX_RESULT_LENGTH(), 1);
-      console.log('read: ' + Utils.bytesToHex(arg));
+      // console.log('read: ' + Utils.bytesToHex(arg));
       return new _SUBCLS_BY_TAG[tag](arg);
     }
   }
@@ -141,7 +141,7 @@ class OpUnary extends Op {
     console.log('Unknown operation tag: ', Utils.bytesToHex([tag]));
   }
   toString() {
-    return this._TAG_NAME() + ' ' + Utils.bytesToHex(this.arg);
+    return this._TAG_NAME();
   }
 }
 
