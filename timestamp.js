@@ -48,12 +48,10 @@ class Timestamp {
   }
 
   serialize(ctx) {
-
     // console.log('SERIALIZE');
     // console.log(this.toString());
 
-
-        // sort
+    // sort
     const sortedAttestations = this.attestations;
     if (sortedAttestations.length > 1) {
       for (let i = 0; i < sortedAttestations.length; i++) {

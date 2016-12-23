@@ -9,8 +9,7 @@
     "promise": "^7.1.1",
     "randomstring": "^1.1.5",
     "request": "^2.79.0",
-    "request-promise": "^4.1.1",
-    "tape": "^4.6.3"
+    "request-promise": "^4.1.1"
   },
   "devDependencies": {
     "tape": "^4.6.3",
