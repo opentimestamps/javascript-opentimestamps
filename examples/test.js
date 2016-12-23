@@ -9,24 +9,26 @@ console.log(infoResult);
 
 // examples/incomplete.txt
 const file = '5468652074696d657374616d70206f6e20746869732066696c6520697320696e636f6d706c6574652c20616e642063616e2062652075706772616465642e0a';
-const stampResult = OpenTimestamps.stamp(file);
-console.log(Utils.bytesToHex(stampResult));
+const stampResultPromise = OpenTimestamps.stamp(file);
+stampResultPromise.then(stampResult => {
+  console.log(Utils.bytesToHex(stampResult));
 
 // WRITE
-const path = 'output.txt';
-const buffer = new Buffer(stampResult);
+  const path = 'output.txt';
+  const buffer = new Buffer(stampResult);
 
-fs.open(path, 'w', (err, fd) => {
-  if (err) {
-    console.error('error opening file: ' + err);
-  }
-
-  fs.write(fd, buffer, 0, buffer.length, null, err => {
+  fs.open(path, 'w', (err, fd) => {
     if (err) {
-      console.error('error writing file: ' + err);
+      console.error('error opening file: ' + err);
     }
-    fs.close(fd, () => {
-      console.log('file written');
+
+    fs.write(fd, buffer, 0, buffer.length, null, err => {
+      if (err) {
+        console.error('error writing file: ' + err);
+      }
+      fs.close(fd, () => {
+        console.log('file written');
+      });
     });
   });
 });
