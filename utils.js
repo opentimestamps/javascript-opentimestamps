@@ -5,6 +5,7 @@
  */
 
 const crypto = require('crypto');
+const fs = require('fs');
 
 // Convert a hex string to a byte array
 exports.hexToBytes = function (hex) {
@@ -24,6 +25,7 @@ exports.bytesToHex = function (bytes) {
   }
   return hex.join('');
 };
+
 exports.charsToHex = function (bytes) {
   const hex = [];
   for (let i = 0; i < bytes.length; i++) {
@@ -33,9 +35,11 @@ exports.charsToHex = function (bytes) {
   }
   return hex.join('');
 };
+
 exports.charToByte = function (char) {
   return char.charCodeAt(0);
 };
+
 exports.charsToBytes = function (chars) {
   const bytes = [];
   for (let i = 0; i < chars.length; i++) {
@@ -93,3 +97,16 @@ exports.randString = function (n) {
   }
   return rs;
 };
+
+exports.readFilePromise = function (filename, mode) {
+  return new Promise((resolve, reject) => {
+    fs.readFile(filename, mode, (err, buffer) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buffer);
+      }
+    });
+  });
+};
+

@@ -1,6 +1,5 @@
 'use strict';
 
-const fs = require('fs');
 const Context = require('./context.js');
 const DetachedTimestampFile = require('./detached-timestamp-file.js');
 const Timestamp = require('./timestamp.js');
@@ -95,24 +94,7 @@ module.exports = {
       console.log('SERIALIZATION');
       console.log(Utils.bytesToHex(css.getOutput()));
 
-      // WRITE
-      const path = 'output.txt';
-      const buffer = new Buffer(css.getOutput());
-
-      fs.open(path, 'w', (err, fd) => {
-        if (err) {
-          console.error('error opening file: ' + err);
-        }
-
-        fs.write(fd, buffer, 0, buffer.length, null, err => {
-          if (err) {
-            console.error('error writing file: ' + err);
-          }
-          fs.close(fd, () => {
-            console.log('file written');
-          });
-        });
-      });
+      return css.getOutput();
     });
   },
   createTimestamp(timestamp, calendarUrls) {
