@@ -6,8 +6,11 @@
   "dependencies": {
     "crypto": "0.0.3",
     "fs": "0.0.1-security",
+    "promise": "^7.1.1",
     "randomstring": "^1.1.5",
-    "request": "^2.79.0"
+    "request": "^2.79.0",
+    "request-promise": "^4.1.1",
+    "tape": "^4.6.3"
   },
   "devDependencies": {
     "tape": "^4.6.3",

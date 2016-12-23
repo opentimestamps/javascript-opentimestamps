@@ -103,14 +103,14 @@ class StreamSerializationContext {
   }
   writeVaruint(value) {
     if (value === 0) {
-      this.output.push('\x00');
+      this.output.push(0);
     } else {
       while (value !== 0) {
         let b = value & 0b01111111;
         if (value > 0b01111111) {
           b |= 0b10000000;
         }
-        this.output.push([b]);
+        this.output.push(b);
         if (value <= 0b01111111) {
           break;
         }
@@ -123,10 +123,8 @@ class StreamSerializationContext {
   }
 
   writeBytes(value) {
-    for (const x in value) {
-      if ({}.hasOwnProperty.call(value, x)) {
-        this.writeByte(x);
-      }
+    for (const x of value) {
+      this.writeByte(x);
     }
   }
   writeVarbytes(value) {

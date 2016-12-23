@@ -33,6 +33,25 @@ exports.charsToHex = function (bytes) {
   }
   return hex.join('');
 };
+exports.charToByte = function (char) {
+  return char.charCodeAt(0);
+};
+exports.charsToBytes = function (chars) {
+  const bytes = [];
+  for (let i = 0; i < chars.length; i++) {
+    const b = chars.charCodeAt(i);
+    bytes.push(b);
+  }
+  return bytes;
+};
+
+exports.arrayToBytes = function (buffer) {
+  const bytes = [];
+  for (let c = 0; c < buffer.length; c++) {
+    bytes.push(parseInt(buffer[c], 10));
+  }
+  return bytes;
+};
 
 exports.arrEq = function (arr1, arr2) {
   let i;

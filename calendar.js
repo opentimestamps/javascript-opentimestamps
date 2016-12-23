@@ -2,11 +2,11 @@
 /**
  * Created by luca on 14/12/16.
  */
-const request = require('request');
+const requestPromise = require('request-promise');
+const Promise = require('promise');
 const Utils = require('./utils.js');
-// const querystring = require('querystring');
-// const http = require('http');
-// const fs = require('fs');
+const Context = require('./context.js');
+const Timestamp = require('./timestamp.js');
 
 class RemoteCalendar {
     // Remote calendar server interface
@@ -21,22 +21,37 @@ class RemoteCalendar {
 
     console.log('digest ', Utils.bytesToHex(digest));
 
-    request({
+    const options = {
       url: this.url + '/digest',
       method: 'POST',
       headers: {
-                // "content-type": "application/xml",  // <--Very important!!!
         Accept: 'application/vnd.opentimestamps.v1',
         'User-Agent': 'javascript-opentimestamps',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      data: digest
-    }, (error, response, body) => {
-      // console.log('error ', error);
-      // console.log('response ', response);
-      const output = response.body;
-      console.log('body ', output);
-      console.log('body ', body);
+      encoding: null,
+      body: new Buffer(digest)
+    };
+
+    return new Promise((resolve, reject) => {
+      requestPromise(options)
+              .then(body => {
+                console.log('body ', body);
+                if (body.size > 10000) {
+                  console.log('Calendar response exceeded size limit');
+                  return;
+                }
+
+                const ctx = new Context.StreamDeserialization();
+                ctx.open(Utils.arrayToBytes(body));
+
+                const timestamp = Timestamp.deserialize(ctx, digest);
+                resolve(timestamp);
+              })
+              .catch(err => {
+                console.log('Calendar response error: ' + err);
+                reject();
+              });
     });
   }
 }

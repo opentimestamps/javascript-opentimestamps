@@ -48,7 +48,10 @@ class Timestamp {
   }
 
   serialize(ctx) {
-    // console.log('serialize');
+
+    // console.log('SERIALIZE');
+    // console.log(this.toString());
+
 
         // sort
     const sortedAttestations = this.attestations;
@@ -60,7 +63,9 @@ class Timestamp {
     }
     if (this.ops.size === 0) {
       ctx.writeBytes('\x00');
-      sortedAttestations[sortedAttestations.length - 1].serialize(ctx);
+      if (sortedAttestations.length > 0) {
+        sortedAttestations[sortedAttestations.length - 1].serialize(ctx);
+      }
     } else if (this.ops.size > 0) {
       if (sortedAttestations.length > 0) {
         ctx.writeBytes(['\xff', '\x00']);
@@ -85,22 +90,22 @@ class Timestamp {
     }
   }
 
-  toString() {
+  toString(indent = 0) {
     let output = '';
-    output += '*** Timestamp ***\n';
-    output += 'msg: ' + Utils.bytesToHex(this.msg) + '\n';
-    output += this.attestations.length + ' attestations: \n';
+    output += Timestamp.indention(indent) + 'msg: ' + Utils.bytesToHex(this.msg) + '\n';
+    output += Timestamp.indention(indent) + this.attestations.length + ' attestations: \n';
     let i = 0;
-    for (const at of this.attestations) {
-      output += '[' + i + '] ' + Utils.bytesToHex(at.toString());
+    for (const attestation of this.attestations) {
+      output += Timestamp.indention(indent) + '[' + i + '] ' + attestation.toString() + '\n';
       i++;
     }
 
     i = 0;
-    output += this.ops.size + ' ops: \n';
+    output += Timestamp.indention(indent) + this.ops.size + ' ops: \n';
     for (const [op, stamp] of this.ops) {
-      output += '[' + i + '] op: ' + op.toString() + '\n';
-      output += '[' + i + '] stamp: ' + stamp.toString() + '\n';
+      output += Timestamp.indention(indent) + '[' + i + '] op: ' + op.toString() + '\n';
+      output += Timestamp.indention(indent) + '[' + i + '] timestamp: \n';
+      output += stamp.toString(indent + 1);
       i++;
     }
     output += '\n';
@@ -143,6 +148,30 @@ class Timestamp {
       }
     }
     return output;
+  }
+
+  merge(other) {
+    if (!(other instanceof Timestamp)) {
+      console.error('Can only merge Timestamps together');
+    }
+    if (this.msg !== other.msg) {
+      console.error('Can\'t merge timestamps for different messages together');
+    }
+
+    for (const attestation of other.attestations) {
+      this.attestations.push(attestation);
+    }
+
+    for (const [otherOp, otherOpStamp] of other.ops) {
+      // ourOpStamp = self.ops.add(otherOp)
+      let ourOpStamp = this.ops.get(otherOp);
+      if (ourOpStamp === undefined) {
+        ourOpStamp = new Timestamp(otherOp.call(this.msg));
+        this.ops.set(otherOp, ourOpStamp);
+      }
+      // otherOp_ts.ops.add(otherOp);
+      ourOpStamp.merge(otherOpStamp);
+    }
   }
 
   static indention(pos) {
