@@ -3,9 +3,8 @@
  * Context input/output buffer module.
  * @module Context
  * @author EternityWall
- * @license GPL3
+ * @license LPGL3
  */
-
 
 /** Class representing Stream Deserialization Context for input buffer. */
 class StreamDeserializationContext {

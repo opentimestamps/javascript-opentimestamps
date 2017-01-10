@@ -3,7 +3,7 @@
  * Detached Timestamp File module.
  * @module DetachedTimestampFile
  * @author EternityWall
- * @license GPL3
+ * @license LPGL3
  */
 
 const Ops = require('./ops.js');
@@ -17,7 +17,6 @@ const Utils = require('./utils.js');
  * @default \x00OpenTimestamps\x00\x00Proof\x00\xbf\x89\xe2\xe8\x84\xe8\x92\x94
  */
 const HEADER_MAGIC = '\x00OpenTimestamps\x00\x00Proof\x00\xbf\x89\xe2\xe8\x84\xe8\x92\x94';
-
 
 /** @constant
  * @type {int}
@@ -50,7 +49,10 @@ class DetachedTimestampFile {
     return this.timestamp.msg;
   }
 
-
+  /** Serialize a Timestamp File.
+   * @param {StreamSerializationContext} ctx - The stream serialization context.
+   * @return {byte[]} The serialized DetachedTimestampFile object.
+   */
   serialize(ctx) {
     ctx.writeBytes(Utils.charsToBytes(HEADER_MAGIC));
     ctx.writeVaruint(MAJOR_VERSION);
@@ -59,6 +61,10 @@ class DetachedTimestampFile {
     this.timestamp.serialize(ctx);
   }
 
+  /** Deserialize a Timestamp File.
+   * @param {StreamDeserializationContext} ctx - The stream deserialization context.
+   * @return {DetachedTimestampFile} The generated DetachedTimestampFile object.
+   */
   static deserialize(ctx) {
     ctx.assertMagic(HEADER_MAGIC);
     ctx.readVaruint();
@@ -71,11 +77,19 @@ class DetachedTimestampFile {
     return new DetachedTimestampFile(fileHashOp, timestamp);
   }
 
+  /** Read the Detached Timestamp File from bytes.
+   * @param {Op} fileHashOp - The file hash operation.
+   * @param {StreamDeserializationContext} ctx - The stream deserialization context.
+   * @return {DetachedTimestampFile} The generated DetachedTimestampFile object.
+   */
   static fromBytes(fileHashOp, ctx) {
     const fdHash = fileHashOp.hashFd(ctx);
     return new DetachedTimestampFile(fileHashOp, new Timestamp(fdHash));
   }
 
+  /** Print the object.
+   * @return {string} The output.
+   */
   toString() {
     let output = 'DetachedTimestampFile\n';
     output += 'fileHashOp: ' + this.fileHashOp.toString() + '\n';

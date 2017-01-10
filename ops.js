@@ -3,7 +3,7 @@
  * Ops crypto operations module.
  * @module Notary
  * @author EternityWall
- * @license GPL3
+ * @license LPGL3
  */
 
 const crypto = require('crypto');
@@ -11,25 +11,11 @@ const Utils = require('./utils.js');
 
 const _SUBCLS_BY_TAG = [];
 
-
 /**
- * Timestamp proof operations. Operations are the edges in the timestamp tree, with each operation taking a message and zero or more arguments to produce a result.
+ * Timestamp proof operations.
+ * Operations are the edges in the timestamp tree, with each operation taking a message and zero or more arguments to produce a result.
  */
 class Op {
-
-  call(msg) {
-    if (msg.length > this._MAX_MSG_LENGTH()) {
-      console.log('Error : Message too long;');
-      return;
-    }
-
-    const r = this.call(msg);
-
-    if (r.length > this._MAX_RESULT_LENGTH()) {
-      console.log('Error : Result too long;');
-    }
-    return r;
-  }
 
   /**
    * Maximum length of an Op result
@@ -99,9 +85,31 @@ class Op {
   serialize(ctx) {
     ctx.writeBytes(Utils.charsToBytes(this._TAG()));
   }
+
+  /**
+   * Apply the operation to a message.
+   Raises MsgValueError if the message value is invalid, such as it being
+   too long, or it causing the result to be too long.
+   * @param {byte[]} msg - The message.
+   */
+  call(msg) {
+    if (msg.length > this._MAX_MSG_LENGTH()) {
+      console.log('Error : Message too long;');
+      return;
+    }
+
+    const r = this.call(msg);
+
+    if (r.length > this._MAX_RESULT_LENGTH()) {
+      console.log('Error : Result too long;');
+    }
+    return r;
+  }
 }
 
-// BINARY SECTION
+/** Operations that act on a message and a single argument.
+ * @extends OpUnary
+ */
 class OpBinary extends Op {
 
   constructor(arg_) {
@@ -130,6 +138,9 @@ class OpBinary extends Op {
   }
 }
 
+/** Append a suffix to a message.
+ * @extends OpBinary
+ */
 class OpAppend extends OpBinary {
   constructor(arg_) {
     super(arg_);
@@ -153,6 +164,9 @@ class OpAppend extends OpBinary {
   }
 }
 
+/** Prepend a prefix to a message.
+ * @extends OpBinary
+ */
 class OpPrepend extends OpBinary {
   constructor(arg_) {
     super(arg_);
@@ -176,7 +190,9 @@ class OpPrepend extends OpBinary {
   }
 }
 
-// UNARY SECTION
+/** Operations that act on a single message.
+ * @extends Op
+ */
 class OpUnary extends Op {
   constructor(arg_) {
     super();
@@ -197,6 +213,9 @@ class OpUnary extends Op {
   }
 }
 
+/** Reverse a message.
+ * @extends OpUnary
+ */
 class OpReverse extends OpUnary {
   constructor(arg_) {
     super(arg_);
@@ -223,6 +242,9 @@ class OpReverse extends OpUnary {
   }
 }
 
+/** Hexlify a message.
+ * @extends OpUnary
+ */
 class OpHexlify extends OpUnary {
   constructor(arg_) {
     super(arg_);
@@ -251,6 +273,12 @@ class OpHexlify extends OpUnary {
   }
 }
 
+/** Cryptographic transformations.
+ These transformations have the unique property that for any length message,
+ the size of the result they return is fixed. Additionally, they're the only
+ type of operation that can be applied directly to a stream.
+ * @extends OpUnary
+ */
 class CryptOp extends OpUnary {
 
   _HASHLIB_NAME() {
@@ -289,6 +317,17 @@ class CryptOp extends OpUnary {
   }
 }
 
+/** Cryptographic SHA1 operation
+ * Cryptographic operation tag numbers taken from RFC4880, although it's not
+ * guaranteed that they'll continue to match that RFC in the future.
+ * Remember that for timestamping, hash algorithms with collision attacks
+ * *are* secure! We've still proven that both messages existed prior to some
+ * point in time - the fact that they both have the same hash digest doesn't
+ * change that.
+ * Heck, even md5 is still secure enough for timestamping... but that's
+ * pushing our luck...
+ * @extends CryptOp
+ */
 class OpSHA1 extends CryptOp {
   _TAG() {
     return '\x02';
@@ -310,6 +349,11 @@ class OpSHA1 extends CryptOp {
   }
 }
 
+/** Cryptographic RIPEMD160 operation
+ * Cryptographic operation tag numbers taken from RFC4880, although it's not
+ * guaranteed that they'll continue to match that RFC in the future.
+ * @extends CryptOp
+ */
 class OpRIPEMD160 extends CryptOp {
   _TAG() {
     return '\x03';
@@ -331,6 +375,11 @@ class OpRIPEMD160 extends CryptOp {
   }
 }
 
+/** Cryptographic SHA256 operation
+ * Cryptographic operation tag numbers taken from RFC4880, although it's not
+ * guaranteed that they'll continue to match that RFC in the future.
+ * @extends CryptOp
+ */
 class OpSHA256 extends CryptOp {
 
   _TAG() {

@@ -3,7 +3,7 @@
  * Calendar module.
  * @module Calendar
  * @author EternityWall
- * @license GPL3
+ * @license LPGL3
  */
 
 const requestPromise = require('request-promise');

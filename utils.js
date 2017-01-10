@@ -1,8 +1,5 @@
 'use strict';
 
-/**
- * Created by luca on 23/11/16.
- */
 
 const crypto = require('crypto');
 const fs = require('fs');

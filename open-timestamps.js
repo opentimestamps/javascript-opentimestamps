@@ -3,7 +3,7 @@
  * OpenTimestamps module.
  * @module OpenTimestamps
  * @author EternityWall
- * @license GPL3
+ * @license LPGL3
  */
 
 const Context = require('./context.js');
