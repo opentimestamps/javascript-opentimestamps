@@ -1,10 +1,20 @@
 'use strict';
+/**
+ * Ops crypto operations module.
+ * @module Notary
+ * @author EternityWall
+ * @license GPL3
+ */
 
 const crypto = require('crypto');
 const Utils = require('./utils.js');
 
 const _SUBCLS_BY_TAG = [];
 
+
+/**
+ * Timestamp proof operations. Operations are the edges in the timestamp tree, with each operation taking a message and zero or more arguments to produce a result.
+ */
 class Op {
 
   call(msg) {
@@ -21,19 +31,59 @@ class Op {
     return r;
   }
 
+  /**
+   * Maximum length of an Op result
+
+   For a verifier, this limit is what limits the maximum amount of memory you
+   need at any one time to verify a particular timestamp path; while verifying
+   a particular commitment operation path previously calculated results can be
+   discarded.
+
+   Of course, if everything was a merkle tree you never need to append/prepend
+   anything near 4KiB of data; 64 bytes would be plenty even with SHA512. The
+   main need for this is compatibility with existing systems like Bitcoin
+   timestamps and Certificate Transparency servers. While the pathological
+   limits required by both are quite large - 1MB and 16MiB respectively - 4KiB
+   is perfectly adequate in both cases for more reasonable usage.
+
+   Op subclasses should set this limit even lower if doing so is appropriate
+   for them.
+   */
   _MAX_RESULT_LENGTH() {
     return 4096;
   }
+
+  /**
+   * Maximum length of the message an Op can be applied too.
+
+   Similar to the result length limit, this limit gives implementations a sane
+   constraint to work with; the maximum result-length limit implicitly
+   constrains maximum message length anyway.
+
+   Op subclasses should set this limit even lower if doing so is appropriate
+   for them.
+   */
   _MAX_MSG_LENGTH() {
     return 4096;
   }
 
+  /**
+   * Deserialize operation from a buffer.
+   * @param {StreamDeserializationContext} ctx - The stream deserialization context.
+   * @return {Op} The subclass Operation.
+   */
   static deserialize(ctx) {
     this.tag = ctx.readBytes(1);
     this.tag = String.fromCharCode(this.tag[0]);
     return Op.deserializeFromTag(ctx, this.tag);
   }
 
+  /**
+   * Deserialize operation from a buffer.
+   * @param {StreamDeserializationContext} ctx - The stream deserialization context.
+   * @param {int} tag - The tag of the operation.
+   * @return {Op} The subclass Operation.
+   */
   static deserializeFromTag(ctx, tag) {
     if (Object.keys(_SUBCLS_BY_TAG).indexOf(tag) !== -1) {
       return _SUBCLS_BY_TAG[tag].deserializeFromTag(ctx, tag);
@@ -41,6 +91,11 @@ class Op {
 
     console.log('Unknown operation tag: ', Utils.bytesToHex([tag]));
   }
+
+  /**
+   * Serialize operation.
+   * @param {StreamSerializationContext} ctx - The stream serialization context.
+   */
   serialize(ctx) {
     ctx.writeBytes(Utils.charsToBytes(this._TAG()));
   }

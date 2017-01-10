@@ -1,12 +1,10 @@
+'use strict';
 /**
  * OpenTimestamps module.
- * @module open-timestamps
- * @author R. Casatta, L. Vaccaro
- * @copyright EternityWall
+ * @module OpenTimestamps
+ * @author EternityWall
  * @license GPL3
  */
-
-'use strict';
 
 const Context = require('./context.js');
 const DetachedTimestampFile = require('./detached-timestamp-file.js');
@@ -18,6 +16,7 @@ const Ops = require('./ops.js');
 module.exports = {
 
   /** Show information on a timestamp.
+   * @exports OpenTimestamps/info
    * @param {string} fileOts - The ots file.
    */
   info(fileOts) {
@@ -39,6 +38,7 @@ module.exports = {
   },
 
   /** Create timestamp with the aid of a remote calendar. May be specified multiple times.
+   * @exports OpenTimestamps/stamp
    * @param {string} file - The plain file to stamp.
    */
   stamp(file) {
@@ -115,7 +115,7 @@ module.exports = {
     });
   },
 
-  /** Create a timestamp
+  /** Create a timestamp.
    * @param {timestamp} timestamp - The timestamp.
    * @param {string[]} calendarUrls - List of calendar's to use.
    */
@@ -143,6 +143,7 @@ module.exports = {
   },
 
   /** Verify a timestamp.
+   * @exports OpenTimestamps/verify
    * @param {string} fileOts - The ots file.
    * @param {string} file - The plain file.
    */

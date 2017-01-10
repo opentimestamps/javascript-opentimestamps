@@ -1,10 +1,13 @@
 'use strict';
+/**
+ * Context input/output buffer module.
+ * @module Context
+ * @author EternityWall
+ * @license GPL3
+ */
 
-/*
-var fileName = "1.ots";
-var fd = undefined;
-*/
 
+/** Class representing Stream Deserialization Context for input buffer. */
 class StreamDeserializationContext {
 
   getOutput() {
@@ -79,6 +82,7 @@ class StreamDeserializationContext {
   }
 }
 
+/** Class representing Stream Serialization Context for output buffer. */
 class StreamSerializationContext {
 
   getOutput() {

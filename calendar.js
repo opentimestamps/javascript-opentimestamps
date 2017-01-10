@@ -1,12 +1,9 @@
 'use strict';
-
 /**
  * Calendar module.
- * @module open-timestamps
- * @author R. Casatta, L. Vaccaro
- * @copyright EternityWall
+ * @module Calendar
+ * @author EternityWall
  * @license GPL3
- * @external Promise, request-promise
  */
 
 const requestPromise = require('request-promise');
@@ -41,7 +38,7 @@ class RemoteCalendar {
    */
 
   /**
-   * @promise Submitting a digest to remote calendar. Returns a Timestamp committing to that digest
+   * Submitting a digest to remote calendar. Returns a Timestamp committing to that digest
    * @param {byte[]} digest - The digest hash to send.
    * @returns {Promise} A promise that returns {@link resolve} if resolved
    * and {@link reject} if rejected.

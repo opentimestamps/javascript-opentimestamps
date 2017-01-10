@@ -1,17 +1,44 @@
 'use strict';
+/**
+ * Timestamp module.
+ * @module Timestamp
+ * @author EternityWall
+ * @license GPL3
+ */
 
 const Utils = require('./utils.js');
 const Notary = require('./notary.js');
 const Ops = require('./ops.js');
 
+/** Class representing Timestamp interface
+ * Proof that one or more attestations commit to a message.
+ * The proof is in the form of a tree, with each node being a message, and the
+ edges being operations acting on those messages. The leafs of the tree are
+ attestations that attest to the time that messages in the tree existed prior. */
 class Timestamp {
 
+  /**
+   * Create a Timestamp object.
+   * @param {string} msg - The server url.
+   */
   constructor(msg) {
     this.msg = msg;
     this.attestations = [];
     this.ops = new Map();
   }
 
+  /** Deserialize a Timestamp.
+   * Because the serialization format doesn't include the message that the
+   timestamp operates on, you have to provide it so that the correct
+   operation results can be calculated.
+
+   The message you provide is assumed to be correct; if it causes a op to
+   raise MsgValueError when the results are being calculated (done
+   immediately, not lazily) DeserializationError is raised instead.
+   * @param {StreamDeserializationContext} ctx - The stream deserialization context.
+   * @param {initialMsg} initialMsg - The initial message.
+   * @return {Timestamp} The generated Timestamp.
+   */
   static deserialize(ctx, initialMsg) {
     // console.log('deserialize: ', Utils.bytesToHex(initialMsg));
     const self = new Timestamp(initialMsg);
@@ -47,6 +74,10 @@ class Timestamp {
     return self;
   }
 
+  /**
+   * Create a Serialize object.
+   * @param {StreamSerializationContext} ctx - The stream serialization context.
+   */
   serialize(ctx) {
     // console.log('SERIALIZE');
     // console.log(this.toString());
@@ -88,6 +119,41 @@ class Timestamp {
     }
   }
 
+
+  /**
+   * Add all operations and attestations from another timestamp to this one.
+   * @param {Timestamp} other - Initial other Timestamp to merge.
+   */
+  merge(other) {
+    if (!(other instanceof Timestamp)) {
+      console.error('Can only merge Timestamps together');
+    }
+    if (this.msg !== other.msg) {
+      console.error('Can\'t merge timestamps for different messages together');
+    }
+
+    for (const attestation of other.attestations) {
+      this.attestations.push(attestation);
+    }
+
+    for (const [otherOp, otherOpStamp] of other.ops) {
+      // ourOpStamp = self.ops.add(otherOp)
+      let ourOpStamp = this.ops.get(otherOp);
+      if (ourOpStamp === undefined) {
+        ourOpStamp = new Timestamp(otherOp.call(this.msg));
+        this.ops.set(otherOp, ourOpStamp);
+      }
+      // otherOp_ts.ops.add(otherOp);
+      ourOpStamp.merge(otherOpStamp);
+    }
+  }
+
+
+  /**
+   * Print as memory hierarchical object.
+   * @param {int} indent - Initial hierarchical indention.
+   * @return {string} The output string.
+   */
   toString(indent = 0) {
     let output = '';
     output += Timestamp.indention(indent) + 'msg: ' + Utils.bytesToHex(this.msg) + '\n';
@@ -110,6 +176,11 @@ class Timestamp {
     return output;
   }
 
+  /**
+   * Print as tree hierarchical object.
+   * @param {int} indent - Initial hierarchical indention.
+   * @return {string} The output string.
+   */
   strTree(indent = 0) {
     let output = '';
     if (this.attestations.length > 0) {
@@ -148,30 +219,12 @@ class Timestamp {
     return output;
   }
 
-  merge(other) {
-    if (!(other instanceof Timestamp)) {
-      console.error('Can only merge Timestamps together');
-    }
-    if (this.msg !== other.msg) {
-      console.error('Can\'t merge timestamps for different messages together');
-    }
 
-    for (const attestation of other.attestations) {
-      this.attestations.push(attestation);
-    }
-
-    for (const [otherOp, otherOpStamp] of other.ops) {
-      // ourOpStamp = self.ops.add(otherOp)
-      let ourOpStamp = this.ops.get(otherOp);
-      if (ourOpStamp === undefined) {
-        ourOpStamp = new Timestamp(otherOp.call(this.msg));
-        this.ops.set(otherOp, ourOpStamp);
-      }
-      // otherOp_ts.ops.add(otherOp);
-      ourOpStamp.merge(otherOpStamp);
-    }
-  }
-
+  /**
+   * Indention function for printing tree.
+   * @param {int} pos - Initial hierarchical indention.
+   * @return {string} The output space string.
+   */
   static indention(pos) {
     let output = '';
     for (let i = 0; i < pos; i++) {
@@ -180,6 +233,12 @@ class Timestamp {
     return output;
   }
 
+
+  /**
+   * Print as tree extended hierarchical object.
+   * @param {int} indent - Initial hierarchical indention.
+   * @return {string} The output string.
+   */
   static strTreeExtended(timestamp, indent = 0) {
     let output = '';
     if (timestamp.attestations.length > 0) {
