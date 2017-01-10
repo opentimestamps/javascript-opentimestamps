@@ -10,20 +10,20 @@ const Ops = require('./ops.js');
 const Timestamp = require('./timestamp.js');
 const Utils = require('./utils.js');
 
-/** @constant
- * @type {string}
+/**
  * Header magic bytes
  * Designed to be give the user some information in a hexdump, while being identified as 'data' by the file utility.
+ * @type {string}
  * @default \x00OpenTimestamps\x00\x00Proof\x00\xbf\x89\xe2\xe8\x84\xe8\x92\x94
  */
 const HEADER_MAGIC = '\x00OpenTimestamps\x00\x00Proof\x00\xbf\x89\xe2\xe8\x84\xe8\x92\x94';
 
-/** @constant
- * @type {int}
+/**
  * While the git commit timestamps have a minor version, probably better to
  * leave it out here: unlike Git commits round-tripping is an issue when
  * timestamps are upgraded, and we could end up with bugs related to not
  * saving/updating minor version numbers correctly.
+ * @type {int}
  * @default 1
  */
 const MAJOR_VERSION = 1;
