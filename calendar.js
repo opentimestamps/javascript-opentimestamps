@@ -47,7 +47,6 @@ class RemoteCalendar {
    * and {@link reject} if rejected.
    */
   submit(digest) {
-
     console.log('digest ', Utils.bytesToHex(digest));
 
     const options = {
