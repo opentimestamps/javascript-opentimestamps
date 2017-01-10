@@ -22,7 +22,6 @@
     "test": "tap test/*.js && xo --ignore ./out/*"
   },
   "xo": {
-    "ignore": "./out/*",
     "esnext": true,
     "space": true
   },
