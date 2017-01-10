@@ -115,33 +115,6 @@ module.exports = {
     });
   },
 
-  /** Create a timestamp.
-   * @param {timestamp} timestamp - The timestamp.
-   * @param {string[]} calendarUrls - List of calendar's to use.
-   */
-  createTimestamp(timestamp, calendarUrls) {
-    // setup_bitcoin : not used
-
-    // const n = calendarUrls.length; // =1
-
-    // only support 1 calendar
-    const calendarUrl = calendarUrls[0];
-
-    return new Promise((resolve, reject) => {
-      console.log('Submitting to remote calendar ', calendarUrl);
-      const remote = new Calendar.RemoteCalendar(calendarUrl);
-      remote.submit(timestamp.msg).then(resultTimestamp => {
-        timestamp.merge(resultTimestamp);
-
-        resolve(timestamp);
-      }, err => {
-        console.log('Error: ' + err);
-
-        reject(err);
-      });
-    });
-  },
-
   /** Verify a timestamp.
    * @exports OpenTimestamps/verify
    * @param {string} fileOts - The ots file.
