@@ -1,4 +1,5 @@
 'use strict';
+
 /**
  * Context input/output buffer module.
  * @module Context

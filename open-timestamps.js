@@ -1,4 +1,5 @@
 'use strict';
+
 /**
  * OpenTimestamps module.
  * @module OpenTimestamps
@@ -15,7 +16,8 @@ const Calendar = require('./calendar.js');
 
 module.exports = {
 
-  /** Show information on a timestamp.
+  /**
+   * Show information on a timestamp.
    * @exports OpenTimestamps/info
    * @param {ArrayBuffer} ots - The ots array buffer.
    */
@@ -36,7 +38,8 @@ module.exports = {
     return firstLine + 'Timestamp:\n' + detachedTimestampFile.timestamp.strTree() + '\n';
   },
 
-  /** Create timestamp with the aid of a remote calendar. May be specified multiple times.
+  /**
+   * Create timestamp with the aid of a remote calendar. May be specified multiple times.
    * @exports OpenTimestamps/stamp
    * @param {ArrayBuffer} plain - The plain array buffer to stamp.
    */
@@ -111,7 +114,8 @@ module.exports = {
     });
   },
 
-  /** Create a timestamp
+  /**
+   * Create a timestamp
    * @param {timestamp} timestamp - The timestamp.
    * @param {string[]} calendarUrls - List of calendar's to use.
    */
@@ -138,7 +142,8 @@ module.exports = {
     });
   },
 
-  /** Verify a timestamp.
+  /**
+   * Verify a timestamp.
    * @exports OpenTimestamps/verify
    * @param {ArrayBuffer} ots - The ots array buffer to stamp.
    * @param {ArrayBuffer} plain - The plain array buffer to stamp.

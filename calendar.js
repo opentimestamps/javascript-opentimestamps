@@ -1,4 +1,5 @@
 'use strict';
+
 /**
  * Calendar module.
  * @module Calendar
@@ -25,14 +26,12 @@ class RemoteCalendar {
 
   /**
    * This callback is called when the result is loaded.
-   *
    * @callback resolve
    * @param {Timestamp} timestamp - The timestamp of the Calendar response.
    */
 
   /**
    * This callback is called when the result fails to load.
-   *
    * @callback reject
    * @param {Error} error - The error that occurred while loading the result.
    */
