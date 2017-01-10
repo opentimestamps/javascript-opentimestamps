@@ -1,5 +1,4 @@
 const fs = require('fs');
-const Utils = require('../utils.js');
 const OpenTimestamps = require('../open-timestamps.js');
 
 // examples/incomplete.txt.ots
