@@ -11,7 +11,7 @@ console.log(infoResult);
 const file = '5468652074696d657374616d70206f6e20746869732066696c6520697320696e636f6d706c6574652c20616e642063616e2062652075706772616465642e0a';
 const stampResultPromise = OpenTimestamps.stamp(file);
 stampResultPromise.then(stampResult => {
-  console.log(Utils.bytesToHex(stampResult));
+  console.log(stampResult);
 
 // WRITE
   const path = 'output.txt';
