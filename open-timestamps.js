@@ -11,22 +11,22 @@ const DetachedTimestampFile = require('./detached-timestamp-file.js');
 const Timestamp = require('./timestamp.js');
 const Utils = require('./utils.js');
 const Ops = require('./ops.js');
+const Calendar = require('./calendar.js');
 
 module.exports = {
 
   /** Show information on a timestamp.
    * @exports OpenTimestamps/info
-   * @param {string} fileOts - The ots file.
+   * @param {ArrayBuffer} ots - The ots array buffer.
    */
-  info(fileOts) {
-    if (fileOts === undefined) {
+  info(ots) {
+    if (ots === undefined) {
       console.log('No ots file');
       return;
     }
 
     const ctx = new Context.StreamDeserialization();
-    const otsBytes = Utils.hexToBytes(fileOts);
-    ctx.open(otsBytes);
+    ctx.open(Utils.arrayToBytes(ots));
     const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
 
     const fileHash = Utils.bytesToHex(detachedTimestampFile.timestamp.msg);
@@ -38,15 +38,12 @@ module.exports = {
 
   /** Create timestamp with the aid of a remote calendar. May be specified multiple times.
    * @exports OpenTimestamps/stamp
-   * @param {string} file - The plain file to stamp.
+   * @param {ArrayBuffer} plain - The plain array buffer to stamp.
    */
-  stamp(file) {
+  stamp(plain) {
     return new Promise((resolve, reject) => {
-      console.log('TODO');
-
       const ctx = new Context.StreamDeserialization();
-      const bytes = Utils.hexToBytes(file);
-      ctx.open(bytes);
+      ctx.open(Utils.arrayToBytes(plain));
 
       const fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
 
@@ -114,25 +111,50 @@ module.exports = {
     });
   },
 
+  /** Create a timestamp
+   * @param {timestamp} timestamp - The timestamp.
+   * @param {string[]} calendarUrls - List of calendar's to use.
+   */
+  createTimestamp(timestamp, calendarUrls) {
+    // setup_bitcoin : not used
+
+    // const n = calendarUrls.length; // =1
+
+    // only support 1 calendar
+    const calendarUrl = calendarUrls[0];
+
+    return new Promise((resolve, reject) => {
+      console.log('Submitting to remote calendar ', calendarUrl);
+      const remote = new Calendar.RemoteCalendar(calendarUrl);
+      remote.submit(timestamp.msg).then(resultTimestamp => {
+        timestamp.merge(resultTimestamp);
+
+        resolve(timestamp);
+      }, err => {
+        console.log('Error: ' + err);
+
+        reject(err);
+      });
+    });
+  },
+
   /** Verify a timestamp.
    * @exports OpenTimestamps/verify
-   * @param {string} fileOts - The ots file.
-   * @param {string} file - The plain file.
+   * @param {ArrayBuffer} ots - The ots array buffer to stamp.
+   * @param {ArrayBuffer} plain - The plain array buffer to stamp.
    */
-  verify(fileOts, file) {
+  verify(ots, plain) {
     console.log('TODO');
-    console.log('fileOts: ', fileOts);
-    console.log('file: ', file);
+    console.log('ots: ', ots);
+    console.log('plain: ', plain);
 
     const ctx = new Context.StreamDeserialization();
-    const otsBytes = Utils.hexToBytes(fileOts);
-    ctx.open(otsBytes);
+    ctx.open(Utils.arrayToBytes(ots));
 
     const detachedTimestamp = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
     console.log('Hashing file, algorithm ' + detachedTimestamp.fileHashOp._TAG_NAME());
 
-    const fileBytes = Utils.hexToBytes(file);
-    const actualFileDigest = detachedTimestamp.fileHashOp.hashFd(fileBytes);
+    const actualFileDigest = detachedTimestamp.fileHashOp.hashFd(Utils.arrayToBytes(plain));
     console.log('Got digest ' + Utils.bytesToHex(actualFileDigest));
 
     if (actualFileDigest !== detachedTimestamp.file_digest) {

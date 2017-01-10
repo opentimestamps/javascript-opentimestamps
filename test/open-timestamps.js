@@ -19,13 +19,13 @@ test('setup', assert => {
     ots = values[1];
     incomplete = values[2];
     assert.end();
-  }).catch(err=> {
-    assert.fail("err=" + err);
+  }).catch(err => {
+    assert.fail('err=' + err);
   });
 });
 
 test('OpenTimestamps.info()', assert => {
-  const otsInfoCalc = OpenTimestamps.info(Utils.bytesToHex(ots));
+  const otsInfoCalc = OpenTimestamps.info(ots);
   assert.false(otsInfoCalc === undefined);
   assert.false(otsInfo === undefined);
   assert.equals(otsInfo, otsInfoCalc, 'ots info match');
@@ -33,7 +33,7 @@ test('OpenTimestamps.info()', assert => {
 });
 
 test('OpenTimestamps.stamp()', assert => {
-  const timestampBytesPromise = OpenTimestamps.stamp(Utils.bytesToHex(incomplete));
+  const timestampBytesPromise = OpenTimestamps.stamp(incomplete);
   timestampBytesPromise.then(timestampBytes => {
     const ctx = new Context.StreamDeserialization();
     ctx.open(timestampBytes);
@@ -41,6 +41,6 @@ test('OpenTimestamps.stamp()', assert => {
     assert.equals('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9', Utils.bytesToHex(detachedTimestampFile.timestamp.msg), 'checking hashes');
     assert.end();
   }).catch(err => {
-    assert.fail("err=" + err);
+    assert.fail('err=' + err);
   });
 });
