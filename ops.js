@@ -11,7 +11,6 @@ const Utils = require('./utils.js');
 
 const _SUBCLS_BY_TAG = [];
 
-
 /**
  * Timestamp proof operations. Operations are the edges in the timestamp tree, with each operation taking a message and zero or more arguments to produce a result.
  */

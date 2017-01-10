@@ -119,7 +119,6 @@ class Timestamp {
     }
   }
 
-
   /**
    * Add all operations and attestations from another timestamp to this one.
    * @param {Timestamp} other - Initial other Timestamp to merge.
@@ -147,7 +146,6 @@ class Timestamp {
       ourOpStamp.merge(otherOpStamp);
     }
   }
-
 
   /**
    * Print as memory hierarchical object.
@@ -219,7 +217,6 @@ class Timestamp {
     return output;
   }
 
-
   /**
    * Indention function for printing tree.
    * @param {int} pos - Initial hierarchical indention.
@@ -232,7 +229,6 @@ class Timestamp {
     }
     return output;
   }
-
 
   /**
    * Print as tree extended hierarchical object.

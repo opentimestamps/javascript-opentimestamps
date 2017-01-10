@@ -6,7 +6,6 @@
  * @license GPL3
  */
 
-
 /** Class representing Stream Deserialization Context for input buffer. */
 class StreamDeserializationContext {
 

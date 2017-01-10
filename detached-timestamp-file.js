@@ -18,7 +18,6 @@ const Utils = require('./utils.js');
  */
 const HEADER_MAGIC = '\x00OpenTimestamps\x00\x00Proof\x00\xbf\x89\xe2\xe8\x84\xe8\x92\x94';
 
-
 /** @constant
  * @type {int}
  * While the git commit timestamps have a minor version, probably better to
@@ -49,7 +48,6 @@ class DetachedTimestampFile {
   fileDigest() {
     return this.timestamp.msg;
   }
-
 
   serialize(ctx) {
     ctx.writeBytes(Utils.charsToBytes(HEADER_MAGIC));

@@ -9,7 +9,6 @@
 const Context = require('./context.js');
 const Utils = require('./utils.js');
 
-
 /** Class representing Timestamp signature verification */
 class TimeAttestation {
 
@@ -84,7 +83,6 @@ class UnknownAttestation extends TimeAttestation {
   }
 }
 
-
 /** Pending attestations.
  * Commitment has been recorded in a remote calendar for future attestation,
  and we have a URI to find a more complete timestamp in the future.
@@ -151,7 +149,6 @@ class PendingAttestation extends TimeAttestation {
     return 'PendingAttestation(\'' + this.uri + '\')';
   }
 }
-
 
 /** Bitcoin Block Header Attestation.
  * The commitment digest will be the merkleroot of the blockheader.
