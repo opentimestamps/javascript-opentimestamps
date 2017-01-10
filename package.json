@@ -19,9 +19,10 @@
     "xo": "^0.17.0"
   },
   "scripts": {
-    "test": "tap test/*.js && xo"
+    "test": "tap test/*.js && xo --ignore ./out/*"
   },
   "xo": {
+    "ignore": "./out/*",
     "esnext": true,
     "space": true
   },
