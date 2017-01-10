@@ -36,7 +36,6 @@ const file = '5468652074696d657374616d70206f6e20746869732066696c6520697320696e63
 const stampResultPromise = OpenTimestamps.stamp(file);
 stampResultPromise.then(stampResult => {
   console.log(Utils.bytesToHex(stampResult));
-  });
 });
 ```
 ### Info
