@@ -30,7 +30,7 @@
     "url": "git+https://github.com/eternitywall/javascript-opentimestamps.git"
   },
   "author": "Luca Vaccaro",
-  "license": "ISC",
+  "license": "GPL3",
   "bugs": {
     "url": "https://github.com/eternitywall/javascript-opentimestamps/issues"
   },
