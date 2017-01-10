@@ -1,23 +1,52 @@
 'use strict';
+
 /**
- * Created by luca on 14/12/16.
+ * Calendar module.
+ * @module open-timestamps
+ * @author R. Casatta, L. Vaccaro
+ * @copyright EternityWall
+ * @license GPL3
+ * @external Promise, request-promise
  */
+
 const requestPromise = require('request-promise');
 const Promise = require('promise');
 const Utils = require('./utils.js');
 const Context = require('./context.js');
 const Timestamp = require('./timestamp.js');
 
+/** Class representing Remote Calendar server interface */
 class RemoteCalendar {
-    // Remote calendar server interface
 
+  /**
+   * Create a RemoteCalendar.
+   * @param {string} url - The server url.
+   */
   constructor(url) {
     this.url = url;
   }
 
+  /**
+   * This callback is called when the result is loaded.
+   *
+   * @callback resolve
+   * @param {Timestamp} timestamp - The timestamp of the Calendar response.
+   */
+
+  /**
+   * This callback is called when the result fails to load.
+   *
+   * @callback reject
+   * @param {Error} error - The error that occurred while loading the result.
+   */
+
+  /**
+   * @promise Submitting a digest to remote calendar. Returns a Timestamp committing to that digest
+   * @param {byte[]} digest - The digest hash to send.
+   * @returns {Promise} A promise that returns {@link resolve} if resolved
+   * and {@link reject} if rejected.
+   */
   submit(digest) {
-        // Submit a digest to the calendar
-        // Returns a Timestamp committing to that digest
 
     console.log('digest ', Utils.bytesToHex(digest));
 

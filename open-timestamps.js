@@ -1,3 +1,11 @@
+/**
+ * OpenTimestamps module.
+ * @module open-timestamps
+ * @author R. Casatta, L. Vaccaro
+ * @copyright EternityWall
+ * @license GPL3
+ */
+
 'use strict';
 
 const Context = require('./context.js');
@@ -9,6 +17,9 @@ const Ops = require('./ops.js');
 
 module.exports = {
 
+  /** Show information on a timestamp.
+   * @param {string} fileOts - The ots file.
+   */
   info(fileOts) {
     if (fileOts === undefined) {
       console.log('No ots file');
@@ -27,7 +38,9 @@ module.exports = {
     return firstLine + 'Timestamp:\n' + detachedTimestampFile.timestamp.strTree() + '\n';
   },
 
-    /* STAMP COMMAND */
+  /** Create timestamp with the aid of a remote calendar. May be specified multiple times.
+   * @param {string} file - The plain file to stamp.
+   */
   stamp(file) {
     return new Promise((resolve, reject) => {
       console.log('TODO');
@@ -101,6 +114,11 @@ module.exports = {
       });
     });
   },
+
+  /** Create a timestamp
+   * @param {timestamp} timestamp - The timestamp.
+   * @param {string[]} calendarUrls - List of calendar's to use.
+   */
   createTimestamp(timestamp, calendarUrls) {
     // setup_bitcoin : not used
 
@@ -124,7 +142,10 @@ module.exports = {
     });
   },
 
-    /* VERIFY COMMAND */
+  /** Verify a timestamp.
+   * @param {string} fileOts - The ots file.
+   * @param {string} file - The plain file.
+   */
   verify(fileOts, file) {
     console.log('TODO');
     console.log('fileOts: ', fileOts);
