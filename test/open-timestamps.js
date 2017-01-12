@@ -30,7 +30,7 @@ test('setup', assert => {
     assert.fail('err=' + err);
   });
 });
-/*
+
 test('OpenTimestamps.info()', assert => {
   const otsInfoCalc = OpenTimestamps.info(ots);
   assert.false(otsInfoCalc === undefined);
@@ -51,7 +51,6 @@ test('OpenTimestamps.stamp()', assert => {
     assert.fail('err=' + err);
   });
 });
-*/
 
 test('OpenTimestamps.verify()', assert => {
   const verifyPromise = OpenTimestamps.verify(ots, incomplete);
@@ -62,7 +61,7 @@ test('OpenTimestamps.verify()', assert => {
     assert.fail('err=' + err);
   });
 });
-/*
+
 test('OpenTimestamps.verify()', assert => {
   const verifyPromise = OpenTimestamps.verify(helloworldOts, helloworld);
   verifyPromise.then(result => {
@@ -71,4 +70,4 @@ test('OpenTimestamps.verify()', assert => {
   }).catch(err => {
     assert.fail('err=' + err);
   });
-}); */
+});

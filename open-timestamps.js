@@ -161,10 +161,10 @@ module.exports = {
     const detachedTimestamp = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
     console.log('Hashing file, algorithm ' + detachedTimestamp.fileHashOp._TAG_NAME());
 
-    const ctx_hashfd = new Context.StreamDeserialization();
-    ctx_hashfd.open(Utils.arrayToBytes(plain));
+    const ctxHashfd = new Context.StreamDeserialization();
+    ctxHashfd.open(Utils.arrayToBytes(plain));
 
-    const actualFileDigest = detachedTimestamp.fileHashOp.hashFd(ctx_hashfd);
+    const actualFileDigest = detachedTimestamp.fileHashOp.hashFd(ctxHashfd);
     console.log('actualFileDigest ' + Utils.bytesToHex(actualFileDigest));
     console.log('detachedTimestamp.fileDigest() ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
 
@@ -184,15 +184,16 @@ module.exports = {
    */
   verifyTimestamp(timestamp) {
     return new Promise((resolve, reject) => {
-      // upgrade_timestamp(timestamp, args);
+      // upgradeTimestamp(timestamp, args);
+
       for (const [msg, attestation] of timestamp.allAttestations()) {
         if (attestation instanceof Notary.PendingAttestation) {
-
+          console.log('PendingAttestation: pass ');
         } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
           console.log('Request to insight ');
-          const url="https://search.bitaccess.co/insight-api";
-          //https://search.bitaccess.co/insight-api
-          //https://insight.bitpay.com/api
+          const url = 'https://search.bitaccess.co/insight-api';
+            // https://search.bitaccess.co/insight-api
+            // https://insight.bitpay.com/api
           const insight = new Insight.Insight(url);
 
           insight.blockindex(attestation.height).then(blockHash => {
@@ -205,7 +206,7 @@ module.exports = {
               console.log('merkleroot: ' + Utils.bytesToHex(merkle));
               console.log('msg: ' + Utils.bytesToHex(message));
 
-              // One Bitcoin attestation is enough
+                // One Bitcoin attestation is enough
               if (Utils.arrEq(merkle, message)) {
                 console.log('Equal');
                 resolve(true);
@@ -213,17 +214,17 @@ module.exports = {
                 console.log('Diff');
                 resolve(false);
               }
-              return;
             }, err => {
               console.log('Error: ' + err);
               reject(err);
             });
           });
+
+          // Verify only the first BitcoinBlockHeaderAttestation
+          return;
         }
       }
-    }, err => {
-      console.log('Error: ' + err);
-      reject(err);
+      resolve(false);
     });
   },
 
@@ -232,7 +233,8 @@ module.exports = {
    * @param {Timestamp} timestamp - The timestamp.
    * @return {boolean} True if the timestamp has changed, False otherwise.
    */
-  upgrade_timestamp(timestamp, plain) {
+      /*
+  upgradeTimestamp(timestamp, plain) {
     // Check remote calendars for upgrades.
     // This time we only check PendingAttestations - we can't be as agressive.
 
@@ -254,17 +256,15 @@ module.exports = {
         }
       }
     }
-  },
-  directly_verified(stamp) {
 
-  },
+  }, */
 
   /** Determine if timestamp is complete and can be verified.
    * @param {Timestamp} stamp - The timestamp.
    * @return {boolean} True if the timestamp is complete, False otherwise.
    */
-  is_timestamp_complete(stamp) {
-    for (const [msg, attestation] of stamp.allAttestations()) {
+  isTimestampComplete(stamp) {
+    for (const [, attestation] of stamp.allAttestations()) {
       if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
         return true;
       }
