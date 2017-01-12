@@ -1,10 +1,10 @@
 
 const OpenTimestamps = require('../open-timestamps.js');
-// const ByteBuffer = require('bytebuffer');
-
+const Context = require('../context.js');
 const Utils = require('../utils.js');
+const DetachedTimestampFile = require('../detached-timestamp-file.js');
+// const ByteBuffer = require('bytebuffer');
 // const DetachedTimestampFile = require('../detached-timestamp-file.js');
-// const Context = require('../context.js');
 
 // examples/incomplete.txt.ots
 // const incompletePlain = '5468652074696d657374616d70206f6e20746869732066696c6520697320696e636f6d706c6574652c20616e642063616e2062652075706772616465642e0a';
@@ -36,6 +36,7 @@ Promise.all([helloworldOtsPromise, helloworldPromise]).then(values => {
   helloworldOts = values[0];
   helloworld = values[1];
 
+  stamp(helloworld);
   info(helloworldOts);
   verify(helloworldOts, helloworld);
   upgrade(helloworldOts);
@@ -54,12 +55,14 @@ Promise.all([incompleteOtsPromise, incompletePromise]).then(values => {
   console.log('err=' + err);
 });
 
-function info(ots){
+function info(ots) {
+  console.log('INFO');
   const infoResult = OpenTimestamps.info(ots);
   console.log(infoResult);
 }
 
 function verify(ots, plain) {
+  console.log('VERIFY');
   const verifyPromise = OpenTimestamps.verify(ots, plain);
   verifyPromise.then(result => {
     console.log(result);
@@ -69,11 +72,24 @@ function verify(ots, plain) {
 }
 
 function upgrade(ots) {
+  console.log('UPGRADE');
   const upgradePromise = OpenTimestamps.upgrade(ots);
   upgradePromise.then(result => {
     console.log(result);
   }).catch(err => {
     console.log(err);
+  });
+}
+
+function stamp(plain) {
+  console.log('STAMP');
+  const timestampBytesPromise = OpenTimestamps.stamp(plain);
+  timestampBytesPromise.then(timestampBytes => {
+    const ctx = new Context.StreamDeserialization();
+    ctx.open(timestampBytes);
+    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+    console.log('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9');
+    console.log(Utils.bytesToHex(detachedTimestampFile.timestamp.msg));
   });
 }
 

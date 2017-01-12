@@ -133,7 +133,6 @@ class Timestamp {
     }
     if (this.msg !== other.msg) {
       console.error('Can\'t merge timestamps for different messages together');
-      return;
     }
 
     for (const attestation of other.attestations) {
