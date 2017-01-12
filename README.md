@@ -1,5 +1,5 @@
-# javascript-opentimestamps
 
+# javascript-opentimestamps
 
 [![Build Status](https://travis-ci.org/eternitywall/javascript-opentimestamps.svg?branch=master)](https://travis-ci.org/eternitywall/javascript-opentimestamps)
 
@@ -12,24 +12,32 @@ Have a look at the /examples folder for a demo of this.
 Documentation available at https://eternitywall.com/docs/javascript-opentimestamps/
 
 ## Installation
+
 Using npm:
+
 ```shell
 $ npm install javascript-opentimestamps
 ```
+
 Using Browserify:
+
 ```shell
 npm install -g browserify
 browserify test.js -o test.bundle.js
 ```
+
 ```html
 <script src="test.bundle.js"></script>
 ```
+
 Note: ECMAScript 6 browser compatibility required.
 
 ## Commands
 
 ### Stamp
+
 Create timestamp with the aid of a remote calendar.
+
 ```js
 const OpenTimestamps = require('javascript-opentimestamps');
 const ByteBuffer = require('bytebuffer');
@@ -40,8 +48,11 @@ stampResultPromise.then(stampResult => {
 });
 ```
 Const `file` created from the hex representation of the file `test/incomplete.txt`
+
 ### Info
+
 Show information on a timestamp.
+
 ```js
 const OpenTimestamps = require('javascript-opentimestamps');
 const ByteBuffer = require('bytebuffer');
@@ -49,10 +60,13 @@ const fileOts = ByteBuffer.fromHex('004f70656e54696d657374616d7073000050726f6f66
 const infoResult = OpenTimestamps.info(fileOts);
 console.log(infoResult);
 ```
+
 Const `fileOts` created from the hex representation of the file `test/incomplete.txt.ots`. You can match the printed result with the file `test/incomplete.txt.ots.info`.
 
-### Verify 
+### Verify
+ 
 Verify the timestamp attestations.
+
 ```js
 const OpenTimestamps = require('javascript-opentimestamps');
 const ByteBuffer = require('bytebuffer');
@@ -64,12 +78,14 @@ verifyResultPromise.then(verifyResult => {
   console.log(verifyResult);
 });
 ```
+
 Const `file` created from the hex representation of the file `test/hello-world.txt.ots` while `fileOts` contains `test/hello-world.txt` 
 
-
 ### Upgrade
+
 TODO: Upgrade remote calendar timestamps to be locally verifiable.
 
 
 ## License
+
 LGPL3
