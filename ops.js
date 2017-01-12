@@ -1,4 +1,5 @@
 'use strict';
+
 /**
  * Ops crypto operations module.
  * @module Notary
@@ -19,21 +20,21 @@ class Op {
 
   /**
    * Maximum length of an Op result
-
-   For a verifier, this limit is what limits the maximum amount of memory you
-   need at any one time to verify a particular timestamp path; while verifying
-   a particular commitment operation path previously calculated results can be
-   discarded.
-
-   Of course, if everything was a merkle tree you never need to append/prepend
-   anything near 4KiB of data; 64 bytes would be plenty even with SHA512. The
-   main need for this is compatibility with existing systems like Bitcoin
-   timestamps and Certificate Transparency servers. While the pathological
-   limits required by both are quite large - 1MB and 16MiB respectively - 4KiB
-   is perfectly adequate in both cases for more reasonable usage.
-
-   Op subclasses should set this limit even lower if doing so is appropriate
-   for them.
+   *
+   * For a verifier, this limit is what limits the maximum amount of memory you
+   * need at any one time to verify a particular timestamp path; while verifying
+   * a particular commitment operation path previously calculated results can be
+   * discarded.
+   *
+   * Of course, if everything was a merkle tree you never need to append/prepend
+   * anything near 4KiB of data; 64 bytes would be plenty even with SHA512. The
+   * main need for this is compatibility with existing systems like Bitcoin
+   * timestamps and Certificate Transparency servers. While the pathological
+   * limits required by both are quite large - 1MB and 16MiB respectively - 4KiB
+   * is perfectly adequate in both cases for more reasonable usage.
+   *
+   * Op subclasses should set this limit even lower if doing so is appropriate
+   * for them.
    */
   _MAX_RESULT_LENGTH() {
     return 4096;
@@ -41,13 +42,13 @@ class Op {
 
   /**
    * Maximum length of the message an Op can be applied too.
-
-   Similar to the result length limit, this limit gives implementations a sane
-   constraint to work with; the maximum result-length limit implicitly
-   constrains maximum message length anyway.
-
-   Op subclasses should set this limit even lower if doing so is appropriate
-   for them.
+   *
+   * Similar to the result length limit, this limit gives implementations a sane
+   * constraint to work with; the maximum result-length limit implicitly
+   * constrains maximum message length anyway.
+   *
+   * Op subclasses should set this limit even lower if doing so is appropriate
+   * for them.
    */
   _MAX_MSG_LENGTH() {
     return 4096;
@@ -88,8 +89,8 @@ class Op {
 
   /**
    * Apply the operation to a message.
-   Raises MsgValueError if the message value is invalid, such as it being
-   too long, or it causing the result to be too long.
+   * Raises MsgValueError if the message value is invalid, such as it being
+   * too long, or it causing the result to be too long.
    * @param {byte[]} msg - The message.
    */
   call(msg) {
@@ -107,7 +108,8 @@ class Op {
   }
 }
 
-/** Operations that act on a message and a single argument.
+/**
+ * Operations that act on a message and a single argument.
  * @extends OpUnary
  */
 class OpBinary extends Op {
@@ -138,7 +140,8 @@ class OpBinary extends Op {
   }
 }
 
-/** Append a suffix to a message.
+/**
+ * Append a suffix to a message.
  * @extends OpBinary
  */
 class OpAppend extends OpBinary {
@@ -164,7 +167,8 @@ class OpAppend extends OpBinary {
   }
 }
 
-/** Prepend a prefix to a message.
+/**
+ * Prepend a prefix to a message.
  * @extends OpBinary
  */
 class OpPrepend extends OpBinary {
@@ -190,7 +194,8 @@ class OpPrepend extends OpBinary {
   }
 }
 
-/** Operations that act on a single message.
+/**
+ * Operations that act on a single message.
  * @extends Op
  */
 class OpUnary extends Op {
@@ -213,7 +218,8 @@ class OpUnary extends Op {
   }
 }
 
-/** Reverse a message.
+/**
+ * Reverse a message.
  * @extends OpUnary
  */
 class OpReverse extends OpUnary {
@@ -242,7 +248,8 @@ class OpReverse extends OpUnary {
   }
 }
 
-/** Hexlify a message.
+/**
+ * Hexlify a message.
  * @extends OpUnary
  */
 class OpHexlify extends OpUnary {
@@ -273,10 +280,11 @@ class OpHexlify extends OpUnary {
   }
 }
 
-/** Cryptographic transformations.
- These transformations have the unique property that for any length message,
- the size of the result they return is fixed. Additionally, they're the only
- type of operation that can be applied directly to a stream.
+/**
+ * Cryptographic transformations.
+ * These transformations have the unique property that for any length message,
+ * the size of the result they return is fixed. Additionally, they're the only
+ * type of operation that can be applied directly to a stream.
  * @extends OpUnary
  */
 class CryptOp extends OpUnary {
@@ -317,7 +325,8 @@ class CryptOp extends OpUnary {
   }
 }
 
-/** Cryptographic SHA1 operation
+/**
+ * Cryptographic SHA1 operation
  * Cryptographic operation tag numbers taken from RFC4880, although it's not
  * guaranteed that they'll continue to match that RFC in the future.
  * Remember that for timestamping, hash algorithms with collision attacks
@@ -349,7 +358,8 @@ class OpSHA1 extends CryptOp {
   }
 }
 
-/** Cryptographic RIPEMD160 operation
+/**
+ * Cryptographic RIPEMD160 operation
  * Cryptographic operation tag numbers taken from RFC4880, although it's not
  * guaranteed that they'll continue to match that RFC in the future.
  * @extends CryptOp
@@ -375,7 +385,8 @@ class OpRIPEMD160 extends CryptOp {
   }
 }
 
-/** Cryptographic SHA256 operation
+/**
+ * Cryptographic SHA256 operation
  * Cryptographic operation tag numbers taken from RFC4880, although it's not
  * guaranteed that they'll continue to match that RFC in the future.
  * @extends CryptOp

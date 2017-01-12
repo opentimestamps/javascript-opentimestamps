@@ -1,4 +1,5 @@
 'use strict';
+
 /**
  * Notary module.
  * @module Notary
@@ -19,7 +20,8 @@ class TimeAttestation {
     return 8192;
   }
 
-  /** Deserialize a general Time Attestation to the specific subclass Attestation.
+  /**
+   * Deserialize a general Time Attestation to the specific subclass Attestation.
    * @param {StreamDeserializationContext} ctx - The stream deserialization context.
    * @return {Attestation} The specific subclass Attestation.
    */
@@ -46,7 +48,8 @@ class TimeAttestation {
     return UnknownAttestation.deserialize(ctxPayload, tag);
   }
 
-  /** Serialize a a general Time Attestation to the specific subclass Attestation.
+  /**
+   * Serialize a a general Time Attestation to the specific subclass Attestation.
    * @param {StreamSerializationContext} ctx - The output stream serialization context.
    */
   serialize(ctx) {
@@ -58,9 +61,10 @@ class TimeAttestation {
   }
 }
 
-/** Placeholder for attestations that don't support
+/**
+ * Placeholder for attestations that don't support
  * @extends TimeAttestation
- * */
+ */
 class UnknownAttestation extends TimeAttestation {
 
   constructor(tag, payload) {
@@ -83,24 +87,25 @@ class UnknownAttestation extends TimeAttestation {
   }
 }
 
-/** Pending attestations.
+/**
+ * Pending attestations.
  * Commitment has been recorded in a remote calendar for future attestation,
- and we have a URI to find a more complete timestamp in the future.
- Nothing other than the URI is recorded, nor is there provision made to add
- extra metadata (other than the URI) in future upgrades. The rational here
- is that remote calendars promise to keep commitments indefinitely, so from
- the moment they are created it should be possible to find the commitment in
- the calendar. Thus if you're not satisfied with the local verifiability of
- a timestamp, the correct thing to do is just ask the remote calendar if
- additional attestations are available and/or when they'll be available.
- While we could additional metadata like what types of attestations the
- remote calendar expects to be able to provide in the future, that metadata
- can easily change in the future too. Given that we don't expect timestamps
- to normally have more than a small number of remote calendar attestations,
- it'd be better to have verifiers get the most recent status of such
- information (possibly with appropriate negative response caching).
+ * and we have a URI to find a more complete timestamp in the future.
+ * Nothing other than the URI is recorded, nor is there provision made to add
+ * extra metadata (other than the URI) in future upgrades. The rational here
+ * is that remote calendars promise to keep commitments indefinitely, so from
+ * the moment they are created it should be possible to find the commitment in
+ * the calendar. Thus if you're not satisfied with the local verifiability of
+ * a timestamp, the correct thing to do is just ask the remote calendar if
+ * additional attestations are available and/or when they'll be available.
+ * While we could additional metadata like what types of attestations the
+ * remote calendar expects to be able to provide in the future, that metadata
+ * can easily change in the future too. Given that we don't expect timestamps
+ * to normally have more than a small number of remote calendar attestations,
+ * it'd be better to have verifiers get the most recent status of such
+ * information (possibly with appropriate negative response caching).
  * @extends TimeAttestation
- * */
+ */
 class PendingAttestation extends TimeAttestation {
   _TAG() {
     return [0x83, 0xdf, 0xe3, 0x0d, 0x2e, 0xf9, 0x0c, 0x8e];
@@ -150,29 +155,30 @@ class PendingAttestation extends TimeAttestation {
   }
 }
 
-/** Bitcoin Block Header Attestation.
+/**
+ * Bitcoin Block Header Attestation.
  * The commitment digest will be the merkleroot of the blockheader.
- The block height is recorded so that looking up the correct block header in
- an external block header database doesn't require every header to be stored
- locally (33MB and counting). (remember that a memory-constrained local
- client can save an MMR that commits to all blocks, and use an external service to fill
- in pruned details).
- Otherwise no additional redundant data about the block header is recorded.
- This is very intentional: since the attestation contains (nearly) the
- absolute bare minimum amount of data, we encourage implementations to do
- the correct thing and get the block header from a by-height index, check
- that the merkleroots match, and then calculate the time from the header
- information. Providing more data would encourage implementations to cheat.
- Remember that the only thing that would invalidate the block height is a
- reorg, but in the event of a reorg the merkleroot will be invalid anyway,
- so there's no point to recording data in the attestation like the header
- itself. At best that would just give us extra confirmation that a reorg
- made the attestation invalid; reorgs deep enough to invalidate timestamps are
- exceptionally rare events anyway, so better to just tell the user the timestamp
- can't be verified rather than add almost-never tested code to handle that case
- more gracefully.
+ * The block height is recorded so that looking up the correct block header in
+ * an external block header database doesn't require every header to be stored
+ * locally (33MB and counting). (remember that a memory-constrained local
+ * client can save an MMR that commits to all blocks, and use an external service to fill
+ * in pruned details).
+ * Otherwise no additional redundant data about the block header is recorded.
+ * This is very intentional: since the attestation contains (nearly) the
+ * absolute bare minimum amount of data, we encourage implementations to do
+ * the correct thing and get the block header from a by-height index, check
+ * that the merkleroots match, and then calculate the time from the header
+ * information. Providing more data would encourage implementations to cheat.
+ * Remember that the only thing that would invalidate the block height is a
+ * reorg, but in the event of a reorg the merkleroot will be invalid anyway,
+ * so there's no point to recording data in the attestation like the header
+ * itself. At best that would just give us extra confirmation that a reorg
+ * made the attestation invalid; reorgs deep enough to invalidate timestamps are
+ * exceptionally rare events anyway, so better to just tell the user the timestamp
+ * can't be verified rather than add almost-never tested code to handle that case
+ * more gracefully.
  * @extends TimeAttestation
- * */
+ */
 class BitcoinBlockHeaderAttestation extends TimeAttestation {
 
   _TAG() {

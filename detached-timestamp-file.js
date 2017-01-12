@@ -1,4 +1,5 @@
 'use strict';
+
 /**
  * Detached Timestamp File module.
  * @module DetachedTimestampFile
@@ -30,7 +31,8 @@ const MAJOR_VERSION = 1;
 // const MIN_FILE_DIGEST_LENGTH = 20;
 // const MAX_FILE_DIGEST_LENGTH = 32;
 
-/** Class representing Detached Timestamp File.
+/**
+ * Class representing Detached Timestamp File.
  * A file containing a timestamp for another file.
  * Contains a timestamp, along with a header and the digest of the file.
  */
@@ -49,7 +51,8 @@ class DetachedTimestampFile {
     return this.timestamp.msg;
   }
 
-  /** Serialize a Timestamp File.
+  /**
+   * Serialize a Timestamp File.
    * @param {StreamSerializationContext} ctx - The stream serialization context.
    * @return {byte[]} The serialized DetachedTimestampFile object.
    */
@@ -61,7 +64,8 @@ class DetachedTimestampFile {
     this.timestamp.serialize(ctx);
   }
 
-  /** Deserialize a Timestamp File.
+  /**
+   * Deserialize a Timestamp File.
    * @param {StreamDeserializationContext} ctx - The stream deserialization context.
    * @return {DetachedTimestampFile} The generated DetachedTimestampFile object.
    */
@@ -77,7 +81,8 @@ class DetachedTimestampFile {
     return new DetachedTimestampFile(fileHashOp, timestamp);
   }
 
-  /** Read the Detached Timestamp File from bytes.
+  /**
+   * Read the Detached Timestamp File from bytes.
    * @param {Op} fileHashOp - The file hash operation.
    * @param {StreamDeserializationContext} ctx - The stream deserialization context.
    * @return {DetachedTimestampFile} The generated DetachedTimestampFile object.
@@ -87,7 +92,8 @@ class DetachedTimestampFile {
     return new DetachedTimestampFile(fileHashOp, new Timestamp(fdHash));
   }
 
-  /** Print the object.
+  /**
+   * Print the object.
    * @return {string} The output.
    */
   toString() {

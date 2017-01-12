@@ -1,9 +1,20 @@
 'use strict';
 
+/**
+ * Utils module.
+ * @module Utils
+ * @author EternityWall
+ * @license LPGL3
+ */
+
 const crypto = require('crypto');
 const fs = require('fs');
 
-// Convert a hex string to a byte array
+/**
+ * Convert a hex string to a byte array
+ * @param hex
+ * @returns {Array}
+ */
 exports.hexToBytes = function (hex) {
   const bytes = [];
   for (let c = 0; c < hex.length; c += 2) {
@@ -12,7 +23,11 @@ exports.hexToBytes = function (hex) {
   return bytes;
 };
 
-// Convert a byte array to a hex string
+/**
+ * Convert a byte array to a hex string
+ * @param bytes
+ * @returns {string}
+ */
 exports.bytesToHex = function (bytes) {
   const hex = [];
   for (let i = 0; i < bytes.length; i++) {
@@ -22,6 +37,11 @@ exports.bytesToHex = function (bytes) {
   return hex.join('');
 };
 
+/**
+ * Convert chars to hexadecimal representation
+ * @param bytes
+ * @returns {string}
+ */
 exports.charsToHex = function (bytes) {
   const hex = [];
   for (let i = 0; i < bytes.length; i++) {
@@ -32,10 +52,20 @@ exports.charsToHex = function (bytes) {
   return hex.join('');
 };
 
+/**
+ * Convert char to byte representation
+ * @param byte
+ * @returns {string}
+ */
 exports.charToByte = function (char) {
   return char.charCodeAt(0);
 };
 
+/**
+ * Convert chars to bytes representation
+ * @param bytes
+ * @returns {Array}
+ */
 exports.charsToBytes = function (chars) {
   const bytes = [];
   for (let i = 0; i < chars.length; i++) {
@@ -94,6 +124,11 @@ exports.randString = function (n) {
   return rs;
 };
 
+/**
+ * fs.readfile promisified
+ * @param filename
+ * @param mode
+ */
 exports.readFilePromise = function (filename, mode) {
   return new Promise((resolve, reject) => {
     fs.readFile(filename, mode, (err, buffer) => {
