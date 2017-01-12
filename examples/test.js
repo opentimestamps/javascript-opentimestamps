@@ -36,6 +36,7 @@ Promise.all([helloworldOtsPromise, helloworldPromise]).then(values => {
   helloworldOts = values[0];
   helloworld = values[1];
 
+  info(helloworldOts);
   verify(helloworldOts, helloworld);
   upgrade(helloworldOts);
 }).catch(err => {
@@ -46,11 +47,17 @@ Promise.all([incompleteOtsPromise, incompletePromise]).then(values => {
   incompleteOts = values[0];
   incomplete = values[1];
 
+  info(incompleteOts);
   verify(incompleteOts, incomplete);
   upgrade(incompleteOts);
 }).catch(err => {
   console.log('err=' + err);
 });
+
+function info(ots){
+  const infoResult = OpenTimestamps.info(ots);
+  console.log(infoResult);
+}
 
 function verify(ots, plain) {
   const verifyPromise = OpenTimestamps.verify(ots, plain);
