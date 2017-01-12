@@ -12,6 +12,8 @@ const Timestamp = require('./timestamp.js');
 const Utils = require('./utils.js');
 const Ops = require('./ops.js');
 const Calendar = require('./calendar.js');
+const Notary = require('./notary.js');
+const Insight = require('./insight.js');
 
 module.exports = {
 
@@ -154,20 +156,115 @@ module.exports = {
     const detachedTimestamp = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
     console.log('Hashing file, algorithm ' + detachedTimestamp.fileHashOp._TAG_NAME());
 
-    const actualFileDigest = detachedTimestamp.fileHashOp.hashFd(Utils.arrayToBytes(plain));
-    console.log('Got digest ' + Utils.bytesToHex(actualFileDigest));
+    const ctx_hashfd = new Context.StreamDeserialization();
+    ctx_hashfd.open(Utils.arrayToBytes(plain));
 
-    if (actualFileDigest !== detachedTimestamp.file_digest) {
+    const actualFileDigest = detachedTimestamp.fileHashOp.hashFd(ctx_hashfd);
+    console.log('actualFileDigest ' + Utils.bytesToHex(actualFileDigest));
+    console.log('detachedTimestamp.fileDigest() ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
+
+    const detachedFileDigest = detachedTimestamp.fileDigest();
+    if (!Utils.arrEq(actualFileDigest, detachedFileDigest)) {
       console.log('Expected digest ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
       console.log('File does not match original!');
       return;
     }
-
-    this.verifyTimestamp(detachedTimestamp.timestamp);
+    console.log(Timestamp.strTreeExtended(detachedTimestamp.timestamp, 0));
+    return this.verifyTimestamp(detachedTimestamp.timestamp);
   },
+
+  /** Verify a timestamp.
+   * @param {Timestamp} timestamp - The timestamp.
+   * @return {boolean} True if the timestamp is verified, False otherwise.
+   */
   verifyTimestamp(timestamp) {
-    console.log('TODO ' + timestamp);
-        // upgrade_timestamp(timestamp, args);
+    return new Promise((resolve, reject) => {
+      // upgrade_timestamp(timestamp, args);
+      for (const [msg, attestation] of timestamp.allAttestations()) {
+        if (attestation instanceof Notary.PendingAttestation) {
+
+        } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
+          console.log('Request to insight ');
+          const url="https://search.bitaccess.co/insight-api";
+          //https://search.bitaccess.co/insight-api
+          //https://insight.bitpay.com/api
+          const insight = new Insight.Insight(url);
+
+          insight.blockindex(attestation.height).then(blockHash => {
+            console.log('blockHash: ' + blockHash);
+
+            insight.block(blockHash).then(merkleroot => {
+              const merkle = Utils.hexToBytes(merkleroot);
+              const message = msg.reverse();
+
+              console.log('merkleroot: ' + Utils.bytesToHex(merkle));
+              console.log('msg: ' + Utils.bytesToHex(message));
+
+              // One Bitcoin attestation is enough
+              if (Utils.arrEq(merkle, message)) {
+                console.log('Equal');
+                resolve(true);
+              } else {
+                console.log('Diff');
+                resolve(false);
+              }
+              return;
+            }, err => {
+              console.log('Error: ' + err);
+              reject(err);
+            });
+          });
+        }
+      }
+    }, err => {
+      console.log('Error: ' + err);
+      reject(err);
+    });
+  },
+
+  /** Attempt to upgrade an incomplete timestamp to make it verifiable.
+   * Note that this means if the timestamp that is already complete, False will be returned as nothing has changed.
+   * @param {Timestamp} timestamp - The timestamp.
+   * @return {boolean} True if the timestamp has changed, False otherwise.
+   */
+  upgrade_timestamp(timestamp, plain) {
+    // Check remote calendars for upgrades.
+    // This time we only check PendingAttestations - we can't be as agressive.
+
+    const calendarUrls = [];
+    // calendarUrls.push('https://alice.btc.calendar.opentimestamps.org');
+    // calendarUrls.append('https://b.pool.opentimestamps.org');
+    calendarUrls.push('https://ots.eternitywall.it');
+
+    while (!this.is_timestamp_complete(timestamp)) {
+      const foundNewAttestations = false;
+
+      for (const sub_stamp of directly_verified(timestamp)) {
+        for (const attestation of sub_stamp.attestations) {
+          if (attestation instanceof Notary.PendingAttestation) {
+            const calendarUrl = attestation.uri;
+            // var calendarUrl = calendarUrls[0];
+            const commitment = sub_stamp.msg;
+          }
+        }
+      }
+    }
+  },
+  directly_verified(stamp) {
+
+  },
+
+  /** Determine if timestamp is complete and can be verified.
+   * @param {Timestamp} stamp - The timestamp.
+   * @return {boolean} True if the timestamp is complete, False otherwise.
+   */
+  is_timestamp_complete(stamp) {
+    for (const [msg, attestation] of stamp.allAttestations()) {
+      if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
+        return true;
+      }
+    }
+    return false;
   }
 
 };

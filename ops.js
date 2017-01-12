@@ -368,7 +368,7 @@ class OpRIPEMD160 extends CryptOp {
     return 20;
   }
   static deserializeFromTag(ctx, tag) {
-    return super.deserializeFromTag(this, ctx, tag);
+    return super.deserializeFromTag(ctx, tag);
   }
   call(msg) {
     return super.call(msg);

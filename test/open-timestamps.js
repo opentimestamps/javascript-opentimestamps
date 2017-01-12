@@ -9,21 +9,28 @@ let otsInfo;
 let ots;
 let incomplete;
 
+let helloworldOts;
+let helloworld;
+
 test('setup', assert => {
   const otsInfoPromise = Utils.readFilePromise('./test/incomplete.txt.ots.info', 'utf8');
   const otsPromise = Utils.readFilePromise('./test/incomplete.txt.ots', null);
   const incompletePromise = Utils.readFilePromise('./test/incomplete.txt', null);
+  const helloworldOtsPromise = Utils.readFilePromise('./test/hello-world.txt.ots', null);
+  const helloworldPromise = Utils.readFilePromise('./test/hello-world.txt', null);
 
-  Promise.all([otsInfoPromise, otsPromise, incompletePromise]).then(values => {
+  Promise.all([otsInfoPromise, otsPromise, incompletePromise, helloworldOtsPromise, helloworldPromise]).then(values => {
     otsInfo = values[0];
     ots = values[1];
     incomplete = values[2];
+    helloworldOts = values[3];
+    helloworld = values[4];
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
   });
 });
-
+/*
 test('OpenTimestamps.info()', assert => {
   const otsInfoCalc = OpenTimestamps.info(ots);
   assert.false(otsInfoCalc === undefined);
@@ -44,3 +51,24 @@ test('OpenTimestamps.stamp()', assert => {
     assert.fail('err=' + err);
   });
 });
+*/
+
+test('OpenTimestamps.verify()', assert => {
+  const verifyPromise = OpenTimestamps.verify(ots, incomplete);
+  verifyPromise.then(result => {
+    assert.false(result);
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+/*
+test('OpenTimestamps.verify()', assert => {
+  const verifyPromise = OpenTimestamps.verify(helloworldOts, helloworld);
+  verifyPromise.then(result => {
+    assert.true(result);
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+}); */

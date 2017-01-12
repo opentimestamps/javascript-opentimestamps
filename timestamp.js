@@ -148,6 +148,24 @@ class Timestamp {
   }
 
   /**
+   * Iterate over all attestations recursively
+   * @return {HashMap} Returns iterable of (msg, attestation)
+   */
+  allAttestations() {
+    const map = new Map();
+    for (const attestation of this.attestations) {
+      map.set(this.msg, attestation);
+    }
+    for (const [, opStamp] of this.ops) {
+      const subMap = opStamp.allAttestations();
+      for (const [a, b] of subMap) {
+        map.set(a, b);
+      }
+    }
+    return map;
+  }
+
+  /**
    * Print as memory hierarchical object.
    * @param {int} indent - Initial hierarchical indention.
    * @return {string} The output string.
