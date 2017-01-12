@@ -147,8 +147,8 @@ module.exports = {
   /**
    * Verify a timestamp.
    * @exports OpenTimestamps/verify
-   * @param {ArrayBuffer} ots - The ots array buffer to stamp.
-   * @param {ArrayBuffer} plain - The plain array buffer to stamp.
+   * @param {ArrayBuffer} ots - The ots array buffer containing the proof to verify.
+   * @param {ArrayBuffer} plain - The plain array buffer to verify.
    */
   verify(ots, plain) {
     console.log('TODO');
