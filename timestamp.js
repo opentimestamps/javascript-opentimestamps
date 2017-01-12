@@ -129,9 +129,11 @@ class Timestamp {
   merge(other) {
     if (!(other instanceof Timestamp)) {
       console.error('Can only merge Timestamps together');
+      return;
     }
     if (this.msg !== other.msg) {
       console.error('Can\'t merge timestamps for different messages together');
+      return;
     }
 
     for (const attestation of other.attestations) {
@@ -145,9 +147,9 @@ class Timestamp {
         ourOpStamp = new Timestamp(otherOp.call(this.msg));
         this.ops.set(otherOp, ourOpStamp);
       }
-      // otherOp_ts.ops.add(otherOp);
       ourOpStamp.merge(otherOpStamp);
     }
+    console.log('Timestamps merged');
   }
 
   /**
@@ -289,6 +291,44 @@ class Timestamp {
       }
     }
     return output;
+  }
+
+  /** Set of al Attestations.
+   * @return {Array} Array of all sub timestamps with attestations.
+   */
+  directlyVerified() {
+    if (this.attestations.length > 0) {
+      return new Array(this);
+    }
+    let array = [];
+    for (const [, value] of this.ops) {
+      const result = value.directlyVerified();
+      array = array.concat(result);
+    }
+    return array;
+  }
+
+  /** Set of al Attestations.
+   * @return {Set} Set of all timestamp attestations.
+   */
+  getAttestations() {
+    const set = new Set();
+    for (const [, attestation] of this.allAttestations()) {
+      set.add(attestation);
+    }
+    return set;
+  }
+
+  /** Determine if timestamp is complete and can be verified.
+   * @return {boolean} True if the timestamp is complete, False otherwise.
+   */
+  isTimestampComplete() {
+    for (const [, attestation] of this.allAttestations()) {
+      if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 

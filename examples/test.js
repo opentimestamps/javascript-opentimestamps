@@ -24,23 +24,51 @@ verifyPromise.then(markles => {
 
 let helloworldOts;
 let helloworld;
+let incompleteOts;
+let incomplete;
 
 const helloworldOtsPromise = Utils.readFilePromise('./test/hello-world.txt.ots', null);
 const helloworldPromise = Utils.readFilePromise('./test/hello-world.txt', null);
+const incompleteOtsPromise = Utils.readFilePromise('./test/incomplete.txt.ots', null);
+const incompletePromise = Utils.readFilePromise('./test/incomplete.txt', null);
 
 Promise.all([helloworldOtsPromise, helloworldPromise]).then(values => {
   helloworldOts = values[0];
   helloworld = values[1];
 
-  const verifyPromise = OpenTimestamps.verify(helloworldOts, helloworld);
+  verify(helloworldOts, helloworld);
+  upgrade(helloworldOts);
+}).catch(err => {
+  console.log('err=' + err);
+});
+
+Promise.all([incompleteOtsPromise, incompletePromise]).then(values => {
+  incompleteOts = values[0];
+  incomplete = values[1];
+
+  verify(incompleteOts, incomplete);
+  upgrade(incompleteOts);
+}).catch(err => {
+  console.log('err=' + err);
+});
+
+function verify(ots, plain) {
+  const verifyPromise = OpenTimestamps.verify(ots, plain);
   verifyPromise.then(result => {
     console.log(result);
   }).catch(err => {
     console.log(err);
   });
-}).catch(err => {
-  console.log('err=' + err);
-});
+}
+
+function upgrade(ots) {
+  const upgradePromise = OpenTimestamps.upgrade(ots);
+  upgradePromise.then(result => {
+    console.log(result);
+  }).catch(err => {
+    console.log(err);
+  });
+}
 
 /*
 // examples/incomplete.txt.ots

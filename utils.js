@@ -75,6 +75,14 @@ exports.charsToBytes = function (chars) {
   return bytes;
 };
 
+exports.bytesToCharts = function (buffer) {
+  let charts = '';
+  for (let b = 0; b < buffer.length; b++) {
+    charts += String.fromCharCode(b)[0];
+  }
+  return charts;
+};
+
 exports.arrayToBytes = function (buffer) {
   const bytes = [];
   for (let c = 0; c < buffer.length; c++) {

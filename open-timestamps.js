@@ -151,7 +151,6 @@ module.exports = {
    * @param {ArrayBuffer} plain - The plain array buffer to verify.
    */
   verify(ots, plain) {
-    console.log('TODO');
     console.log('ots: ', ots);
     console.log('plain: ', plain);
 
@@ -228,13 +227,36 @@ module.exports = {
     });
   },
 
+  /** Upgrade a timestamp.
+   * @param {ArrayBuffer} ots - The ots array buffer containing the proof to verify.
+   * @return {boolean} True if the timestamp has changed, False otherwise.
+   */
+  upgrade(ots) {
+    console.log('ots: ', ots);
+
+    const ctx = new Context.StreamDeserialization();
+    ctx.open(Utils.arrayToBytes(ots));
+    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+
+    const changed = this.upgradeTimestamp(detachedTimestampFile.timestamp);
+
+    if (changed) {
+      console.log('Change timestamp');
+    }
+
+    if (detachedTimestampFile.timestamp.isTimestampComplete()) {
+      console.log('Success! Timestamp complete');
+    } else {
+      console.log('Failed! Timestamp not complete');
+    }
+  },
+
   /** Attempt to upgrade an incomplete timestamp to make it verifiable.
    * Note that this means if the timestamp that is already complete, False will be returned as nothing has changed.
    * @param {Timestamp} timestamp - The timestamp.
    * @return {boolean} True if the timestamp has changed, False otherwise.
    */
-      /*
-  upgradeTimestamp(timestamp, plain) {
+  upgradeTimestamp(timestamp) {
     // Check remote calendars for upgrades.
     // This time we only check PendingAttestations - we can't be as agressive.
 
@@ -243,33 +265,71 @@ module.exports = {
     // calendarUrls.append('https://b.pool.opentimestamps.org');
     calendarUrls.push('https://ots.eternitywall.it');
 
-    while (!this.is_timestamp_complete(timestamp)) {
-      const foundNewAttestations = false;
+    const existingAttestations = timestamp.getAttestations();
+    // let foundNewAttestations = false;
 
-      for (const sub_stamp of directly_verified(timestamp)) {
-        for (const attestation of sub_stamp.attestations) {
+    while (!timestamp.isTimestampComplete()) {
+      console.log(timestamp.directlyVerified().length);
+      for (const subStamp of timestamp.directlyVerified()) {
+        for (const attestation of subStamp.attestations) {
           if (attestation instanceof Notary.PendingAttestation) {
             const calendarUrl = attestation.uri;
             // var calendarUrl = calendarUrls[0];
-            const commitment = sub_stamp.msg;
+            const commitment = subStamp.msg;
+
+            console.log('attestation url: ', calendarUrl);
+            console.log('commitment: ', Utils.bytesToHex(commitment));
+
+            const calendar = new Calendar.RemoteCalendar(calendarUrl);
+
+            this.upgradeStamp(calendar, commitment, existingAttestations).then(upgradedStamp => {
+              console.log(upgradedStamp);
+              subStamp.merge(upgradedStamp);
+            }).catch(err => {
+              console.log(err);
+            });
+
+            return;
           }
         }
       }
     }
 
-  }, */
-
-  /** Determine if timestamp is complete and can be verified.
-   * @param {Timestamp} stamp - The timestamp.
-   * @return {boolean} True if the timestamp is complete, False otherwise.
-   */
-  isTimestampComplete(stamp) {
-    for (const [, attestation] of stamp.allAttestations()) {
-      if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-        return true;
-      }
-    }
+    console.log(Timestamp.strTreeExtended(timestamp, 0));
     return false;
+  },
+
+  upgradeStamp(calendar, commitment, existingAttestations) {
+    return new Promise((resolve, reject) => {
+      calendar.getTimestamp(commitment).then(upgradedStamp => {
+        console.log(Timestamp.strTreeExtended(upgradedStamp, 0));
+
+        // const atts_from_remote = get_attestations(upgradedStamp)
+        const attsFromRemote = upgradedStamp.getAttestations();
+        if (attsFromRemote.size > 0) {
+          console.log(attsFromRemote.size + ' attestation(s) from ' + calendar.url);
+        }
+
+        // difference from remote attestations & existing attestations
+        const newAttestations = new Set([...attsFromRemote].filter(x => !existingAttestations.has(x)));
+        if (newAttestations.size > 0) {
+          // changed & found_new_attestations
+          // foundNewAttestations = true;
+          console.log(attsFromRemote.size + ' attestation(s) from ' + calendar.url);
+
+          // union of existingAttestations & newAttestations
+          existingAttestations = new Set([...existingAttestations, ...newAttestations]);
+          resolve(upgradedStamp);
+          // subStamp.merge(upgradedStamp);
+          // args.cache.merge(upgraded_stamp)
+          // sub_stamp.merge(upgraded_stamp)
+        } else {
+          reject();
+        }
+      }).catch(err => {
+        reject(err);
+      });
+    });
   }
 
 };

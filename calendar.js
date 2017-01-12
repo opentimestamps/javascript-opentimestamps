@@ -37,7 +37,7 @@ class RemoteCalendar {
    */
 
   /**
-   * Submitting a digest to remote calendar. Returns a Timestamp committing to that digest
+   * Submitting a digest to remote calendar. Returns a Timestamp committing to that digest.
    * @param {byte[]} digest - The digest hash to send.
    * @returns {Promise} A promise that returns {@link resolve} if resolved
    * and {@link reject} if rejected.
@@ -76,6 +76,49 @@ class RemoteCalendar {
                 console.log('Calendar response error: ' + err);
                 reject();
               });
+    });
+  }
+
+  /**
+   * Get a timestamp for a given commitment.
+   * @param {byte[]} digest - The digest hash to send.
+   * @returns {Promise} A promise that returns {@link resolve} if resolved
+   * and {@link reject} if rejected.
+   */
+  getTimestamp(commitment) {
+    console.log('commitment ', Utils.bytesToHex(commitment));
+    console.log('commitment ', Utils.bytesToCharts(commitment));
+
+    const options = {
+      url: this.url + '/timestamp/' + Utils.bytesToHex(commitment),
+      method: 'GET',
+      headers: {
+        Accept: 'application/vnd.opentimestamps.v1',
+        'User-Agent': 'javascript-opentimestamps',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      encoding: null
+    };
+
+    return new Promise((resolve, reject) => {
+      requestPromise(options)
+          .then(body => {
+            console.log('body ', body);
+            if (body.size > 10000) {
+              console.log('Calendar response exceeded size limit');
+              return;
+            }
+
+            const ctx = new Context.StreamDeserialization();
+            ctx.open(Utils.arrayToBytes(body));
+
+            const timestamp = Timestamp.deserialize(ctx, commitment);
+            resolve(timestamp);
+          })
+          .catch(err => {
+            console.log('Calendar response error: ' + err);
+            reject();
+          });
     });
   }
 }
