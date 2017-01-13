@@ -195,7 +195,7 @@ module.exports = {
             // https://insight.bitpay.com/api
           const insight = new Insight.Insight(url);
 
-          insight.blockindex(attestation.height).then(blockHash => {
+          insight.blockhash(attestation.height).then(blockHash => {
             console.log('blockHash: ' + blockHash);
 
             insight.block(blockHash).then(merkleroot => {

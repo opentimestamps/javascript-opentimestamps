@@ -1,4 +1,5 @@
 'use strict';
+
 /**
  * Insight module.
  * @module Insight
@@ -9,7 +10,7 @@
 const requestPromise = require('request-promise');
 const Promise = require('promise');
 
-/** Class representing Remote Calendar server interface */
+/** Class used to query Insight API */
 class Insight {
 
   /**
@@ -44,7 +45,7 @@ class Insight {
    * @returns {Promise} A promise that returns {@link resolve} if resolved
    * and {@link reject} if rejected.
    */
-  blockindex(height) {
+  blockhash(height) {
     const options = {
       url: this.urlBlockindex + '/' + height,
       method: 'GET',
@@ -110,9 +111,80 @@ class Insight {
           });
     });
   }
+}
+
+const urls = ['https://notexisting.it','https://search.bitaccess.co/insight-api', 'https://search.bitaccess.co/insight-api', 'https://insight.bitpay.com/api'];
+
+class MultiInsight {
+
+  constructor() {
+    this.insights = [];
+    for(const url of urls) {
+      this.insights.push(new Insight(url));
+    }
+  }
+
+  blockhash(height) {
+    let res = [];
+    for(const insight of this.insights) {
+      res.push(insight.blockhash(height));
+    }
+    return new Promise((resolve,reject) => {
+      Promise.all( res.map(softFail) ).then( results => {
+        console.log("results=" + results);
+        let set = new Set();
+        for(const result of results) {
+          if(result !== undefined) {
+            if (set.has(result)) {
+              //return if two results are equal
+              return resolve(result);
+            }
+            set.add(result);
+          }
+        }
+        reject();
+      });
+
+    } );
+  }
+
+  block(hash) {
+    let res = [];
+    for(const insight of this.insights) {
+      res.push(insight.block(hash));
+    }
+    return new Promise((resolve,reject) => {
+      Promise.all( res.map(softFail) ).then( results => {
+        console.log("results=" + results);
+        let set = new Set();
+        for(const result of results) {
+          if(result !== undefined) {
+            if (set.has(result)) {
+              //return if two results are equal
+              return resolve(result);
+            }
+            set.add(result);
+          }
+        }
+        reject();
+      });
+
+    } );
+  }
+
+
 
 }
 
+function softFail(promise) {
+  return new Promise(function(resolve, reject) {
+    promise
+      .then(resolve)
+      .catch(resolve)
+  })
+}
+
 module.exports = {
-  Insight
+  Insight,
+  MultiInsight
 };
