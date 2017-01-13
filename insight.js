@@ -113,30 +113,30 @@ class Insight {
   }
 }
 
-const urls = ['https://notexisting.it','https://search.bitaccess.co/insight-api', 'https://search.bitaccess.co/insight-api', 'https://insight.bitpay.com/api'];
+const urls = ['https://notexisting.it', 'https://search.bitaccess.co/insight-api', 'https://search.bitaccess.co/insight-api', 'https://insight.bitpay.com/api'];
 
 class MultiInsight {
 
   constructor() {
     this.insights = [];
-    for(const url of urls) {
+    for (const url of urls) {
       this.insights.push(new Insight(url));
     }
   }
 
   blockhash(height) {
-    let res = [];
-    for(const insight of this.insights) {
+    const res = [];
+    for (const insight of this.insights) {
       res.push(insight.blockhash(height));
     }
-    return new Promise((resolve,reject) => {
-      Promise.all( res.map(softFail) ).then( results => {
-        console.log("results=" + results);
-        let set = new Set();
-        for(const result of results) {
-          if(result !== undefined) {
+    return new Promise((resolve, reject) => {
+      Promise.all(res.map(softFail)).then(results => {
+        console.log('results=' + results);
+        const set = new Set();
+        for (const result of results) {
+          if (result !== undefined) {
             if (set.has(result)) {
-              //return if two results are equal
+              // return if two results are equal
               return resolve(result);
             }
             set.add(result);
@@ -144,23 +144,22 @@ class MultiInsight {
         }
         reject();
       });
-
-    } );
+    });
   }
 
   block(hash) {
-    let res = [];
-    for(const insight of this.insights) {
+    const res = [];
+    for (const insight of this.insights) {
       res.push(insight.block(hash));
     }
-    return new Promise((resolve,reject) => {
-      Promise.all( res.map(softFail) ).then( results => {
-        console.log("results=" + results);
-        let set = new Set();
-        for(const result of results) {
-          if(result !== undefined) {
+    return new Promise((resolve, reject) => {
+      Promise.all(res.map(softFail)).then(results => {
+        console.log('results=' + results);
+        const set = new Set();
+        for (const result of results) {
+          if (result !== undefined) {
             if (set.has(result)) {
-              //return if two results are equal
+              // return if two results are equal
               return resolve(result);
             }
             set.add(result);
@@ -168,20 +167,17 @@ class MultiInsight {
         }
         reject();
       });
-
-    } );
+    });
   }
-
-
 
 }
 
 function softFail(promise) {
-  return new Promise(function(resolve, reject) {
+  return new Promise(resolve => {
     promise
       .then(resolve)
-      .catch(resolve)
-  })
+      .catch(resolve);
+  });
 }
 
 module.exports = {
