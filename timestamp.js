@@ -133,6 +133,7 @@ class Timestamp {
     }
     if (this.msg !== other.msg) {
       console.error('Can\'t merge timestamps for different messages together');
+      // return;
     }
 
     for (const attestation of other.attestations) {
@@ -148,7 +149,7 @@ class Timestamp {
       }
       ourOpStamp.merge(otherOpStamp);
     }
-    console.log('Timestamps merged');
+    // console.log('Timestamps merged');
   }
 
   /**

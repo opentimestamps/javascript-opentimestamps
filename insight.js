@@ -9,6 +9,7 @@
 
 const requestPromise = require('request-promise');
 const Promise = require('promise');
+const Utils = require('./utils.js');
 
 /** Class used to query Insight API */
 class Insight {
@@ -130,7 +131,7 @@ class MultiInsight {
       res.push(insight.blockhash(height));
     }
     return new Promise((resolve, reject) => {
-      Promise.all(res.map(softFail)).then(results => {
+      Promise.all(res.map(Utils.softFail)).then(results => {
         console.log('results=' + results);
         const set = new Set();
         for (const result of results) {
@@ -153,7 +154,7 @@ class MultiInsight {
       res.push(insight.block(hash));
     }
     return new Promise((resolve, reject) => {
-      Promise.all(res.map(softFail)).then(results => {
+      Promise.all(res.map(Utils.softFail)).then(results => {
         console.log('results=' + results);
         const set = new Set();
         for (const result of results) {
@@ -170,14 +171,6 @@ class MultiInsight {
     });
   }
 
-}
-
-function softFail(promise) {
-  return new Promise(resolve => {
-    promise
-      .then(resolve)
-      .catch(resolve);
-  });
 }
 
 module.exports = {

@@ -229,34 +229,49 @@ module.exports = {
 
   /** Upgrade a timestamp.
    * @param {ArrayBuffer} ots - The ots array buffer containing the proof to verify.
-   * @return {boolean} True if the timestamp has changed, False otherwise.
+   * @return {Promise} resolve(changed) : changed = True if the timestamp has changed, False otherwise.
    */
   upgrade(ots) {
-    console.log('ots: ', ots);
+    return new Promise((resolve, reject) => {
+      const ctx = new Context.StreamDeserialization();
+      ctx.open(Utils.arrayToBytes(ots));
+      const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
 
-    const ctx = new Context.StreamDeserialization();
-    ctx.open(Utils.arrayToBytes(ots));
-    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+      this.upgradeTimestamp(detachedTimestampFile.timestamp).then(changed => {
+        if (changed) {
+          console.log('Timestamp upgraded');
+        }
 
-    const changed = this.upgradeTimestamp(detachedTimestampFile.timestamp);
+        if (detachedTimestampFile.timestamp.isTimestampComplete()) {
+          console.log('Timestamp complete');
+        } else {
+          console.log('Timestamp not complete');
+        }
 
-    if (changed) {
-      console.log('Change timestamp');
-    }
+        // serialization
+        // console.log(Timestamp.strTreeExtended(detachedTimestampFile.timestamp));
+        const css = new Context.StreamSerialization();
+        css.open();
+        detachedTimestampFile.timestamp.serialize(css);
+        resolve(css.getOutput());
 
-    if (detachedTimestampFile.timestamp.isTimestampComplete()) {
-      console.log('Success! Timestamp complete');
-    } else {
-      console.log('Failed! Timestamp not complete');
-    }
+        // console.log('SERIALIZATION');
+        // console.log(Utils.bytesToHex(css.getOutput()));
+      }).catch(err => {
+        console.error('Error : ' + err);
+        reject(err);
+      });
+    });
   },
 
   /** Attempt to upgrade an incomplete timestamp to make it verifiable.
    * Note that this means if the timestamp that is already complete, False will be returned as nothing has changed.
    * @param {Timestamp} timestamp - The timestamp.
-   * @return {boolean} True if the timestamp has changed, False otherwise.
+   * @return {Promise} True if the timestamp has changed, False otherwise.
    */
   upgradeTimestamp(timestamp) {
+    console.error('*** upgradeTimestamp');
+
     // Check remote calendars for upgrades.
     // This time we only check PendingAttestations - we can't be as agressive.
 
@@ -266,40 +281,50 @@ module.exports = {
     calendarUrls.push('https://ots.eternitywall.it');
 
     const existingAttestations = timestamp.getAttestations();
-    // let foundNewAttestations = false;
+    const promises = [];
+    const self = this;
 
-    while (!timestamp.isTimestampComplete()) {
-      console.log(timestamp.directlyVerified().length);
-      for (const subStamp of timestamp.directlyVerified()) {
-        for (const attestation of subStamp.attestations) {
-          if (attestation instanceof Notary.PendingAttestation) {
-            const calendarUrl = attestation.uri;
-            // var calendarUrl = calendarUrls[0];
-            const commitment = subStamp.msg;
+    console.log(timestamp.directlyVerified().length);
+    for (const subStamp of timestamp.directlyVerified()) {
+      for (const attestation of subStamp.attestations) {
+        if (attestation instanceof Notary.PendingAttestation) {
+          const calendarUrl = attestation.uri;
+          // var calendarUrl = calendarUrls[0];
+          const commitment = subStamp.msg;
 
-            console.log('attestation url: ', calendarUrl);
-            console.log('commitment: ', Utils.bytesToHex(commitment));
+          console.log('attestation url: ', calendarUrl);
+          console.log('commitment: ', Utils.bytesToHex(commitment));
 
-            const calendar = new Calendar.RemoteCalendar(calendarUrl);
-
-            this.upgradeStamp(calendar, commitment, existingAttestations).then(upgradedStamp => {
-              console.log(upgradedStamp);
-              subStamp.merge(upgradedStamp);
-            }).catch(err => {
-              console.log(err);
-            });
-
-            return;
-          }
+          const calendar = new Calendar.RemoteCalendar(calendarUrl);
+          // promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations));
+          promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations));
         }
       }
     }
 
-    console.log(Timestamp.strTreeExtended(timestamp, 0));
-    return false;
+    return new Promise((resolve, reject) => {
+      Promise.all(promises).then(results => {
+        console.error('Timestamp before merged');
+        console.error(Timestamp.strTreeExtended(timestamp));
+
+        for (const result of results) {
+          result.subStamp.merge(result.upgradedStamp);
+        }
+        console.error('Timestamp merged');
+        console.error(Timestamp.strTreeExtended(timestamp));
+        if (results.length === 0) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      }).catch(err => {
+        console.error('Error: ' + err);
+        reject(err);
+      });
+    });
   },
 
-  upgradeStamp(calendar, commitment, existingAttestations) {
+  upgradeStamp(subStamp, calendar, commitment, existingAttestations) {
     return new Promise((resolve, reject) => {
       calendar.getTimestamp(commitment).then(upgradedStamp => {
         console.log(Timestamp.strTreeExtended(upgradedStamp, 0));
@@ -310,16 +335,16 @@ module.exports = {
           console.log(attsFromRemote.size + ' attestation(s) from ' + calendar.url);
         }
 
-        // difference from remote attestations & existing attestations
+        // Set difference from remote attestations & existing attestations
         const newAttestations = new Set([...attsFromRemote].filter(x => !existingAttestations.has(x)));
         if (newAttestations.size > 0) {
           // changed & found_new_attestations
           // foundNewAttestations = true;
           console.log(attsFromRemote.size + ' attestation(s) from ' + calendar.url);
 
-          // union of existingAttestations & newAttestations
+          // Set union of existingAttestations & newAttestations
           existingAttestations = new Set([...existingAttestations, ...newAttestations]);
-          resolve(upgradedStamp);
+          resolve({subStamp, upgradedStamp});
           // subStamp.merge(upgradedStamp);
           // args.cache.merge(upgraded_stamp)
           // sub_stamp.merge(upgraded_stamp)
@@ -327,6 +352,7 @@ module.exports = {
           reject();
         }
       }).catch(err => {
+        console.error('Error : ' + err);
         reject(err);
       });
     });

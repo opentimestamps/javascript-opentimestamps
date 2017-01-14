@@ -4,24 +4,25 @@ const Utils = require('../utils.js');
 const OpenTimestamps = require('../open-timestamps.js');
 const DetachedTimestampFile = require('../detached-timestamp-file.js');
 const Context = require('../context.js');
+// const Calendar = require('../calendar.js');
+// const Timestamp = require('../timestamp.js');
 
-let otsInfo;
-let ots;
+let incompleteOtsInfo;
+let incompleteOts;
 let incomplete;
-
 let helloworldOts;
 let helloworld;
 
 test('setup', assert => {
-  const otsInfoPromise = Utils.readFilePromise('./test/incomplete.txt.ots.info', 'utf8');
-  const otsPromise = Utils.readFilePromise('./test/incomplete.txt.ots', null);
+  const incompleteOtsInfoPromise = Utils.readFilePromise('./test/incomplete.txt.ots.info', 'utf8');
+  const incompleteOtsPromise = Utils.readFilePromise('./test/incomplete.txt.ots', null);
   const incompletePromise = Utils.readFilePromise('./test/incomplete.txt', null);
   const helloworldOtsPromise = Utils.readFilePromise('./test/hello-world.txt.ots', null);
   const helloworldPromise = Utils.readFilePromise('./test/hello-world.txt', null);
 
-  Promise.all([otsInfoPromise, otsPromise, incompletePromise, helloworldOtsPromise, helloworldPromise]).then(values => {
-    otsInfo = values[0];
-    ots = values[1];
+  Promise.all([incompleteOtsInfoPromise, incompleteOtsPromise, incompletePromise, helloworldOtsPromise, helloworldPromise]).then(values => {
+    incompleteOtsInfo = values[0];
+    incompleteOts = values[1];
     incomplete = values[2];
     helloworldOts = values[3];
     helloworld = values[4];
@@ -31,13 +32,17 @@ test('setup', assert => {
   });
 });
 
+// INFO TESTS
+
 test('OpenTimestamps.info()', assert => {
-  const otsInfoCalc = OpenTimestamps.info(ots);
+  const otsInfoCalc = OpenTimestamps.info(incompleteOts);
   assert.false(otsInfoCalc === undefined);
-  assert.false(otsInfo === undefined);
-  assert.equals(otsInfo, otsInfoCalc, 'ots info match');
+  assert.false(incompleteOts === undefined);
+  assert.equals(incompleteOtsInfo, otsInfoCalc, 'ots info match');
   assert.end();
 });
+
+// STAMP TESTS
 
 test('OpenTimestamps.stamp()', assert => {
   const timestampBytesPromise = OpenTimestamps.stamp(incomplete);
@@ -52,8 +57,10 @@ test('OpenTimestamps.stamp()', assert => {
   });
 });
 
+// VERIFY TESTS
+
 test('OpenTimestamps.verify()', assert => {
-  const verifyPromise = OpenTimestamps.verify(ots, incomplete);
+  const verifyPromise = OpenTimestamps.verify(incompleteOts, incomplete);
   verifyPromise.then(result => {
     assert.false(result);
     assert.end();
@@ -71,3 +78,60 @@ test('OpenTimestamps.verify()', assert => {
     assert.fail('err=' + err);
   });
 });
+
+// UPGRADE TESTS
+
+test('OpenTimestamps.upgrade()', assert => {
+  const upgradePromise = OpenTimestamps.upgrade(incompleteOts);
+  upgradePromise.then(timestampBytes => {
+    assert.true(timestampBytes !== null);
+
+    let ctx = new Context.StreamDeserialization();
+    ctx.open(Utils.arrayToBytes(incompleteOts));
+    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+    ctx = new Context.StreamSerialization();
+    ctx.open();
+    detachedTimestampFile.timestamp.serialize(ctx);
+    const inputTimestampSerialized = ctx.getOutput();
+    // console.error("OTS TIMESTAMP");
+    // console.error(Utils.bytesToHex(inputTimestampSerialized));
+
+    // output timestamp serialization
+    const outputTimestampSerialized = timestampBytes;
+    // console.error("RESULT TIMESTAMP");
+    // console.error(Utils.bytesToHex(outputTimestampSerialized));
+
+    assert.false(Utils.arrEq(inputTimestampSerialized, outputTimestampSerialized));
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
+test('OpenTimestamps.upgrade()', assert => {
+  const upgradePromise = OpenTimestamps.upgrade(helloworldOts);
+  upgradePromise.then(timestampBytes => {
+    assert.true(timestampBytes !== null);
+
+    let ctx = new Context.StreamDeserialization();
+    ctx.open(Utils.arrayToBytes(helloworldOts));
+    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+    ctx = new Context.StreamSerialization();
+    ctx.open();
+    detachedTimestampFile.timestamp.serialize(ctx);
+    const inputTimestampSerialized = ctx.getOutput();
+    // console.error("OTS TIMESTAMP");
+    // console.error(Utils.bytesToHex(inputTimestampSerialized));
+
+    // output timestamp serialization
+    const outputTimestampSerialized = timestampBytes;
+    // console.error("RESULT TIMESTAMP");
+    // console.error(Utils.bytesToHex(outputTimestampSerialized));
+
+    assert.true(Utils.arrEq(inputTimestampSerialized, outputTimestampSerialized));
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+

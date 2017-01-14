@@ -2,6 +2,7 @@
 const OpenTimestamps = require('../open-timestamps.js');
 const Context = require('../context.js');
 const Utils = require('../utils.js');
+// const Timestamp = require('../timestamp.js');
 const DetachedTimestampFile = require('../detached-timestamp-file.js');
 // const ByteBuffer = require('bytebuffer');
 // const DetachedTimestampFile = require('../detached-timestamp-file.js');
@@ -58,14 +59,14 @@ Promise.all([incompleteOtsPromise, incompletePromise]).then(values => {
 function info(ots) {
   console.log('INFO');
   const infoResult = OpenTimestamps.info(ots);
-  console.log(infoResult);
+  console.log('INFO result : ' + infoResult);
 }
 
 function verify(ots, plain) {
   console.log('VERIFY');
   const verifyPromise = OpenTimestamps.verify(ots, plain);
   verifyPromise.then(result => {
-    console.log(result);
+    console.log('VERIFY result : ' + result);
   }).catch(err => {
     console.log(err);
   });
@@ -74,10 +75,32 @@ function verify(ots, plain) {
 function upgrade(ots) {
   console.log('UPGRADE');
   const upgradePromise = OpenTimestamps.upgrade(ots);
-  upgradePromise.then(result => {
-    console.log(result);
+  upgradePromise.then(timestampBytes => {
+    // input timestamp serialization
+    let ctx = new Context.StreamDeserialization();
+    ctx.open(Utils.arrayToBytes(ots));
+    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+    ctx = new Context.StreamSerialization();
+    ctx.open();
+    detachedTimestampFile.timestamp.serialize(ctx);
+    console.log('OTS TIMESTAMP');
+    console.log(Utils.bytesToHex(ctx.getOutput()));
+    const inputTimestampSerialized = ctx.getOutput();
+
+    // output timestamp serialization
+    console.log('OUTPUT TIMESTAMP');
+    console.log(Utils.bytesToHex(timestampBytes));
+    const outputTimestampSerialized = timestampBytes;
+
+    // check timestamp
+    if (Utils.arrEq(inputTimestampSerialized, outputTimestampSerialized)) {
+      console.log('Timestamp not changed');
+    } else {
+      console.log('Timestamp changed');
+    }
+    // assert.equals(Utils.arrEq(inputTimestampSerialized,outputTimestampSerialized));
   }).catch(err => {
-    console.log(err);
+    console.log('ERROR ' + err);
   });
 }
 
@@ -88,6 +111,7 @@ function stamp(plain) {
     const ctx = new Context.StreamDeserialization();
     ctx.open(timestampBytes);
     const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+    console.log('STAMP result : ');
     console.log('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9');
     console.log(Utils.bytesToHex(detachedTimestampFile.timestamp.msg));
   });

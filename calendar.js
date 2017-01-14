@@ -86,8 +86,7 @@ class RemoteCalendar {
    * and {@link reject} if rejected.
    */
   getTimestamp(commitment) {
-    console.log('commitment ', Utils.bytesToHex(commitment));
-    console.log('commitment ', Utils.bytesToCharts(commitment));
+    console.error('commitment ', Utils.bytesToHex(commitment));
 
     const options = {
       url: this.url + '/timestamp/' + Utils.bytesToHex(commitment),
@@ -103,21 +102,21 @@ class RemoteCalendar {
     return new Promise((resolve, reject) => {
       requestPromise(options)
           .then(body => {
-            console.log('body ', body);
+            console.error('body ', body);
             if (body.size > 10000) {
               console.log('Calendar response exceeded size limit');
-              return;
+              return reject();
             }
-
             const ctx = new Context.StreamDeserialization();
             ctx.open(Utils.arrayToBytes(body));
 
             const timestamp = Timestamp.deserialize(ctx, commitment);
-            resolve(timestamp);
+            console.error(Timestamp.strTreeExtended(timestamp));
+            return resolve(timestamp);
           })
           .catch(err => {
             console.log('Calendar response error: ' + err);
-            reject();
+            return reject();
           });
     });
   }

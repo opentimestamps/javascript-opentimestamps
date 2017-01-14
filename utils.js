@@ -132,6 +132,14 @@ exports.randString = function (n) {
   return rs;
 };
 
+exports.softFail = function (promise) {
+  return new Promise(resolve => {
+    promise
+        .then(resolve)
+        .catch(resolve);
+  });
+};
+
 /**
  * fs.readfile promisified
  * @param filename
