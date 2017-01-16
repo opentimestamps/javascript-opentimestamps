@@ -28,10 +28,10 @@ let helloworld;
 let incompleteOts;
 let incomplete;
 
-const helloworldOtsPromise = Utils.readFilePromise('./test/hello-world.txt.ots', null);
-const helloworldPromise = Utils.readFilePromise('./test/hello-world.txt', null);
-const incompleteOtsPromise = Utils.readFilePromise('./test/incomplete.txt.ots', null);
-const incompletePromise = Utils.readFilePromise('./test/incomplete.txt', null);
+const helloworldOtsPromise = Utils.readFilePromise('./examples/hello-world.txt.ots', null);
+const helloworldPromise = Utils.readFilePromise('./examples/hello-world.txt', null);
+const incompleteOtsPromise = Utils.readFilePromise('./examples/incomplete.txt.ots', null);
+const incompletePromise = Utils.readFilePromise('./examples/incomplete.txt', null);
 
 Promise.all([helloworldOtsPromise, helloworldPromise]).then(values => {
   helloworldOts = values[0];

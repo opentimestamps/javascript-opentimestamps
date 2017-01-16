@@ -10,11 +10,11 @@ let helloworldOts;
 let helloworld;
 
 test('setup', assert => {
-  const incompleteOtsInfoPromise = Utils.readFilePromise('./test/incomplete.txt.ots.info', 'utf8');
-  const incompleteOtsPromise = Utils.readFilePromise('./test/incomplete.txt.ots', null);
-  const incompletePromise = Utils.readFilePromise('./test/incomplete.txt', null);
-  const helloworldOtsPromise = Utils.readFilePromise('./test/hello-world.txt.ots', null);
-  const helloworldPromise = Utils.readFilePromise('./test/hello-world.txt', null);
+  const incompleteOtsInfoPromise = Utils.readFilePromise('./examples/incomplete.txt.ots.info', 'utf8');
+  const incompleteOtsPromise = Utils.readFilePromise('./examples/incomplete.txt.ots', null);
+  const incompletePromise = Utils.readFilePromise('./examples/incomplete.txt', null);
+  const helloworldOtsPromise = Utils.readFilePromise('./examples/hello-world.txt.ots', null);
+  const helloworldPromise = Utils.readFilePromise('./examples/hello-world.txt', null);
 
   Promise.all([incompleteOtsInfoPromise, incompleteOtsPromise, incompletePromise, helloworldOtsPromise, helloworldPromise]).then(values => {
     incompleteOtsInfo = values[0];

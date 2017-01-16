@@ -37,7 +37,7 @@ module.exports = {
     const hashOp = detachedTimestampFile.fileHashOp._HASHLIB_NAME();
     const firstLine = 'File ' + hashOp + ' hash: ' + fileHash + '\n';
 
-    return firstLine + 'Timestamp:\n' + detachedTimestampFile.timestamp.strTree() + '\n';
+    return firstLine + 'Timestamp:\n' + detachedTimestampFile.timestamp.strTree();
   },
 
   /**

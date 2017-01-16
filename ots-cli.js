@@ -1,8 +1,9 @@
-const OpenTimestamps = require('../open-timestamps.js');
-const Context = require('../context.js');
-const Utils = require('../utils.js');
-// const Timestamp = require('../timestamp.js');
-const DetachedTimestampFile = require('../detached-timestamp-file.js');
+const fs = require('fs');
+const OpenTimestamps = require('./open-timestamps.js');
+const Context = require('./context.js');
+const Utils = require('./utils.js');
+// const Timestamp = require('nod ./timestamp.js');
+const DetachedTimestampFile = require('./detached-timestamp-file.js');
 
 const args = process.argv.slice(2);
 const path = process.argv[1].split('/');
@@ -12,19 +13,19 @@ if (args[0] === null) {
   showHelp();
 }
 
-console.log('arguments: ', args);
+// console.log('arguments: ', args);
 switch (args[0]) {
-  case '--info':
-  case '-i':
-    console.log('Show information on a timestamp.\n');
+  case 'info':
+  case 'i':
     if (args.length !== 2) {
-      console.log(title + ': bad options number ');
+      console.log('Show information on a timestamp given as argument.\n');
+      console.log(title + ' info: bad options number ');
       break;
     }
     info(args[1]);
     break;
-  case '--stamp':
-  case '-s':
+  case 'stamp':
+  case 's':
     console.log('Create timestamp with the aid of a remote calendar.\n');
     if (args.length !== 2) {
       console.log(title + ': bad options number ');
@@ -32,17 +33,18 @@ switch (args[0]) {
     }
     stamp(args[1]);
     break;
-  case '--verify':
-  case '-v':
-    console.log('Verify the timestamp attestations.\n');
-    if (args.length !== 3) {
+  case 'verify':
+  case 'v':
+
+    if (args.length !== 2) {
+      console.log('Verify the timestamp attestations given as argument.\n');
       console.log(title + ': bad options number ');
       break;
     }
-    verify(args[1], args[2]);
+    verify(args[1]);
     break;
-  case '--upgrade':
-  case '-u':
+  case 'upgrade':
+  case 'u':
     console.log('Upgrade remote calendar timestamps to be locally verifiable.\n');
     if (args.length !== 2) {
       console.log(title + ': bad options number ');
@@ -52,7 +54,7 @@ switch (args[0]) {
     break;
   case '--version':
   case '-V':
-    console.log('Version: ' + title + ' v.' + require('../package.json').version + '\n');
+    console.log('Version: ' + title + ' v.' + require('./package.json').version + '\n');
     break;
   case '--help':
   case '-h':
@@ -64,13 +66,15 @@ switch (args[0]) {
 
 function showHelp() {
   console.log(
-        'Usage: ' + title + ' [options] [arguments]\n\n' +
+        'Usage: ' + title + ' [options] {stamp,s,upgrade,u,verify,v,info} [arguments]\n\n' +
+        'Subcommands:\n' +
+        's, stamp FILE       \tCreate timestamp with the aid of a remote calendar.\n' +
+        'i, info FILE_OTS \tShow information on a timestamp.\n' +
+        'v, verify FILE_OTS FILE\tVerify the timestamp attestations.\n' +
+        'u, upgrade FILE_OTS\tUpgrade remote calendar timestamps to be locally verifiable.\n\n' +
         'Options:\n' +
-        '-s, --stamp FILE       \tCreate timestamp with the aid of a remote calendar.\n' +
-        '-i, --info FILE_OTS \tShow information on a timestamp.\n' +
-        '-v, --verify FILE_OTS FILE\tVerify the timestamp attestations.\n' +
-        '-u, --upgrade FILE_OTS\tUpgrade remote calendar timestamps to be locally verifiable.\n' +
         '-V, --version         \tprint ' + title + ' version.\n' +
+        '-h, --help         \tprint this help.\n' +
         '\nLicense: LGPL.'
     );
 }
@@ -81,7 +85,7 @@ function info(argsFileOts) {
     const ots = values[0];
 
     const infoResult = OpenTimestamps.info(ots);
-    console.log('INFO result : ' + infoResult);
+    console.log(infoResult);
   }).catch(err => {
     console.log('Error: ' + err);
   });
@@ -99,13 +103,22 @@ function stamp(argsFile) {
       const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
       console.log('STAMP result : ');
       console.log(Utils.bytesToHex(detachedTimestampFile.timestamp.msg));
+
+      fs.writeFile(argsFile + '.ots', timestampBytes, 'binary', err => {  // this does not work, it writes byte array as string representation instead of binary data
+        if (err) {
+          return console.log(err);
+        }
+
+        console.log('The file was saved!');
+      });
     });
   }).catch(err => {
     console.log('Error: ' + err);
   });
 }
 
-function verify(argsFileOts, argsFile) {
+function verify(argsFileOts) {
+  const argsFile = argsFileOts.replace('.ots', '');
   const filePromise = Utils.readFilePromise(argsFile, null);
   const filePromiseOts = Utils.readFilePromise(argsFileOts, null);
   Promise.all([filePromise, filePromiseOts]).then(values => {
@@ -152,7 +165,9 @@ function upgrade(argsFileOts) {
       } else {
         console.log('Timestamp changed');
       }
-            // assert.equals(Utils.arrEq(inputTimestampSerialized,outputTimestampSerialized));
+
+      // TODOs missing write to file
+      // assert.equals(Utils.arrEq(inputTimestampSerialized,outputTimestampSerialized));
     }).catch(err => {
       console.log('Error: ' + err);
     });
