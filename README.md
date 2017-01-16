@@ -107,7 +107,7 @@ upgradePromise.then(timestampBytes => {
       console.log('Timestamp changed');
     }
 }).catch(err => {
-    console.log('ERROR ' + err);
+    console.log(err);
 });
 ```
 ## License
