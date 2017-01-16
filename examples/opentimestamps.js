@@ -51,6 +51,7 @@ switch (args[0]) {
     upgrade(args[1]);
     break;
   case '--version':
+  case '-V':
     console.log('Version: ' + title + ' v.' + require('../package.json').version + '\n');
     break;
   case '--help':
@@ -65,12 +66,12 @@ function showHelp() {
   console.log(
         'Usage: ' + title + ' [options] [arguments]\n\n' +
         'Options:\n' +
-        '--stamp FILE       \tCreate timestamp with the aid of a remote calendar.\n' +
-        '--info FILE_OTS \tShow information on a timestamp.\n' +
-        '--verify FILE_OTS FILE\tVerify the timestamp attestations.\n' +
-        '--upgrade FILE_OTS\tUpgrade remote calendar timestamps to be locally verifiable.\n' +
-        '--version         \tprint ' + title + ' version\n' +
-        '\nLicense: LGPL'
+        '-s, --stamp FILE       \tCreate timestamp with the aid of a remote calendar.\n' +
+        '-i, --info FILE_OTS \tShow information on a timestamp.\n' +
+        '-v, --verify FILE_OTS FILE\tVerify the timestamp attestations.\n' +
+        '-u, --upgrade FILE_OTS\tUpgrade remote calendar timestamps to be locally verifiable.\n' +
+        '-V, --version         \tprint ' + title + ' version.\n' +
+        '\nLicense: LGPL.'
     );
 }
 
