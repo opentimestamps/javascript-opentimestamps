@@ -104,7 +104,8 @@ function stamp(argsFile) {
       console.log('STAMP result : ');
       console.log(Utils.bytesToHex(detachedTimestampFile.timestamp.msg));
 
-      fs.writeFile(argsFile + '.ots', timestampBytes, 'binary', err => {  // this does not work, it writes byte array as string representation instead of binary data
+      const buffer = new Buffer(timestampBytes);
+      fs.writeFile(argsFile + '.ots', buffer, 'binary', err => {  // this does not work, it writes byte array as string representation instead of binary data
         if (err) {
           return console.log(err);
         }
