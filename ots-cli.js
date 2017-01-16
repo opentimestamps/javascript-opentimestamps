@@ -109,7 +109,6 @@ function stamp(argsFile) {
         if (err) {
           return console.log(err);
         }
-
         console.log('The file was saved!');
       });
     });
@@ -165,6 +164,19 @@ function upgrade(argsFileOts) {
         console.log('Timestamp not changed');
       } else {
         console.log('Timestamp changed');
+        fs.writeFile(argsFileOts + '.bak', new Buffer(ots), 'binary', err => {  // this does not work, it writes byte array as string representation instead of binary data
+          if (err) {
+            return console.log(err);
+          }
+          console.log('The file .bak was saved!');
+        });
+
+        fs.writeFile(argsFileOts , new Buffer(timestampBytes), 'binary', err => {  // this does not work, it writes byte array as string representation instead of binary data
+          if (err) {
+            return console.log(err);
+          }
+          console.log('The file .ots was upgraded!');
+        });
       }
 
       // TODOs missing write to file
