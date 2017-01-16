@@ -105,7 +105,7 @@ function stamp(argsFile) {
       console.log(Utils.bytesToHex(detachedTimestampFile.timestamp.msg));
 
       const buffer = new Buffer(timestampBytes);
-      fs.writeFile(argsFile + '.ots', buffer, 'binary', err => {  // this does not work, it writes byte array as string representation instead of binary data
+      fs.writeFile(argsFile + '.ots', buffer, 'binary', err => {
         if (err) {
           return console.log(err);
         }
@@ -138,12 +138,10 @@ function verify(argsFileOts) {
 
 function upgrade(argsFileOts) {
   const otsPromise = Utils.readFilePromise(argsFileOts, null);
-  Promise.all([otsPromise]).then(values => {
-    const ots = values[0];
-
+  otsPromise.then(ots => {
     const upgradePromise = OpenTimestamps.upgrade(ots);
     upgradePromise.then(timestampBytes => {
-            // input timestamp serialization
+      // input timestamp serialization
       let ctx = new Context.StreamDeserialization();
       ctx.open(Utils.arrayToBytes(ots));
       const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
@@ -164,14 +162,14 @@ function upgrade(argsFileOts) {
         console.log('Timestamp not changed');
       } else {
         console.log('Timestamp changed');
-        fs.writeFile(argsFileOts + '.bak', new Buffer(ots), 'binary', err => {  // this does not work, it writes byte array as string representation instead of binary data
+        fs.writeFile(argsFileOts + '.bak', new Buffer(ots), 'binary', err => {
           if (err) {
             return console.log(err);
           }
           console.log('The file .bak was saved!');
         });
 
-        fs.writeFile(argsFileOts , new Buffer(timestampBytes), 'binary', err => {  // this does not work, it writes byte array as string representation instead of binary data
+        fs.writeFile(argsFileOts , new Buffer(timestampBytes), 'binary', err => {
           if (err) {
             return console.log(err);
           }
@@ -179,7 +177,6 @@ function upgrade(argsFileOts) {
         });
       }
 
-      // TODOs missing write to file
       // assert.equals(Utils.arrEq(inputTimestampSerialized,outputTimestampSerialized));
     }).catch(err => {
       console.log('Error: ' + err);
