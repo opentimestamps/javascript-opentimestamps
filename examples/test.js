@@ -77,28 +77,19 @@ function upgrade(ots) {
   const upgradePromise = OpenTimestamps.upgrade(ots);
   upgradePromise.then(timestampBytes => {
     // input timestamp serialization
-    let ctx = new Context.StreamDeserialization();
-    ctx.open(Utils.arrayToBytes(ots));
-    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-    ctx = new Context.StreamSerialization();
-    ctx.open();
-    detachedTimestampFile.timestamp.serialize(ctx);
-    console.log('OTS TIMESTAMP');
-    console.log(Utils.bytesToHex(ctx.getOutput()));
-    const inputTimestampSerialized = ctx.getOutput();
+    console.log('OTS TIMESTAMP FILE');
+    console.log(Utils.bytesToHex(ots));
 
     // output timestamp serialization
-    console.log('OUTPUT TIMESTAMP');
+    console.log('UPGRADE TIMESTAMP FILE');
     console.log(Utils.bytesToHex(timestampBytes));
-    const outputTimestampSerialized = timestampBytes;
 
     // check timestamp
-    if (Utils.arrEq(inputTimestampSerialized, outputTimestampSerialized)) {
+    if (ots.equals(timestampBytes)) {
       console.log('Timestamp not changed');
     } else {
       console.log('Timestamp changed');
     }
-    // assert.equals(Utils.arrEq(inputTimestampSerialized,outputTimestampSerialized));
   }).catch(err => {
     console.log('ERROR ' + err);
   });

@@ -252,8 +252,9 @@ module.exports = {
         // console.log(Timestamp.strTreeExtended(detachedTimestampFile.timestamp));
         const css = new Context.StreamSerialization();
         css.open();
-        detachedTimestampFile.timestamp.serialize(css);
-        resolve(new ArrayBuffer(css.getOutput()));
+        // detachedTimestampFile.timestamp.serialize(css);
+        detachedTimestampFile.serialize(css);
+        resolve(new Buffer(css.getOutput()));
 
         // console.log('SERIALIZATION');
         // console.log(Utils.bytesToHex(css.getOutput()));
@@ -270,8 +271,6 @@ module.exports = {
    * @return {Promise} True if the timestamp has changed, False otherwise.
    */
   upgradeTimestamp(timestamp) {
-    console.error('*** upgradeTimestamp');
-
     // Check remote calendars for upgrades.
     // This time we only check PendingAttestations - we can't be as agressive.
 

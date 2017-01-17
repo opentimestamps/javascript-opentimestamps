@@ -85,23 +85,8 @@ test('OpenTimestamps.upgrade()', assert => {
   const upgradePromise = OpenTimestamps.upgrade(incompleteOts);
   upgradePromise.then(timestampBytes => {
     assert.true(timestampBytes !== null);
-
-    let ctx = new Context.StreamDeserialization();
-    ctx.open(Utils.arrayToBytes(incompleteOts));
-    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-    ctx = new Context.StreamSerialization();
-    ctx.open();
-    detachedTimestampFile.timestamp.serialize(ctx);
-    const inputTimestampSerialized = ctx.getOutput();
-    // console.error("OTS TIMESTAMP");
-    // console.error(Utils.bytesToHex(inputTimestampSerialized));
-
-    // output timestamp serialization
-    const outputTimestampSerialized = timestampBytes;
-    // console.error("RESULT TIMESTAMP");
-    // console.error(Utils.bytesToHex(outputTimestampSerialized));
-
-    assert.false(Utils.arrEq(inputTimestampSerialized, outputTimestampSerialized));
+    assert.true(timestampBytes.length > 0);
+    assert.false(incompleteOts.equals(timestampBytes));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -112,26 +97,10 @@ test('OpenTimestamps.upgrade()', assert => {
   const upgradePromise = OpenTimestamps.upgrade(helloworldOts);
   upgradePromise.then(timestampBytes => {
     assert.true(timestampBytes !== null);
-
-    let ctx = new Context.StreamDeserialization();
-    ctx.open(Utils.arrayToBytes(helloworldOts));
-    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-    ctx = new Context.StreamSerialization();
-    ctx.open();
-    detachedTimestampFile.timestamp.serialize(ctx);
-    const inputTimestampSerialized = ctx.getOutput();
-    // console.error("OTS TIMESTAMP");
-    // console.error(Utils.bytesToHex(inputTimestampSerialized));
-
-    // output timestamp serialization
-    const outputTimestampSerialized = timestampBytes;
-    // console.error("RESULT TIMESTAMP");
-    // console.error(Utils.bytesToHex(outputTimestampSerialized));
-
-    assert.true(Utils.arrEq(inputTimestampSerialized, outputTimestampSerialized));
+    assert.true(timestampBytes.length > 0);
+    assert.true(helloworldOts.equals(timestampBytes));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
   });
 });
-

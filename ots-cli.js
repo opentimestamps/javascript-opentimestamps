@@ -160,8 +160,6 @@ function upgrade(argsFileOts) {
           console.log('The file .ots was upgraded!');
         });
       }
-
-      // assert.equals(Utils.arrEq(inputTimestampSerialized,outputTimestampSerialized));
     }).catch(err => {
       console.log('Error: ' + err);
     });
