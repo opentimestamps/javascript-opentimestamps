@@ -169,7 +169,7 @@ function upgrade(argsFileOts) {
           console.log('The file .bak was saved!');
         });
 
-        fs.writeFile(argsFileOts , new Buffer(timestampBytes), 'binary', err => {
+        fs.writeFile(argsFileOts, new Buffer(timestampBytes), 'binary', err => {
           if (err) {
             return console.log(err);
           }
