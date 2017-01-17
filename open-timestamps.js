@@ -253,7 +253,7 @@ module.exports = {
         const css = new Context.StreamSerialization();
         css.open();
         detachedTimestampFile.timestamp.serialize(css);
-        resolve(css.getOutput());
+        resolve(new ArrayBuffer(css.getOutput()));
 
         // console.log('SERIALIZATION');
         // console.log(Utils.bytesToHex(css.getOutput()));
