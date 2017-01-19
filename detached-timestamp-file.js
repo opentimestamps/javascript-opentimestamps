@@ -9,7 +9,6 @@
 
 const Ops = require('./ops.js');
 const Timestamp = require('./timestamp.js');
-const Utils = require('./utils.js');
 
 /**
  * Header magic bytes
@@ -57,7 +56,7 @@ class DetachedTimestampFile {
    * @return {byte[]} The serialized DetachedTimestampFile object.
    */
   serialize(ctx) {
-    ctx.writeBytes(Utils.charsToBytes(HEADER_MAGIC));
+    ctx.writeBytes(HEADER_MAGIC);
     ctx.writeVaruint(MAJOR_VERSION);
     this.fileHashOp.serialize(ctx);
     ctx.writeBytes(this.timestamp.msg);
@@ -73,6 +72,7 @@ class DetachedTimestampFile {
     ctx.assertMagic(HEADER_MAGIC);
     ctx.readVaruint();
 
+    console.log(ctx.toString());
     const fileHashOp = Ops.CryptOp.deserialize(ctx);
     const fileHash = ctx.readBytes(fileHashOp._DIGEST_LENGTH());
     const timestamp = Timestamp.deserialize(ctx, fileHash);

@@ -61,9 +61,9 @@ class Insight {
     return new Promise((resolve, reject) => {
       requestPromise(options)
           .then(body => {
-            console.log('body ', body);
+            // console.log('body ', body);
             if (body.size === 0) {
-              console.log('Insight response error body ');
+              console.error('Insight response error body ');
               reject();
               return;
             }
@@ -71,7 +71,7 @@ class Insight {
             resolve(body.blockHash);
           })
           .catch(err => {
-            console.log('Insight response error: ' + err);
+            console.error('Insight response error: ' + err);
             reject();
           });
     });
@@ -98,16 +98,16 @@ class Insight {
     return new Promise((resolve, reject) => {
       requestPromise(options)
           .then(body => {
-            console.log('body ', body);
+            // console.log('body ', body);
             if (body.size === 0) {
-              console.log('Insight response error body ');
+              console.error('Insight response error body ');
               reject();
               return;
             }
             resolve(body.merkleroot);
           })
           .catch(err => {
-            console.log('Insight response error: ' + err);
+            console.error('Insight response error: ' + err);
             reject();
           });
     });

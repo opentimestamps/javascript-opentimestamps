@@ -34,8 +34,7 @@ class TimeAttestation {
     const serializedAttestation = ctx.readVarbytes(new TimeAttestation()._MAX_PAYLOAD_SIZE());
     // console.log('serializedAttestation: ', Utils.bytesToHex(serializedAttestation));
 
-    const ctxPayload = new Context.StreamDeserialization();
-    ctxPayload.open(serializedAttestation);
+    const ctxPayload = new Context.StreamDeserialization(serializedAttestation);
 
     /* eslint no-use-before-define: ["error", { "classes": false }] */
     if (Utils.arrEq(tag, new PendingAttestation()._TAG()) === true) {
@@ -55,7 +54,6 @@ class TimeAttestation {
   serialize(ctx) {
     ctx.writeBytes(this._TAG());
     const ctxPayload = new Context.StreamSerialization();
-    ctxPayload.open();
     this.serializePayload(ctxPayload);
     ctx.writeVarbytes(ctxPayload.getOutput());
   }
@@ -124,13 +122,13 @@ class PendingAttestation extends TimeAttestation {
 
   static checkUri(uri) {
     if (uri.length > new PendingAttestation()._MAX_URI_LENGTH()) {
-      console.log('URI exceeds maximum length');
+      console.error('URI exceeds maximum length');
       return false;
     }
     for (let i = 0; i < uri.length; i++) {
       const char = String.fromCharCode(uri[i]);
       if (new PendingAttestation()._ALLOWED_URI_CHARS().indexOf(char) < 0) {
-        console.log('URI contains invalid character ');
+        console.error('URI contains invalid character ');
         return false;
       }
     }
@@ -140,7 +138,7 @@ class PendingAttestation extends TimeAttestation {
   static deserialize(ctxPayload) {
     const utf8Uri = ctxPayload.readVarbytes(new PendingAttestation()._MAX_URI_LENGTH());
     if (this.checkUri(utf8Uri) === false) {
-      console.log('Invalid URI: ');
+      console.error('Invalid URI: ');
       return;
     }
     const decode = new Buffer(utf8Uri).toString('ascii');
@@ -148,7 +146,7 @@ class PendingAttestation extends TimeAttestation {
   }
 
   serializePayload(ctx) {
-    ctx.writeVarbytes(Utils.charsToBytes(this.uri));
+    ctx.writeVarbytes(this.uri);
   }
   toString() {
     return 'PendingAttestation(\'' + this.uri + '\')';

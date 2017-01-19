@@ -60,15 +60,13 @@ class RemoteCalendar {
     return new Promise((resolve, reject) => {
       requestPromise(options)
               .then(body => {
-                console.log('body ', body);
+                // console.log('body ', body);
                 if (body.size > 10000) {
-                  console.log('Calendar response exceeded size limit');
+                  console.error('Calendar response exceeded size limit');
                   return;
                 }
 
-                const ctx = new Context.StreamDeserialization();
-                ctx.open(Utils.arrayToBytes(body));
-
+                const ctx = new Context.StreamDeserialization(body);
                 const timestamp = Timestamp.deserialize(ctx, digest);
                 resolve(timestamp);
               })
@@ -102,16 +100,14 @@ class RemoteCalendar {
     return new Promise((resolve, reject) => {
       requestPromise(options)
           .then(body => {
-            console.error('body ', body);
+            // /console.log('body ', body);
             if (body.size > 10000) {
-              console.log('Calendar response exceeded size limit');
+              console.error('Calendar response exceeded size limit');
               return reject();
             }
-            const ctx = new Context.StreamDeserialization();
-            ctx.open(Utils.arrayToBytes(body));
+            const ctx = new Context.StreamDeserialization(body);
 
             const timestamp = Timestamp.deserialize(ctx, commitment);
-            console.error(Timestamp.strTreeExtended(timestamp));
             return resolve(timestamp);
           })
           .catch(err => {

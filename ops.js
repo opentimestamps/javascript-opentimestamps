@@ -10,7 +10,7 @@
 const crypto = require('crypto');
 const Utils = require('./utils.js');
 
-const _SUBCLS_BY_TAG = [];
+const _SUBCLS_BY_TAG = new Map();
 
 /**
  * Timestamp proof operations.
@@ -60,8 +60,7 @@ class Op {
    * @return {Op} The subclass Operation.
    */
   static deserialize(ctx) {
-    this.tag = ctx.readBytes(1);
-    this.tag = String.fromCharCode(this.tag[0]);
+    this.tag = ctx.readBytes(1)[0];
     return Op.deserializeFromTag(ctx, this.tag);
   }
 
@@ -72,11 +71,12 @@ class Op {
    * @return {Op} The subclass Operation.
    */
   static deserializeFromTag(ctx, tag) {
-    if (Object.keys(_SUBCLS_BY_TAG).indexOf(tag) !== -1) {
-      return _SUBCLS_BY_TAG[tag].deserializeFromTag(ctx, tag);
+    if (_SUBCLS_BY_TAG.get(tag) !== undefined) {
+      return _SUBCLS_BY_TAG.get(tag).deserializeFromTag(ctx, tag);
     }
 
-    console.log('Unknown operation tag: ', Utils.bytesToHex([tag]));
+    console.log(_SUBCLS_BY_TAG.keys());
+    console.error('Unknown operation tag: ', Utils.bytesToHex([tag]));
   }
 
   /**
@@ -84,7 +84,7 @@ class Op {
    * @param {StreamSerializationContext} ctx - The stream serialization context.
    */
   serialize(ctx) {
-    ctx.writeBytes(Utils.charsToBytes(this._TAG()));
+    ctx.writeByte(this._TAG());
   }
 
   /**
@@ -95,14 +95,14 @@ class Op {
    */
   call(msg) {
     if (msg.length > this._MAX_MSG_LENGTH()) {
-      console.log('Error : Message too long;');
+      console.error('Error : Message too long;');
       return;
     }
 
     const r = this.call(msg);
 
     if (r.length > this._MAX_RESULT_LENGTH()) {
-      console.log('Error : Result too long;');
+      console.error('Error : Result too long;');
     }
     return r;
   }
@@ -124,11 +124,10 @@ class OpBinary extends Op {
   }
 
   static deserializeFromTag(ctx, tag) {
-        // tag=String.fromCharCode(tag);
-    if (Object.keys(_SUBCLS_BY_TAG).indexOf(tag) >= 0) {
+    if (_SUBCLS_BY_TAG.get(tag) !== undefined) {
       const arg = ctx.readVarbytes(new Op()._MAX_RESULT_LENGTH(), 1);
       // console.log('read: ' + Utils.bytesToHex(arg));
-      return new _SUBCLS_BY_TAG[tag](arg);
+      return new (_SUBCLS_BY_TAG.get(tag))(arg);
     }
   }
   serialize(ctx) {
@@ -154,7 +153,7 @@ class OpAppend extends OpBinary {
     }
   }
   _TAG() {
-    return '\xf0';
+    return 0xf0;
   }
   _TAG_NAME() {
     return 'append';
@@ -181,7 +180,7 @@ class OpPrepend extends OpBinary {
     }
   }
   _TAG() {
-    return '\xf1';
+    return 0xf1;
   }
   _TAG_NAME() {
     return 'prepend';
@@ -208,10 +207,10 @@ class OpUnary extends Op {
     }
   }
   static deserializeFromTag(ctx, tag) {
-    if (Object.keys(_SUBCLS_BY_TAG).indexOf(tag) >= 0) {
-      return new _SUBCLS_BY_TAG[tag]();
+    if (_SUBCLS_BY_TAG.get(tag) !== undefined) {
+      return new (_SUBCLS_BY_TAG.get(tag))();
     }
-    console.log('Unknown operation tag: ', Utils.bytesToHex([tag]));
+    console.error('Unknown operation tag: ', Utils.bytesToHex([tag]));
   }
   toString() {
     return this._TAG_NAME();
@@ -232,14 +231,14 @@ class OpReverse extends OpUnary {
     }
   }
   _TAG() {
-    return '\xf2';
+    return 0xf2;
   }
   _TAG_NAME() {
     return 'reverse';
   }
   call(msg) {
     if (msg.length === 0) {
-      console.log('Can\'t reverse an empty message');
+      console.error('Can\'t reverse an empty message');
     }
         // return msg;//[::-1];
   }
@@ -262,7 +261,7 @@ class OpHexlify extends OpUnary {
     }
   }
   _TAG() {
-    return '\xf3';
+    return 0xf3;
   }
   _TAG_NAME() {
     return 'hexlify';
@@ -272,7 +271,7 @@ class OpHexlify extends OpUnary {
   }
   call(msg) {
     if (msg.length === 0) {
-      console.log('Can\'t hexlify an empty message');
+      console.error('Can\'t hexlify an empty message');
     }
   }
   static deserializeFromTag(ctx, tag) {
@@ -290,7 +289,7 @@ class OpHexlify extends OpUnary {
 class CryptOp extends OpUnary {
 
   _HASHLIB_NAME() {
-    return '';
+    return 0x00;
   }
 
   call(msg) {
@@ -339,7 +338,7 @@ class CryptOp extends OpUnary {
  */
 class OpSHA1 extends CryptOp {
   _TAG() {
-    return '\x02';
+    return 0x02;
   }
   _TAG_NAME() {
     return 'sha1';
@@ -366,7 +365,7 @@ class OpSHA1 extends CryptOp {
  */
 class OpRIPEMD160 extends CryptOp {
   _TAG() {
-    return '\x03';
+    return 0x03;
   }
   _TAG_NAME() {
     return 'ripemd160';
@@ -394,7 +393,7 @@ class OpRIPEMD160 extends CryptOp {
 class OpSHA256 extends CryptOp {
 
   _TAG() {
-    return '\x08';
+    return 0x08;
   }
   _TAG_NAME() {
     return 'sha256';
@@ -413,13 +412,13 @@ class OpSHA256 extends CryptOp {
   }
 }
 
-_SUBCLS_BY_TAG[new OpAppend()._TAG()] = OpAppend;
-_SUBCLS_BY_TAG[new OpPrepend()._TAG()] = OpPrepend;
-_SUBCLS_BY_TAG[new OpReverse()._TAG()] = OpReverse;
-_SUBCLS_BY_TAG[new OpHexlify()._TAG()] = OpHexlify;
-_SUBCLS_BY_TAG[new OpSHA1()._TAG()] = OpSHA1;
-_SUBCLS_BY_TAG[new OpRIPEMD160()._TAG()] = OpRIPEMD160;
-_SUBCLS_BY_TAG[new OpSHA256()._TAG()] = OpSHA256;
+_SUBCLS_BY_TAG.set(new OpAppend()._TAG(), OpAppend);
+_SUBCLS_BY_TAG.set(new OpPrepend()._TAG(), OpPrepend);
+_SUBCLS_BY_TAG.set(new OpReverse()._TAG(), OpReverse);
+_SUBCLS_BY_TAG.set(new OpHexlify()._TAG(), OpHexlify);
+_SUBCLS_BY_TAG.set(new OpSHA1()._TAG(), OpSHA1);
+_SUBCLS_BY_TAG.set(new OpRIPEMD160()._TAG(), OpRIPEMD160);
+_SUBCLS_BY_TAG.set(new OpSHA256()._TAG(), OpSHA256);
 
 module.exports = {
   Op,

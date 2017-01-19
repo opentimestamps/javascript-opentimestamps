@@ -25,12 +25,11 @@ module.exports = {
    */
   info(ots) {
     if (ots === undefined) {
-      console.log('No ots file');
+      console.error('No ots file');
       return;
     }
 
-    const ctx = new Context.StreamDeserialization();
-    ctx.open(Utils.arrayToBytes(ots));
+    const ctx = new Context.StreamDeserialization(ots);
     const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
 
     const fileHash = Utils.bytesToHex(detachedTimestampFile.timestamp.msg);
@@ -47,8 +46,7 @@ module.exports = {
    */
   stamp(plain) {
     return new Promise((resolve, reject) => {
-      const ctx = new Context.StreamDeserialization();
-      ctx.open(Utils.arrayToBytes(plain));
+      const ctx = new Context.StreamDeserialization(plain);
 
       const fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
 
@@ -67,7 +65,7 @@ module.exports = {
         nonceAppendedStamp = new Timestamp(opAppend.call(fileTimestamp.timestamp.msg));
         fileTimestamp.timestamp.ops.set(opAppend, nonceAppendedStamp);
 
-        console.log(Timestamp.strTreeExtended(fileTimestamp.timestamp));
+        // console.log(Timestamp.strTreeExtended(fileTimestamp.timestamp));
       }
 
       // merkle_root = nonce_appended_stamp.ops.add(OpSHA256())
@@ -77,14 +75,14 @@ module.exports = {
         merkleRoot = new Timestamp(opSHA256.call(nonceAppendedStamp.msg));
         nonceAppendedStamp.ops.set(opSHA256, merkleRoot);
 
-        console.log(Timestamp.strTreeExtended(fileTimestamp.timestamp));
+        // console.log(Timestamp.strTreeExtended(fileTimestamp.timestamp));
       }
 
-      console.log('fileTimestamp:');
-      console.log(fileTimestamp.toString());
+      // console.log('fileTimestamp:');
+      // console.log(fileTimestamp.toString());
 
-      console.log('merkleRoot:');
-      console.log(merkleRoot.toString());
+      // console.log('merkleRoot:');
+      // console.log(merkleRoot.toString());
 
       // merkleTip  = make_merkle_tree(merkle_roots)
       const merkleTip = merkleRoot;
@@ -95,20 +93,13 @@ module.exports = {
       calendarUrls.push('https://ots.eternitywall.it');
 
       this.createTimestamp(merkleTip, calendarUrls).then(timestamp => {
-        console.log('Result Timestamp:');
-        console.log(Timestamp.strTreeExtended(timestamp));
-
-        console.log('Complete Timestamp:');
-        console.log(Timestamp.strTreeExtended(fileTimestamp.timestamp));
-
         // serialization
+        if (timestamp === undefined) {
+          reject();
+          return;
+        }
         const css = new Context.StreamSerialization();
-        css.open();
         fileTimestamp.serialize(css);
-
-        console.log('SERIALIZATION');
-        console.log(Utils.bytesToHex(css.getOutput()));
-
         resolve(css.getOutput());
       }).catch(err => {
         reject(err);
@@ -151,29 +142,24 @@ module.exports = {
    * @param {ArrayBuffer} plain - The plain array buffer to verify.
    */
   verify(ots, plain) {
-    console.log('ots: ', ots);
-    console.log('plain: ', plain);
-
-    const ctx = new Context.StreamDeserialization();
-    ctx.open(Utils.arrayToBytes(ots));
+    const ctx = new Context.StreamDeserialization(ots);
 
     const detachedTimestamp = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-    console.log('Hashing file, algorithm ' + detachedTimestamp.fileHashOp._TAG_NAME());
+    // console.log('Hashing file, algorithm ' + detachedTimestamp.fileHashOp._TAG_NAME());
 
-    const ctxHashfd = new Context.StreamDeserialization();
-    ctxHashfd.open(Utils.arrayToBytes(plain));
+    const ctxHashfd = new Context.StreamDeserialization(plain);
 
     const actualFileDigest = detachedTimestamp.fileHashOp.hashFd(ctxHashfd);
-    console.log('actualFileDigest ' + Utils.bytesToHex(actualFileDigest));
-    console.log('detachedTimestamp.fileDigest() ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
+    // console.log('actualFileDigest ' + Utils.bytesToHex(actualFileDigest));
+    // console.log('detachedTimestamp.fileDigest() ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
 
     const detachedFileDigest = detachedTimestamp.fileDigest();
     if (!Utils.arrEq(actualFileDigest, detachedFileDigest)) {
-      console.log('Expected digest ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
-      console.log('File does not match original!');
+      console.error('Expected digest ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
+      console.error('File does not match original!');
       return;
     }
-    console.log(Timestamp.strTreeExtended(detachedTimestamp.timestamp, 0));
+    // console.log(Timestamp.strTreeExtended(detachedTimestamp.timestamp, 0));
     return this.verifyTimestamp(detachedTimestamp.timestamp);
   },
 
@@ -187,30 +173,26 @@ module.exports = {
 
       for (const [msg, attestation] of timestamp.allAttestations()) {
         if (attestation instanceof Notary.PendingAttestation) {
-          console.log('PendingAttestation: pass ');
+          // console.log('PendingAttestation: pass ');
         } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-          console.log('Request to insight ');
+          // console.log('Request to insight ');
           const url = 'https://search.bitaccess.co/insight-api';
             // https://search.bitaccess.co/insight-api
             // https://insight.bitpay.com/api
           const insight = new Insight.Insight(url);
 
           insight.blockhash(attestation.height).then(blockHash => {
-            console.log('blockHash: ' + blockHash);
-
             insight.block(blockHash).then(merkleroot => {
               const merkle = Utils.hexToBytes(merkleroot);
               const message = msg.reverse();
 
-              console.log('merkleroot: ' + Utils.bytesToHex(merkle));
-              console.log('msg: ' + Utils.bytesToHex(message));
+              // console.log('merkleroot: ' + Utils.bytesToHex(merkle));
+              // console.log('msg: ' + Utils.bytesToHex(message));
 
-                // One Bitcoin attestation is enough
+              // One Bitcoin attestation is enought
               if (Utils.arrEq(merkle, message)) {
-                console.log('Equal');
                 resolve(true);
               } else {
-                console.log('Diff');
                 resolve(false);
               }
             }, err => {
@@ -233,26 +215,22 @@ module.exports = {
    */
   upgrade(ots) {
     return new Promise((resolve, reject) => {
-      const ctx = new Context.StreamDeserialization();
-      ctx.open(Utils.arrayToBytes(ots));
+      const ctx = new Context.StreamDeserialization(ots);
       const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
 
       this.upgradeTimestamp(detachedTimestampFile.timestamp).then(changed => {
         if (changed) {
-          console.log('Timestamp upgraded');
+          // console.log('Timestamp upgraded');
         }
 
         if (detachedTimestampFile.timestamp.isTimestampComplete()) {
-          console.log('Timestamp complete');
+          // console.log('Timestamp complete');
         } else {
-          console.log('Timestamp not complete');
+          // console.log('Timestamp not complete');
         }
 
         // serialization
-        // console.log(Timestamp.strTreeExtended(detachedTimestampFile.timestamp));
         const css = new Context.StreamSerialization();
-        css.open();
-        // detachedTimestampFile.timestamp.serialize(css);
         detachedTimestampFile.serialize(css);
         resolve(new Buffer(css.getOutput()));
 
@@ -291,8 +269,8 @@ module.exports = {
           // var calendarUrl = calendarUrls[0];
           const commitment = subStamp.msg;
 
-          console.log('attestation url: ', calendarUrl);
-          console.log('commitment: ', Utils.bytesToHex(commitment));
+          // console.log('attestation url: ', calendarUrl);
+          // console.log('commitment: ', Utils.bytesToHex(commitment));
 
           const calendar = new Calendar.RemoteCalendar(calendarUrl);
           // promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations));
@@ -303,14 +281,14 @@ module.exports = {
 
     return new Promise((resolve, reject) => {
       Promise.all(promises).then(results => {
-        console.error('Timestamp before merged');
-        console.error(Timestamp.strTreeExtended(timestamp));
+        // console.log('Timestamp before merged');
+        // console.log(Timestamp.strTreeExtended(timestamp));
 
         for (const result of results) {
           result.subStamp.merge(result.upgradedStamp);
         }
-        console.error('Timestamp merged');
-        console.error(Timestamp.strTreeExtended(timestamp));
+        // console.log('Timestamp merged');
+        // console.log(Timestamp.strTreeExtended(timestamp));
         if (results.length === 0) {
           resolve(false);
         } else {
@@ -326,12 +304,12 @@ module.exports = {
   upgradeStamp(subStamp, calendar, commitment, existingAttestations) {
     return new Promise((resolve, reject) => {
       calendar.getTimestamp(commitment).then(upgradedStamp => {
-        console.log(Timestamp.strTreeExtended(upgradedStamp, 0));
+        // console.log(Timestamp.strTreeExtended(upgradedStamp, 0));
 
         // const atts_from_remote = get_attestations(upgradedStamp)
         const attsFromRemote = upgradedStamp.getAttestations();
         if (attsFromRemote.size > 0) {
-          console.log(attsFromRemote.size + ' attestation(s) from ' + calendar.url);
+          // console.log(attsFromRemote.size + ' attestation(s) from ' + calendar.url);
         }
 
         // Set difference from remote attestations & existing attestations
@@ -339,7 +317,7 @@ module.exports = {
         if (newAttestations.size > 0) {
           // changed & found_new_attestations
           // foundNewAttestations = true;
-          console.log(attsFromRemote.size + ' attestation(s) from ' + calendar.url);
+          // console.log(attsFromRemote.size + ' attestation(s) from ' + calendar.url);
 
           // Set union of existingAttestations & newAttestations
           existingAttestations = new Set([...existingAttestations, ...newAttestations]);

@@ -48,7 +48,7 @@ class Timestamp {
 
     function doTagOrAttestation(tag, initialMsg) {
       // console.log('doTagOrAttestation: ', tag);
-      if (tag === '\x00') {
+      if (tag === 0x00) {
         const attestation = Notary.TimeAttestation.deserialize(ctx);
         self.attestations.push(attestation);
         // console.log('attestation ', attestation);
@@ -63,14 +63,11 @@ class Timestamp {
       }
     }
 
-    let tag = String.fromCharCode(ctx.readBytes(1)[0])[0];
-
-    while (tag === '\xff') {
-      let current = ctx.readBytes(1);
-      current = String.fromCharCode(current[0])[0];
+    let tag = ctx.readBytes(1)[0];
+    while (tag === 0xff) {
+      const current = ctx.readBytes(1)[0];
       doTagOrAttestation(current, initialMsg);
-      tag = ctx.readBytes(1);
-      tag = String.fromCharCode(tag[0])[0];
+      tag = ctx.readBytes(1)[0];
     }
     doTagOrAttestation(tag, initialMsg);
 
@@ -82,26 +79,25 @@ class Timestamp {
    * @param {StreamSerializationContext} ctx - The stream serialization context.
    */
   serialize(ctx) {
-    console.log('SERIALIZE');
-    console.log(Utils.bytesToHex(ctx.getOutput()));
+    // console.log('SERIALIZE');
+    // console.log(ctx.toString());
 
     // sort
     const sortedAttestations = this.attestations;
     if (sortedAttestations.length > 1) {
       for (let i = 0; i < sortedAttestations.length; i++) {
-        ctx.writeBytes(['\xff', '\x00']);
+        ctx.writeBytes([0xff, 0x00]);
         sortedAttestations[i].serialize(ctx);
       }
     }
     if (this.ops.size === 0) {
-      ctx.writeBytes('\x00');
+      ctx.writeByte(0x00);
       if (sortedAttestations.length > 0) {
         sortedAttestations[sortedAttestations.length - 1].serialize(ctx);
       }
     } else if (this.ops.size > 0) {
       if (sortedAttestations.length > 0) {
-        ctx.writeByte(255);
-        ctx.writeByte(0);
+        ctx.writeBytes([0xff, 0x00]);
         sortedAttestations[sortedAttestations.length - 1].serialize(ctx);
       }
             // var sorted_ops = [];//sorted(self.ops.items(), key=lambda item: item[0])

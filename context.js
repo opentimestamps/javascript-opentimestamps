@@ -7,28 +7,36 @@
  * @license LPGL3
  */
 
+const ByteBuffer = require('bytebuffer');
+const Utils = require('./utils.js');
+
 /** Class representing Stream Deserialization Context for input buffer. */
 class StreamDeserializationContext {
 
+  constructor(streamBytes) {
+    this.buffer = ByteBuffer.wrap(streamBytes);
+    this.counter = 0;
+  }
+
   getOutput() {
-    return this.respBytes;
+    return this.buffer.buffer;
   }
 
   getCounter() {
-    return this.counter;
+    return this.buffer.capacity();
   }
 
-  open(streamBytes) {
-    this.respBytes = streamBytes;
-    this.counter = 0;
-  }
   read(l) {
-    if (l > this.respBytes.length) {
-      l = this.respBytes.length;
+    if (this.counter === this.buffer.capacity()) {
+      return undefined;
     }
-    const output = this.respBytes.slice(this.counter, this.counter + l);
+    if (l > this.buffer.capacity()) {
+      l = this.buffer.capacity();
+    }
+    const output = new ByteBuffer(l);
+    this.buffer.copyTo(output, 0, this.counter, l + this.counter);
     this.counter += l;
-    return output;
+    return Utils.arrayToBytes(output.buffer);
   }
   readBool() {
     const b = this.read(1)[0];
@@ -58,10 +66,10 @@ class StreamDeserializationContext {
   readVarbytes(maxLen, minLen = 0) {
     const l = this.readVaruint();
     if (l > maxLen) {
-      console.log('varbytes max length exceeded;');
+      console.error('varbytes max length exceeded;');
       return;
     } else if (l < minLen) {
-      console.log('varbytes min length not met;');
+      console.error('varbytes min length not met;');
       return;
     }
     return this.read(l);
@@ -80,41 +88,45 @@ class StreamDeserializationContext {
     }
     return false;
   }
+  toString() {
+    return this.buffer.toHex(0);
+  }
 }
 
 /** Class representing Stream Serialization Context for output buffer. */
 class StreamSerializationContext {
 
+  constructor() {
+    this.buffer = new ByteBuffer(1024);
+    this.buffer.clear();
+  }
   getOutput() {
-    return this.output;
+    const output = this.buffer.buffer.subarray(0, this.buffer.offset);
+    return output;
   }
 
   getCounter() {
-    return this.counter;
+    return this.buffer.capacity();
   }
 
-  open() {
-        // respBytes = Utils.hexToBytes(resp);
-    this.output = [];
-    this.counter = 0;
-  }
   writeBool(value) {
     if (value === true) {
-      this.output.push('\xff');
+      this.writeByte(0xff);
     } else {
-      this.output.push('\x00');
+      this.writeByte(0x00);
     }
   }
+
   writeVaruint(value) {
     if (value === 0) {
-      this.output.push(0);
+      this.writeByte(0);
     } else {
       while (value !== 0) {
         let b = value & 0b01111111;
         if (value > 0b01111111) {
           b |= 0b10000000;
         }
-        this.output.push(b);
+        this.writeByte(b);
         if (value <= 0b01111111) {
           break;
         }
@@ -123,7 +135,18 @@ class StreamSerializationContext {
     }
   }
   writeByte(value) {
-    this.output.push(value);
+    if (this.buffer.offset >= this.buffer.limit - 1) {
+      const newLenght = this.buffer.capacity() * 2;
+      const swapBuffer = new ByteBuffer(newLenght);
+      this.buffer.copyTo(swapBuffer, 0);
+      this.buffer = swapBuffer;
+    }
+
+    if (isNaN(value)) {
+      this.buffer.writeByte(value.codePointAt());
+    } else {
+      this.buffer.writeByte(value);
+    }
   }
 
   writeBytes(value) {
@@ -131,12 +154,13 @@ class StreamSerializationContext {
       this.writeByte(x);
     }
   }
+
   writeVarbytes(value) {
     this.writeVaruint(value.length);
     this.writeBytes(value);
   }
   toString() {
-    console.log('output: ' + this.output);
+    return this.buffer.toHex(0);
   }
 
 }
