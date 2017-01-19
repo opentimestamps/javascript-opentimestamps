@@ -74,8 +74,6 @@ class Op {
     if (_SUBCLS_BY_TAG.get(tag) !== undefined) {
       return _SUBCLS_BY_TAG.get(tag).deserializeFromTag(ctx, tag);
     }
-
-    console.log(_SUBCLS_BY_TAG.keys());
     console.error('Unknown operation tag: ', Utils.bytesToHex([tag]));
   }
 

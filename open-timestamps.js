@@ -121,14 +121,14 @@ module.exports = {
     const calendarUrl = calendarUrls[0];
 
     return new Promise((resolve, reject) => {
-      console.log('Submitting to remote calendar ', calendarUrl);
+      //console.log('Submitting to remote calendar ', calendarUrl);
       const remote = new Calendar.RemoteCalendar(calendarUrl);
       remote.submit(timestamp.msg).then(resultTimestamp => {
         timestamp.merge(resultTimestamp);
 
         resolve(timestamp);
       }, err => {
-        console.log('Error: ' + err);
+        console.error('Error: ' + err);
 
         reject(err);
       });
@@ -196,7 +196,7 @@ module.exports = {
                 resolve(false);
               }
             }, err => {
-              console.log('Error: ' + err);
+              console.error('Error: ' + err);
               reject(err);
             });
           });

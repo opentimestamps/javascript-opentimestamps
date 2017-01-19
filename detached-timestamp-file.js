@@ -72,7 +72,6 @@ class DetachedTimestampFile {
     ctx.assertMagic(HEADER_MAGIC);
     ctx.readVaruint();
 
-    console.log(ctx.toString());
     const fileHashOp = Ops.CryptOp.deserialize(ctx);
     const fileHash = ctx.readBytes(fileHashOp._DIGEST_LENGTH());
     const timestamp = Timestamp.deserialize(ctx, fileHash);

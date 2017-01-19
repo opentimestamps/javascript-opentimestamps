@@ -43,7 +43,7 @@ class RemoteCalendar {
    * and {@link reject} if rejected.
    */
   submit(digest) {
-    console.log('digest ', Utils.bytesToHex(digest));
+    //console.log('digest ', Utils.bytesToHex(digest));
 
     const options = {
       url: this.url + '/digest',
@@ -71,7 +71,7 @@ class RemoteCalendar {
                 resolve(timestamp);
               })
               .catch(err => {
-                console.log('Calendar response error: ' + err);
+                console.error('Calendar response error: ' + err);
                 reject();
               });
     });
@@ -111,7 +111,7 @@ class RemoteCalendar {
             return resolve(timestamp);
           })
           .catch(err => {
-            console.log('Calendar response error: ' + err);
+            console.error('Calendar response error: ' + err);
             return reject();
           });
     });
