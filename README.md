@@ -30,7 +30,16 @@ browserify test.js -o test.bundle.js
 <script src="test.bundle.js"></script>
 ```
 
-Note: ECMAScript 6 browser compatibility required.
+
+## Compatibility
+
+#### Browser
+
+ECMAScript 6 browser compatibility required.
+
+#### Node version
+
+This library is tested on CI against version 6.0 and 6.1
 
 
 ## Command Line
@@ -127,11 +136,9 @@ const ots = ByteBuffer.fromHex('004f70656e54696d657374616d7073000050726f6f6600bf
 const upgradePromise = OpenTimestamps.upgrade(ots);
 upgradePromise.then(timestampBytes => {
     // extract timestamp from ots file
-    let ctx = new Context.StreamDeserialization();
-    ctx.open(Utils.arrayToBytes(ots));
+    let ctx = new Context.StreamDeserialization(ots);
     const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
     ctx = new Context.StreamSerialization();
-    ctx.open();
     detachedTimestampFile.timestamp.serialize(ctx);
     const otsTimestampSerialized = ctx.getOutput();
 
