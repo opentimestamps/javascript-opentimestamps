@@ -128,9 +128,9 @@ class Timestamp {
       console.error('Can only merge Timestamps together');
       return;
     }
-    if (this.msg !== other.msg) {
+    if (!Utils.arrEq(this.msg, other.msg)) {
       console.error('Can\'t merge timestamps for different messages together');
-      // return;
+      return;
     }
 
     for (const attestation of other.attestations) {
