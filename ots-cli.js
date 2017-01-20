@@ -100,14 +100,18 @@ function stamp(argsFile) {
     timestampBytesPromise.then(timestampBytes => {
       const ctx = new Context.StreamDeserialization(timestampBytes);
       const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+      if (detachedTimestampFile === undefined) {
+        console.error('Invalid timestamp');
+        return;
+      }
       // console.log('STAMP result : ');
       // console.log(Utils.bytesToHex(detachedTimestampFile.timestamp.msg));
 
       const buffer = new Buffer(timestampBytes);
-      let otsFilename = argsFile + '.ots';
+      const otsFilename = argsFile + '.ots';
       fs.exists(otsFilename, fileExist => {
-        if(fileExist) {
-          console.log("The timestamp proof \'" +otsFilename +"\' already exists");
+        if (fileExist) {
+          console.log('The timestamp proof \'' + otsFilename + '\' already exists');
         } else {
           fs.writeFile(otsFilename, buffer, 'binary', err => {
             if (err) {
@@ -117,7 +121,6 @@ function stamp(argsFile) {
           });
         }
       });
-
     }).catch(err => {
       console.log('Error: ' + err);
     });
@@ -164,14 +167,14 @@ function upgrade(argsFileOts) {
           if (err) {
             return console.log(err);
           }
-          //console.log('The file .bak was saved!');
+          // console.log('The file .bak was saved!');
         });
 
         fs.writeFile(argsFileOts, new Buffer(timestampBytes), 'binary', err => {
           if (err) {
             return console.log(err);
           }
-          //console.log('The file .ots was upgraded!');
+          // console.log('The file .ots was upgraded!');
         });
       }
     }).catch(err => {
