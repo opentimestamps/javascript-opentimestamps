@@ -132,7 +132,7 @@ class MultiInsight {
     }
     return new Promise((resolve, reject) => {
       Promise.all(res.map(Utils.softFail)).then(results => {
-        //console.log('results=' + results);
+        // console.log('results=' + results);
         const set = new Set();
         for (const result of results) {
           if (result !== undefined) {
@@ -155,7 +155,7 @@ class MultiInsight {
     }
     return new Promise((resolve, reject) => {
       Promise.all(res.map(Utils.softFail)).then(results => {
-        //console.log('results=' + results);
+        // console.log('results=' + results);
         const set = new Set();
         for (const result of results) {
           if (result !== undefined) {
