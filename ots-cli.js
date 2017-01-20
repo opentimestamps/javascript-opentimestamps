@@ -111,6 +111,8 @@ function stamp(argsFile) {
         }
         console.log('The file was saved!');
       });
+    }).catch(err => {
+      console.log('Error: ' + err);
     });
   }).catch(err => {
     console.log('Error: ' + err);
