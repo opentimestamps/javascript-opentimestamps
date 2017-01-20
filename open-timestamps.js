@@ -261,7 +261,7 @@ module.exports = {
     const promises = [];
     const self = this;
 
-    console.log(timestamp.directlyVerified().length);
+    // console.log(timestamp.directlyVerified().length);
     for (const subStamp of timestamp.directlyVerified()) {
       for (const attestation of subStamp.attestations) {
         if (attestation instanceof Notary.PendingAttestation) {
