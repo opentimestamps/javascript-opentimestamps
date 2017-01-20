@@ -84,7 +84,7 @@ class RemoteCalendar {
    * and {@link reject} if rejected.
    */
   getTimestamp(commitment) {
-    console.error('commitment ', Utils.bytesToHex(commitment));
+    // console.error('commitment ', Utils.bytesToHex(commitment));
 
     const options = {
       url: this.url + '/timestamp/' + Utils.bytesToHex(commitment),

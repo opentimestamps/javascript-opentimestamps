@@ -26,8 +26,8 @@ switch (args[0]) {
     break;
   case 'stamp':
   case 's':
-    console.log('Create timestamp with the aid of a remote calendar.\n');
     if (args.length !== 2) {
+      console.log('Create timestamp with the aid of a remote calendar.\n');
       console.log(title + ': bad options number ');
       break;
     }
@@ -45,8 +45,8 @@ switch (args[0]) {
     break;
   case 'upgrade':
   case 'u':
-    console.log('Upgrade remote calendar timestamps to be locally verifiable.\n');
     if (args.length !== 2) {
+      console.log('Upgrade remote calendar timestamps to be locally verifiable.\n');
       console.log(title + ': bad options number ');
       break;
     }
@@ -100,16 +100,24 @@ function stamp(argsFile) {
     timestampBytesPromise.then(timestampBytes => {
       const ctx = new Context.StreamDeserialization(timestampBytes);
       const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-      console.log('STAMP result : ');
-      console.log(Utils.bytesToHex(detachedTimestampFile.timestamp.msg));
+      // console.log('STAMP result : ');
+      // console.log(Utils.bytesToHex(detachedTimestampFile.timestamp.msg));
 
       const buffer = new Buffer(timestampBytes);
-      fs.writeFile(argsFile + '.ots', buffer, 'binary', err => {
-        if (err) {
-          return console.log(err);
+      let otsFilename = argsFile + '.ots';
+      fs.exists(otsFilename, fileExist => {
+        if(fileExist) {
+          console.log("The timestamp proof \'" +otsFilename +"\' already exists");
+        } else {
+          fs.writeFile(otsFilename, buffer, 'binary', err => {
+            if (err) {
+              return console.log(err);
+            }
+            console.log('The timestamp proof \'' + otsFilename + '\' has been created!');
+          });
         }
-        console.log('The file was saved!');
       });
+
     }).catch(err => {
       console.log('Error: ' + err);
     });
@@ -151,19 +159,19 @@ function upgrade(argsFileOts) {
       if (Utils.arrEq(Utils.arrayToBytes(ots), Utils.arrayToBytes(timestampBytes))) {
         console.log('Timestamp not changed');
       } else {
-        console.log('Timestamp changed');
+        console.log('Timestamp has been successfully upgraded!');
         fs.writeFile(argsFileOts + '.bak', new Buffer(ots), 'binary', err => {
           if (err) {
             return console.log(err);
           }
-          console.log('The file .bak was saved!');
+          //console.log('The file .bak was saved!');
         });
 
         fs.writeFile(argsFileOts, new Buffer(timestampBytes), 'binary', err => {
           if (err) {
             return console.log(err);
           }
-          console.log('The file .ots was upgraded!');
+          //console.log('The file .ots was upgraded!');
         });
       }
     }).catch(err => {
