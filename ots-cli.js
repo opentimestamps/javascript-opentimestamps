@@ -98,8 +98,7 @@ function stamp(argsFile) {
 
     const timestampBytesPromise = OpenTimestamps.stamp(file);
     timestampBytesPromise.then(timestampBytes => {
-      const ctx = new Context.StreamDeserialization();
-      ctx.open(timestampBytes);
+      const ctx = new Context.StreamDeserialization(timestampBytes);
       const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
       console.log('STAMP result : ');
       console.log(Utils.bytesToHex(detachedTimestampFile.timestamp.msg));
