@@ -49,7 +49,8 @@ This library is tested on CI against version 6.0 and 6.1
 Create timestamp `README.md.ots` from this `README.md` with the aid of a remote calendar.
 
 ```shell
-node ots-cli.js stamp README.md
+$ node ots-cli.js stamp README.md
+The timestamp proof 'README.md.ots' has been created!
 ```
 
 #### Info
@@ -57,7 +58,17 @@ node ots-cli.js stamp README.md
 Show information on a timestamp.
 
 ```shell
-node ots-cli.js info examples/hello-world.txt.ots
+$ node ots-cli.js info examples/incomplete.txt.ots
+File sha256 hash: 05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9
+Timestamp:
+append e754bf93806a7ebaa680ef7bd0114bf4
+sha256
+append b573e8850cfd9e63d1f043fbb6fc250e
+sha256
+prepend 57cfa5c4
+append 6fb1ac8d4e4eb0e7
+verify PendingAttestation('https://alice.btc.calendar.opentimestamps.org')
+
 ```
 
 #### Verify
@@ -65,7 +76,9 @@ node ots-cli.js info examples/hello-world.txt.ots
 Verify the timestamp attestations with the aid of remote block explorers.
 
 ```shell
-node ots-cli.js verify examples/hello-world.txt.ots
+$ node ots-cli.js verify examples/hello-world.txt.ots
+Assuming target filename is 'examples/hello-world.txt'
+Success! Bitcoin attests data existed as of Thu May 28 2015 17:41:18 GMT+0200 (CEST)
 ```
 
 Note: This verification using block explorers is convenient but not as secure as asking to a local node.
@@ -76,7 +89,8 @@ To mitigate the risks, answer from block explorer is considered only if two diff
 Upgrade incomplete remote calendar timestamps to be independently verifiable. This command overwrite the file `examples/incomplete.txt.ots` if needed and make a backup of the old content at `examples/incomplete.txt.ots`. 
 
 ```shell
-node ots-cli.js upgrade examples/incomplete.txt.ots
+$ node ots-cli.js upgrade examples/incomplete.txt.ots
+Timestamp has been successfully upgraded!
 ```
 
 ## From code
