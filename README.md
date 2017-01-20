@@ -68,6 +68,9 @@ Verify the timestamp attestations with the aid of remote block explorers.
 node ots-cli.js verify examples/hello-world.txt.ots
 ```
 
+Note: This verification using block explorers is convenient but not as secure as asking to a local node.
+To mitigate the risks, answer from block explorer is considered only if two different endpoint return the same result. Even by doing so this is not as secure as asking a local node.   
+
 #### Upgrade
 
 Upgrade incomplete remote calendar timestamps to be independently verifiable. This command overwrite the file `examples/incomplete.txt.ots` if needed and make a backup of the old content at `examples/incomplete.txt.ots`. 
