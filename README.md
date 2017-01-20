@@ -32,9 +32,44 @@ browserify test.js -o test.bundle.js
 
 Note: ECMAScript 6 browser compatibility required.
 
-## Commands
 
-### Stamp
+## Command Line
+
+#### Stamp
+
+Create timestamp `README.md.ots` from this `README.md` with the aid of a remote calendar.
+
+```shell
+node ots-cli.js stamp README.md
+```
+
+#### Info
+
+Show information on a timestamp.
+
+```shell
+node ots-cli.js info examples/hello-world.txt.ots
+```
+
+#### Verify
+
+Verify the timestamp attestations with the aid of remote block explorers.
+
+```shell
+node ots-cli.js verify examples/hello-world.txt.ots
+```
+
+#### Upgrade
+
+Upgrade incomplete remote calendar timestamps to be independently verifiable.
+
+```shell
+node ots-cli.js upgrade examples/incomplete.txt.ots
+```
+
+## From code
+
+#### Stamp
 
 Create timestamp with the aid of a remote calendar.
 
@@ -49,7 +84,7 @@ stampResultPromise.then(stampResult => {
 ```
 Const `file` created from the hex representation of the file `test/incomplete.txt`
 
-### Info
+#### Info
 
 Show information on a timestamp.
 
@@ -63,7 +98,7 @@ console.log(infoResult);
 
 Const `fileOts` created from the hex representation of the file `test/incomplete.txt.ots`. You can match the printed result with the file `test/incomplete.txt.ots.info`.
 
-### Verify
+#### Verify
  
 Verify the timestamp attestations.
 
@@ -81,9 +116,9 @@ verifyResultPromise.then(verifyResult => {
 
 Const `file` created from the hex representation of the file `test/hello-world.txt.ots` while `fileOts` contains `test/hello-world.txt` 
 
-### Upgrade
+#### Upgrade
 
-Upgrade remote calendar timestamps to be locally verifiable.
+Upgrade incomplete remote calendar timestamps to be indipendently verifiable.
 
 ```js
 const OpenTimestamps = require('javascript-opentimestamps');
@@ -110,6 +145,7 @@ upgradePromise.then(timestampBytes => {
     console.log(err);
 });
 ```
+
 ## License
 
 LGPL3
