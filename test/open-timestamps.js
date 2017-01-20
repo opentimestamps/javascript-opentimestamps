@@ -61,7 +61,7 @@ test('OpenTimestamps.stamp()', assert => {
 test('OpenTimestamps.verify()', assert => {
   const verifyPromise = OpenTimestamps.verify(incompleteOts, incomplete);
   verifyPromise.then(result => {
-    assert.false(result);
+    assert.true(result === undefined);
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -71,7 +71,7 @@ test('OpenTimestamps.verify()', assert => {
 test('OpenTimestamps.verify()', assert => {
   const verifyPromise = OpenTimestamps.verify(helloworldOts, helloworld);
   verifyPromise.then(result => {
-    assert.true(result);
+    assert.true(result !== undefined);
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);

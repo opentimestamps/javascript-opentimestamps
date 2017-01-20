@@ -127,9 +127,8 @@ module.exports = {
         timestamp.merge(resultTimestamp);
 
         resolve(timestamp);
-      }, err => {
+      }).catch(err => {
         console.error('Error: ' + err);
-
         reject(err);
       });
     });
@@ -159,6 +158,7 @@ module.exports = {
       console.error('File does not match original!');
       return;
     }
+
     // console.log(Timestamp.strTreeExtended(detachedTimestamp.timestamp, 0));
     return this.verifyTimestamp(detachedTimestamp.timestamp);
   },
@@ -179,30 +179,33 @@ module.exports = {
           const insight = new Insight.MultiInsight();
 
           insight.blockhash(attestation.height).then(blockHash => {
-            insight.block(blockHash).then(merkleroot => {
-              const merkle = Utils.hexToBytes(merkleroot);
+            insight.block(blockHash).then(blockInfo => {
+              const merkle = Utils.hexToBytes(blockInfo.merkleroot);
               const message = msg.reverse();
 
               // console.log('merkleroot: ' + Utils.bytesToHex(merkle));
               // console.log('msg: ' + Utils.bytesToHex(message));
+              // console.log('Time: ' + (new Date(blockInfo.time * 1000)));
 
               // One Bitcoin attestation is enought
               if (Utils.arrEq(merkle, message)) {
-                resolve(true);
+                resolve(blockInfo.time);
               } else {
-                resolve(false);
+                resolve();
               }
-            }, err => {
+            }).catch(err => {
               console.error('Error: ' + err);
               reject(err);
             });
+          }).catch(err => {
+            console.error('Error: ' + err);
+            reject(err);
           });
-
           // Verify only the first BitcoinBlockHeaderAttestation
           return;
         }
       }
-      resolve(false);
+      resolve();
     });
   },
 

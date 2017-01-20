@@ -126,9 +126,14 @@ function verify(argsFileOts) {
     const file = values[0];
     const fileOts = values[1];
 
+    console.log('Assuming target filename is \'' + argsFile + '\'');
     const verifyPromise = OpenTimestamps.verify(fileOts, file);
     verifyPromise.then(result => {
-      console.log('VERIFY result : ' + result);
+      if (result === undefined) {
+        console.log('Pending or Bad attestation');
+      } else {
+        console.log('Success! Bitcoin attests data existed as of ' + (new Date(result * 1000)));
+      }
     }).catch(err => {
       console.log(err);
     });

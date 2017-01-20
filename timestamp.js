@@ -146,7 +146,6 @@ class Timestamp {
       }
       ourOpStamp.merge(otherOpStamp);
     }
-    // console.log('Timestamps merged');
   }
 
   /**

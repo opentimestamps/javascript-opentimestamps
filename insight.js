@@ -104,7 +104,7 @@ class Insight {
               reject();
               return;
             }
-            resolve(body.merkleroot);
+            resolve({merkleroot: body.merkleroot, time: body.time});
           })
           .catch(err => {
             console.error('Insight response error: ' + err);
@@ -114,7 +114,8 @@ class Insight {
   }
 }
 
-const urls = ['https://notexisting.it', 'https://search.bitaccess.co/insight-api', 'https://search.bitaccess.co/insight-api', 'https://insight.bitpay.com/api'];
+// const urls = ['https://notexisting.it', 'https://search.bitaccess.co/insight-api', 'https://search.bitaccess.co/insight-api', 'https://insight.bitpay.com/api'];
+const urls = ['https://search.bitaccess.co/insight-api', 'https://search.bitaccess.co/insight-api', 'https://insight.bitpay.com/api'];
 
 class MultiInsight {
 
@@ -156,14 +157,14 @@ class MultiInsight {
     return new Promise((resolve, reject) => {
       Promise.all(res.map(Utils.softFail)).then(results => {
         // console.log('results=' + results);
-        const set = new Set();
+        const resultSet = new Set();
         for (const result of results) {
           if (result !== undefined) {
-            if (set.has(result)) {
+            if (resultSet.has(JSON.stringify(result))) {
               // return if two results are equal
               return resolve(result);
             }
-            set.add(result);
+            resultSet.add(JSON.stringify(result));
           }
         }
         reject();
