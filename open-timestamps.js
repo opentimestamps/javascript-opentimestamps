@@ -165,7 +165,7 @@ module.exports = {
 
   /** Verify a timestamp.
    * @param {Timestamp} timestamp - The timestamp.
-   * @return {boolean} True if the timestamp is verified, False otherwise.
+   * @return {int} unix timestamp if verified, undefined otherwise.
    */
   verifyTimestamp(timestamp) {
     return new Promise((resolve, reject) => {
@@ -176,10 +176,7 @@ module.exports = {
           // console.log('PendingAttestation: pass ');
         } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
           // console.log('Request to insight ');
-          const url = 'https://search.bitaccess.co/insight-api';
-            // https://search.bitaccess.co/insight-api
-            // https://insight.bitpay.com/api
-          const insight = new Insight.Insight(url);
+          const insight = new Insight.MultiInsight();
 
           insight.blockhash(attestation.height).then(blockHash => {
             insight.block(blockHash).then(merkleroot => {
