@@ -61,7 +61,7 @@ node ots-cli.js verify examples/hello-world.txt.ots
 
 #### Upgrade
 
-Upgrade incomplete remote calendar timestamps to be independently verifiable.
+Upgrade incomplete remote calendar timestamps to be independently verifiable. This command overwrite the file `examples/incomplete.txt.ots` if needed and make a backup of the old content at `examples/incomplete.txt.ots`. 
 
 ```shell
 node ots-cli.js upgrade examples/incomplete.txt.ots
