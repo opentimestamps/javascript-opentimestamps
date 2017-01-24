@@ -98,9 +98,15 @@ module.exports = {
           reject();
           return;
         }
+
+        fileTimestamp.timestamp=timestamp;
+
         const css = new Context.StreamSerialization();
         fileTimestamp.serialize(css);
         resolve(css.getOutput());
+
+
+
       }).catch(err => {
         reject(err);
       });
