@@ -88,7 +88,7 @@ module.exports = {
       const merkleTip = merkleRoot;
 
       const calendarUrls = [];
-      // calendarUrls.push('https://alice.btc.calendar.opentimestamps.org');
+      calendarUrls.push('https://alice.btc.calendar.opentimestamps.org');
       // calendarUrls.append('https://b.pool.opentimestamps.org');
       calendarUrls.push('https://ots.eternitywall.it');
 
@@ -115,18 +115,21 @@ module.exports = {
   createTimestamp(timestamp, calendarUrls) {
     // setup_bitcoin : not used
 
-    // const n = calendarUrls.length; // =1
-
-    // only support 1 calendar
-    const calendarUrl = calendarUrls[0];
-
-    return new Promise((resolve, reject) => {
-      // console.log('Submitting to remote calendar ', calendarUrl);
+    const res = [];
+    for (const calendarUrl of calendarUrls) {
       const remote = new Calendar.RemoteCalendar(calendarUrl);
-      remote.submit(timestamp.msg).then(resultTimestamp => {
-        timestamp.merge(resultTimestamp);
-
-        resolve(timestamp);
+      res.push(remote.submit(timestamp.msg));
+    }
+    return new Promise((resolve, reject) => {
+      Promise.all(res.map(Utils.softFail)).then(results => {
+        // console.log('results=' + results);
+        for (const resultTimestamp of results) {
+          if (resultTimestamp !== undefined) {
+            timestamp.merge(resultTimestamp);
+          }
+        }
+        // console.log(Timestamp.strTreeExtended(timestamp));
+        return resolve(timestamp);
       }).catch(err => {
         console.error('Error: ' + err);
         reject(err);
