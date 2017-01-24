@@ -194,6 +194,19 @@ class Timestamp {
   }
 
   /**
+   * Indention function for printing tree.
+   * @param {int} pos - Initial hierarchical indention.
+   * @return {string} The output space string.
+   */
+  static indention(pos) {
+    let output = '';
+    for (let i = 0; i < pos; i++) {
+      output += '    ';
+    }
+    return output;
+  }
+
+  /**
    * Print as tree hierarchical object.
    * @param {int} indent - Initial hierarchical indention.
    * @return {string} The output string.
@@ -202,49 +215,28 @@ class Timestamp {
     let output = '';
     if (this.attestations.length > 0) {
       for (const attestation of this.attestations) {
-        for (let i = 0; i < indent; i++) {
-          output += '\t';
-        }
+        output += Timestamp.indention(indent);
         output += 'verify ' + attestation.toString() + '\n';
       }
     }
 
     if (this.ops.size > 1) {
       for (const [op, timestamp] of this.ops) {
-        for (let i = 0; i < indent; i++) {
-          output += '\t';
-        }
+        output += Timestamp.indention(indent);
         output += ' -> ';
         output += op.toString() + '\n';
-        output += timestamp.strTree(indent + 1) + '\n';
+        output += timestamp.strTree(indent + 1);
       }
     } else if (this.ops.size > 0) {
-      for (let i = 0; i < indent; i++) {
-        output += '\t';
-      }
+      // output += Timestamp.indention(indent);
       for (const [op, timestamp] of this.ops) {
-        for (let i = 0; i < indent; i++) {
-          output += '\t';
-        }
+        output += Timestamp.indention(indent);
         output += op.toString() + '\n';
 
         // output += ' ( ' + Utils.bytesToHex(this.msg) + ' ) ';
         // output += '\n';
         output += timestamp.strTree(indent);
       }
-    }
-    return output;
-  }
-
-  /**
-   * Indention function for printing tree.
-   * @param {int} pos - Initial hierarchical indention.
-   * @return {string} The output space string.
-   */
-  static indention(pos) {
-    let output = '';
-    for (let i = 0; i < pos; i++) {
-      output += '\t';
     }
     return output;
   }
