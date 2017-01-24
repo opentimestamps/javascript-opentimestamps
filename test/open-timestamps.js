@@ -12,20 +12,28 @@ let incompleteOts;
 let incomplete;
 let helloworldOts;
 let helloworld;
+let merkle2Ots;
+let merkle2OtsInfo;
 
 test('setup', assert => {
   const incompleteOtsInfoPromise = Utils.readFilePromise('./examples/incomplete.txt.ots.info', 'utf8');
   const incompleteOtsPromise = Utils.readFilePromise('./examples/incomplete.txt.ots', null);
   const incompletePromise = Utils.readFilePromise('./examples/incomplete.txt', null);
+
   const helloworldOtsPromise = Utils.readFilePromise('./examples/hello-world.txt.ots', null);
   const helloworldPromise = Utils.readFilePromise('./examples/hello-world.txt', null);
 
-  Promise.all([incompleteOtsInfoPromise, incompleteOtsPromise, incompletePromise, helloworldOtsPromise, helloworldPromise]).then(values => {
+  const merkle2OtsPromise = Utils.readFilePromise('./examples/merkle2.txt.ots', null);
+  const merkle2OtsInfoPromise = Utils.readFilePromise('./examples/merkle2.txt.ots.info', 'utf8');
+
+  Promise.all([incompleteOtsInfoPromise, incompleteOtsPromise, incompletePromise, helloworldOtsPromise, helloworldPromise, merkle2OtsPromise, merkle2OtsInfoPromise]).then(values => {
     incompleteOtsInfo = values[0];
     incompleteOts = values[1];
     incomplete = values[2];
     helloworldOts = values[3];
     helloworld = values[4];
+    merkle2Ots = values[5];
+    merkle2OtsInfo = values[6];
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -39,6 +47,12 @@ test('OpenTimestamps.info()', assert => {
   assert.false(otsInfoCalc === undefined);
   assert.false(incompleteOts === undefined);
   assert.equals(incompleteOtsInfo, otsInfoCalc, 'ots info match');
+
+  const merkle2OtsInfoCalc = OpenTimestamps.info(merkle2Ots);
+  assert.false(merkle2OtsInfoCalc === undefined);
+  assert.false(merkle2Ots === undefined);
+  assert.equals(merkle2OtsInfo, merkle2OtsInfoCalc, 'ots info match on merkle2');
+
   assert.end();
 });
 

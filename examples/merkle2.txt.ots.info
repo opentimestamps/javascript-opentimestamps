@@ -1,0 +1,19 @@
+File sha256 hash: 8bd5a5f07b4451c29756df5eb51d194fb5b20c7e89812d877bbad30d871c582f
+Timestamp:
+append b63d8f213d047298b8ab4595acd8e5d0
+sha256
+prepend ae59d2c0d2f5efa97df8f3cca7e85845880c102237f1a6a1b0b4c6a5ab77f494
+sha256
+append 026356e7972f023930ec84c213adedc4050460973935bbd2f4df3d7bd5dec55f
+sha256
+ -> append 2e12050afd7a10ea4f591ed717d35de6
+    sha256
+    prepend 57d982df
+    append b1f26e2e55590477
+    verify PendingAttestation('https://alice.btc.calendar.opentimestamps.org')
+ -> append 4aaade9c2ffb853ccff9c07681d019fd
+    sha256
+    prepend 57d982e0
+    append 6644ef713071762a
+    verify PendingAttestation('https://bob.btc.calendar.opentimestamps.org')
+
