@@ -1,9 +1,9 @@
 
 const test = require('tape');
-const Utils = require('../utils.js');
-const OpenTimestamps = require('../open-timestamps.js');
-const DetachedTimestampFile = require('../detached-timestamp-file.js');
-const Context = require('../context.js');
+const Utils = require('../src/utils.js');
+const OpenTimestamps = require('../src/open-timestamps.js');
+const DetachedTimestampFile = require('../src/detached-timestamp-file.js');
+const Context = require('../src/context.js');
 // const Calendar = require('../calendar.js');
 // const Timestamp = require('../timestamp.js');
 

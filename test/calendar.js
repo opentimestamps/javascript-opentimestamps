@@ -1,7 +1,7 @@
 const test = require('tape');
-const Calendar = require('../calendar.js');
-const Utils = require('../utils.js');
-const Timestamp = require('../timestamp.js');
+const Calendar = require('../src/calendar.js');
+const Utils = require('../src/utils.js');
+const Timestamp = require('../src/timestamp.js');
 /*
 let incompleteOtsInfo;
 let incompleteOts;

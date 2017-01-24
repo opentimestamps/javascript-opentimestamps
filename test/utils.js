@@ -1,5 +1,5 @@
 const test = require('tape');
-const Utils = require('../utils.js');
+const Utils = require('../src/utils.js');
 
 test('utils.js test', assert => {
   assert.equal(Utils.randString(16).length, 16, 'Utils.randString() length');

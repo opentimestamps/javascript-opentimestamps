@@ -1,9 +1,9 @@
 
-const OpenTimestamps = require('../open-timestamps.js');
-const Context = require('../context.js');
-const Utils = require('../utils.js');
+const OpenTimestamps = require('../src/open-timestamps.js');
+const Context = require('../src/context.js');
+const Utils = require('../src/utils.js');
 // const Timestamp = require('../timestamp.js');
-const DetachedTimestampFile = require('../detached-timestamp-file.js');
+const DetachedTimestampFile = require('../src/detached-timestamp-file.js');
 // const ByteBuffer = require('bytebuffer');
 // const DetachedTimestampFile = require('../detached-timestamp-file.js');
 

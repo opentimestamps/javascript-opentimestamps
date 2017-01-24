@@ -1,5 +1,5 @@
 const test = require('tape');
-const Insight = require('../insight.js');
+const Insight = require('../src/insight.js');
 
 test('insight.js test', assert => {
   assert.pass('This test will pass.');
