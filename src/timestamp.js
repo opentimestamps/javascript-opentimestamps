@@ -79,8 +79,8 @@ class Timestamp {
    * @param {StreamSerializationContext} ctx - The stream serialization context.
    */
   serialize(ctx) {
-    // console.log('SERIALIZE');
-    // console.log(ctx.toString());
+    console.log('SERIALIZE');
+    console.log(ctx.toString());
 
     // sort
     const sortedAttestations = this.attestations;
@@ -100,22 +100,27 @@ class Timestamp {
         ctx.writeBytes([0xff, 0x00]);
         sortedAttestations[sortedAttestations.length - 1].serialize(ctx);
       }
-            // var sorted_ops = [];//sorted(self.ops.items(), key=lambda item: item[0])
 
-      let lastOp;
-      let lastStamp;
-
-      for (const [key, value] of this.ops) {
-        lastOp = key;
-        lastStamp = value;
+      // all op/stamp
+      let counter = 0;
+      for (const [op, stamp] of this.ops) {
+        if (counter < this.ops.size-1){
+          ctx.writeBytes([0xff]);
+          counter++;
+        }
+        op.serialize(ctx)
+        stamp.serialize(ctx)
       }
 
-      // console.log('lastOp : ');
-      // console.log(lastOp.toString());
-      // console.log(lastStamp.toString());
-
-      lastOp.serialize(ctx);
-      lastStamp.serialize(ctx);
+      // last op/stamp
+      /*let lastOp;
+      let lastStamp;
+      for (const [op, stamp] of this.ops) {
+        lastOp = op;
+        lastStamp = stamp;
+      }*/
+      //lastOp.serialize(ctx);
+      //lastStamp.serialize(ctx);
     }
   }
 

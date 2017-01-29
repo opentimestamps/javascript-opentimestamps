@@ -97,7 +97,7 @@ class StreamDeserializationContext {
 class StreamSerializationContext {
 
   constructor() {
-    this.buffer = new ByteBuffer(1024);
+    this.buffer = new ByteBuffer(1024*4);
     this.buffer.clear();
   }
   getOutput() {
