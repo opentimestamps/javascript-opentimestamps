@@ -36,7 +36,7 @@ switch (args[0]) {
   case 'verify':
   case 'v':
 
-    if (args.length !== 2) {
+    if (args.length !== 3) {
       console.log('Verify the timestamp attestations given as argument.\n');
       console.log(title + ': bad options number ');
       break;
