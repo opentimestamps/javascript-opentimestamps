@@ -13,10 +13,10 @@ const Timestamp = require('./timestamp.js');
 /**
  * Header magic bytes
  * Designed to be give the user some information in a hexdump, while being identified as 'data' by the file utility.
- * @type {string}
+ * @type {int[]}
  * @default \x00OpenTimestamps\x00\x00Proof\x00\xbf\x89\xe2\xe8\x84\xe8\x92\x94
  */
-const HEADER_MAGIC = '\x00OpenTimestamps\x00\x00Proof\x00\xbf\x89\xe2\xe8\x84\xe8\x92\x94';
+const HEADER_MAGIC = [ 0x00,0x4f,0x70,0x65 ,0x6e,0x54 ,0x69,0x6d ,0x65,0x73 ,0x74,0x61,0x6d,0x70 ,0x73,0x00,0x00,0x50 ,0x72,0x6f ,0x6f,0x66 ,0x00,0xbf ,0x89,0xe2,0xe8,0x84,0xe8,0x92,0x94];
 
 /**
  * While the git commit timestamps have a minor version, probably better to
