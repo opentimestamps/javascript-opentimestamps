@@ -36,7 +36,7 @@ switch (args[0]) {
   case 'verify':
   case 'v':
 
-    if (args.length !== 3) {
+    if (args.length !== 2) {
       console.log('Verify the timestamp attestations given as argument.\n');
       console.log(title + ': bad options number ');
       break;
@@ -68,9 +68,9 @@ function showHelp() {
   console.log(
         'Usage: ' + title + ' [options] {stamp,s,upgrade,u,verify,v,info} [arguments]\n\n' +
         'Subcommands:\n' +
-        's, stamp FILE       \tCreate timestamp with the aid of a remote calendar.\n' +
+        's, stamp FILE       \tCreate timestamp with the aid of a remote calendar, the output receipt will be saved with .ots\n' +
         'i, info FILE_OTS \tShow information on a timestamp.\n' +
-        'v, verify FILE_OTS FILE\tVerify the timestamp attestations.\n' +
+        'v, verify FILE_OTS\tVerify the timestamp attestations, expect original file present in the same directory without .ots\n' +
         'u, upgrade FILE_OTS\tUpgrade remote calendar timestamps to be locally verifiable.\n\n' +
         'Options:\n' +
         '-V, --version         \tprint ' + title + ' version.\n' +
