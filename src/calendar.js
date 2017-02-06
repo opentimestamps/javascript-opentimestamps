@@ -111,7 +111,11 @@ class RemoteCalendar {
             return resolve(timestamp);
           })
           .catch(err => {
-            console.error('Calendar response error: ' + err);
+            if (err.statusCode === 404) {
+              // console.error(err.response.body);
+            } else {
+              console.error('Calendar response error: ' + err);
+            }
             return reject();
           });
     });

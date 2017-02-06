@@ -99,7 +99,7 @@ module.exports = {
           return;
         }
 
-        fileTimestamp.timestamp = timestamp;
+        // fileTimestamp.timestamp = timestamp;
 
         const css = new Context.StreamSerialization();
         fileTimestamp.serialize(css);
@@ -155,8 +155,8 @@ module.exports = {
     const ctxHashfd = new Context.StreamDeserialization(plain);
 
     const actualFileDigest = detachedTimestamp.fileHashOp.hashFd(ctxHashfd);
-    // console.log('actualFileDigest ' + Utils.bytesToHex(actualFileDigest));
-    // console.log('detachedTimestamp.fileDigest() ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
+    console.log('actualFileDigest ' + Utils.bytesToHex(actualFileDigest));
+    console.log('detachedTimestamp.fileDigest() ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
 
     const detachedFileDigest = detachedTimestamp.fileDigest();
     if (!Utils.arrEq(actualFileDigest, detachedFileDigest)) {
@@ -291,7 +291,9 @@ module.exports = {
         // console.log(Timestamp.strTreeExtended(timestamp));
 
         for (const result of results) {
-          result.subStamp.merge(result.upgradedStamp);
+          if (result !== undefined) {
+            result.subStamp.merge(result.upgradedStamp);
+          }
         }
         // console.log('Timestamp merged');
         // console.log(Timestamp.strTreeExtended(timestamp));
@@ -301,14 +303,14 @@ module.exports = {
           resolve(true);
         }
       }).catch(err => {
-        console.error('Error: ' + err);
+        console.error('Error upgradeTimestamp: ' + err);
         reject(err);
       });
     });
   },
 
   upgradeStamp(subStamp, calendar, commitment, existingAttestations) {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       calendar.getTimestamp(commitment).then(upgradedStamp => {
         // console.log(Timestamp.strTreeExtended(upgradedStamp, 0));
 
@@ -332,11 +334,14 @@ module.exports = {
           // args.cache.merge(upgraded_stamp)
           // sub_stamp.merge(upgraded_stamp)
         } else {
-          reject();
+          resolve();
         }
       }).catch(err => {
-        console.error('Error : ' + err);
-        reject(err);
+        if (err === undefined) {
+          resolve();
+        } else {
+          resolve();
+        }
       });
     });
   }
