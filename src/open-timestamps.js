@@ -155,8 +155,8 @@ module.exports = {
     const ctxHashfd = new Context.StreamDeserialization(plain);
 
     const actualFileDigest = detachedTimestamp.fileHashOp.hashFd(ctxHashfd);
-    //console.log('actualFileDigest ' + Utils.bytesToHex(actualFileDigest));
-    //console.log('detachedTimestamp.fileDigest() ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
+    // console.log('actualFileDigest ' + Utils.bytesToHex(actualFileDigest));
+    // console.log('detachedTimestamp.fileDigest() ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
 
     const detachedFileDigest = detachedTimestamp.fileDigest();
     if (!Utils.arrEq(actualFileDigest, detachedFileDigest)) {
