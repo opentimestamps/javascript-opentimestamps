@@ -26,17 +26,19 @@ module.exports = {
   info(ots) {
     if (ots === undefined) {
       console.error('No ots file');
-      return;
+      return 'No ots file';
     }
 
-    const ctx = new Context.StreamDeserialization(ots);
-    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-
-    const fileHash = Utils.bytesToHex(detachedTimestampFile.timestamp.msg);
-    const hashOp = detachedTimestampFile.fileHashOp._HASHLIB_NAME();
-    const firstLine = 'File ' + hashOp + ' hash: ' + fileHash + '\n';
-
-    return firstLine + 'Timestamp:\n' + detachedTimestampFile.timestamp.strTree();
+    try {
+      const ctx = new Context.StreamDeserialization(ots);
+      const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+      const fileHash = Utils.bytesToHex(detachedTimestampFile.timestamp.msg);
+      const hashOp = detachedTimestampFile.fileHashOp._HASHLIB_NAME();
+      const firstLine = 'File ' + hashOp + ' hash: ' + fileHash + '\n';
+      return firstLine + 'Timestamp:\n' + detachedTimestampFile.timestamp.strTree();
+    } catch (err) {
+      return 'Error deserialization';
+    }
   },
 
   /**
@@ -46,61 +48,57 @@ module.exports = {
    */
   stamp(plain) {
     return new Promise((resolve, reject) => {
-      const ctx = new Context.StreamDeserialization(plain);
-
-      const fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
-
-          /* Add nonce
-
-          # Remember that the files - and their timestamps - might get separated
-          # later, so if we didn't use a nonce for every file, the timestamp
-          # would leak information on the digests of adjacent files. */
-
-      const bytesRandom16 = Utils.randBytes(16);
-
-      // nonce_appended_stamp = file_timestamp.timestamp.ops.add(OpAppend(os.urandom(16)))
-      const opAppend = new Ops.OpAppend(Utils.arrayToBytes(bytesRandom16));
-      let nonceAppendedStamp = fileTimestamp.timestamp.ops.get(opAppend);
-      if (nonceAppendedStamp === undefined) {
-        nonceAppendedStamp = new Timestamp(opAppend.call(fileTimestamp.timestamp.msg));
-        fileTimestamp.timestamp.ops.set(opAppend, nonceAppendedStamp);
-
-        // console.log(Timestamp.strTreeExtended(fileTimestamp.timestamp));
+      // Read plain
+      let fileTimestamp;
+      try {
+        const ctx = new Context.StreamDeserialization(plain);
+        fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
+      } catch (err) {
+        return reject(err);
       }
 
-      // merkle_root = nonce_appended_stamp.ops.add(OpSHA256())
-      const opSHA256 = new Ops.OpSHA256();
-      let merkleRoot = nonceAppendedStamp.ops.get(opSHA256);
-      if (merkleRoot === undefined) {
-        merkleRoot = new Timestamp(opSHA256.call(nonceAppendedStamp.msg));
-        nonceAppendedStamp.ops.set(opSHA256, merkleRoot);
+      /* Add nonce:
+       * Remember that the files - and their timestamps - might get separated
+       * later, so if we didn't use a nonce for every file, the timestamp
+       * would leak information on the digests of adjacent files.
+       * */
+      let merkleRoot;
+      try {
+        const bytesRandom16 = Utils.randBytes(16);
 
-        // console.log(Timestamp.strTreeExtended(fileTimestamp.timestamp));
+        // nonce_appended_stamp = file_timestamp.timestamp.ops.add(OpAppend(os.urandom(16)))
+        const opAppend = new Ops.OpAppend(Utils.arrayToBytes(bytesRandom16));
+        let nonceAppendedStamp = fileTimestamp.timestamp.ops.get(opAppend);
+        if (nonceAppendedStamp === undefined) {
+          nonceAppendedStamp = new Timestamp(opAppend.call(fileTimestamp.timestamp.msg));
+          fileTimestamp.timestamp.ops.set(opAppend, nonceAppendedStamp);
+        }
+
+        // merkle_root = nonce_appended_stamp.ops.add(OpSHA256())
+        const opSHA256 = new Ops.OpSHA256();
+        merkleRoot = nonceAppendedStamp.ops.get(opSHA256);
+        if (merkleRoot === undefined) {
+          merkleRoot = new Timestamp(opSHA256.call(nonceAppendedStamp.msg));
+          nonceAppendedStamp.ops.set(opSHA256, merkleRoot);
+        }
+      } catch (err) {
+        return reject(err);
       }
-
-      // console.log('fileTimestamp:');
-      // console.log(fileTimestamp.toString());
-
-      // console.log('merkleRoot:');
-      // console.log(merkleRoot.toString());
 
       // merkleTip  = make_merkle_tree(merkle_roots)
       const merkleTip = merkleRoot;
 
+      // Calendars
       const calendarUrls = [];
       calendarUrls.push('https://alice.btc.calendar.opentimestamps.org');
       // calendarUrls.append('https://b.pool.opentimestamps.org');
       calendarUrls.push('https://ots.eternitywall.it');
 
       this.createTimestamp(merkleTip, calendarUrls).then(timestamp => {
-        // serialization
         if (timestamp === undefined) {
-          reject();
-          return;
+          return reject();
         }
-
-        // fileTimestamp.timestamp = timestamp;
-
+        // Timestamp serialization
         const css = new Context.StreamSerialization();
         fileTimestamp.serialize(css);
         resolve(css.getOutput());
@@ -134,7 +132,6 @@ module.exports = {
         // console.log(Timestamp.strTreeExtended(timestamp));
         return resolve(timestamp);
       }).catch(err => {
-        console.error('Error: ' + err);
         reject(err);
       });
     });
@@ -147,22 +144,35 @@ module.exports = {
    * @param {ArrayBuffer} plain - The plain array buffer to verify.
    */
   verify(ots, plain) {
-    const ctx = new Context.StreamDeserialization(ots);
+    // Read OTS
+    let detachedTimestamp;
+    try {
+      const ctx = new Context.StreamDeserialization(ots);
+      detachedTimestamp = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+    } catch (err) {
+      return new Promise((resolve, reject) => {
+        reject(err);
+      });
+    }
 
-    const detachedTimestamp = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-    // console.log('Hashing file, algorithm ' + detachedTimestamp.fileHashOp._TAG_NAME());
-
-    const ctxHashfd = new Context.StreamDeserialization(plain);
-
-    const actualFileDigest = detachedTimestamp.fileHashOp.hashFd(ctxHashfd);
-    // console.log('actualFileDigest ' + Utils.bytesToHex(actualFileDigest));
-    // console.log('detachedTimestamp.fileDigest() ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
+    // Read plain
+    let actualFileDigest;
+    try {
+      const ctxHashfd = new Context.StreamDeserialization(plain);
+      actualFileDigest = detachedTimestamp.fileHashOp.hashFd(ctxHashfd);
+    } catch (err) {
+      return new Promise((resolve, reject) => {
+        reject(err);
+      });
+    }
 
     const detachedFileDigest = detachedTimestamp.fileDigest();
     if (!Utils.arrEq(actualFileDigest, detachedFileDigest)) {
       console.error('Expected digest ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
       console.error('File does not match original!');
-      return;
+      return new Promise((resolve, reject) => {
+        reject();
+      });
     }
 
     // console.log(Timestamp.strTreeExtended(detachedTimestamp.timestamp, 0));
@@ -221,9 +231,16 @@ module.exports = {
    */
   upgrade(ots) {
     return new Promise((resolve, reject) => {
-      const ctx = new Context.StreamDeserialization(ots);
-      const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+      // Read DetachedTimestampFile
+      let detachedTimestampFile;
+      try {
+        const ctx = new Context.StreamDeserialization(ots);
+        detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+      } catch (err) {
+        return reject(err);
+      }
 
+      // Upgrade timestamp
       this.upgradeTimestamp(detachedTimestampFile.timestamp).then(changed => {
         if (changed) {
           // console.log('Timestamp upgraded');
@@ -236,14 +253,14 @@ module.exports = {
         }
 
         // serialization
-        const css = new Context.StreamSerialization();
-        detachedTimestampFile.serialize(css);
-        resolve(new Buffer(css.getOutput()));
-
-        // console.log('SERIALIZATION');
-        // console.log(Utils.bytesToHex(css.getOutput()));
+        try {
+          const css = new Context.StreamSerialization();
+          detachedTimestampFile.serialize(css);
+          resolve(new Buffer(css.getOutput()));
+        } catch (err) {
+          reject(err);
+        }
       }).catch(err => {
-        console.error('Error : ' + err);
         reject(err);
       });
     });
