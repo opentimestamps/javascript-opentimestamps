@@ -4,7 +4,7 @@ const Utils = require('../src/utils.js');
 const OpenTimestamps = require('../src/open-timestamps.js');
 const DetachedTimestampFile = require('../src/detached-timestamp-file.js');
 const Context = require('../src/context.js');
-// const Calendar = require('../calendar.js');
+const Ops = require('../src/ops.js');
 // const Timestamp = require('../timestamp.js');
 
 let incompleteOtsInfo;
@@ -56,7 +56,7 @@ test('OpenTimestamps.info()', assert => {
   assert.end();
 });
 
-// STAMP TESTS
+// STAMP TESTS FILE
 
 test('OpenTimestamps.stamp()', assert => {
   const timestampBytesPromise = OpenTimestamps.stamp(incomplete);
@@ -64,7 +64,26 @@ test('OpenTimestamps.stamp()', assert => {
     const ctx = new Context.StreamDeserialization(timestampBytes);
     const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
     assert.false(detachedTimestampFile === undefined);
-    // assert.equals('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9', Utils.bytesToHex(detachedTimestampFile.timestamp.msg), 'checking hashes');
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
+// STAMP TESTS HASH
+test('OpenTimestamps.stamp()', assert => {
+  const sha256 = '05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9';
+
+  const ctx = new Context.StreamDeserialization(incomplete);
+  const fdHash = new Ops.OpSHA256().hashFd(ctx);
+  assert.equals(sha256, Utils.bytesToHex(fdHash), 'checking hashes');
+
+  const timestampBytesPromise = OpenTimestamps.stamp(fdHash, true);
+  timestampBytesPromise.then(timestampBytes => {
+    const ctx = new Context.StreamDeserialization(timestampBytes);
+    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+    assert.false(detachedTimestampFile === undefined);
+    assert.equals(sha256, Utils.bytesToHex(detachedTimestampFile.fileDigest()), 'checking hashes');
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);

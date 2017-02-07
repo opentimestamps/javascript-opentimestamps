@@ -45,16 +45,26 @@ module.exports = {
    * Create timestamp with the aid of a remote calendar. May be specified multiple times.
    * @exports OpenTimestamps/stamp
    * @param {ArrayBuffer} plain - The plain array buffer to stamp.
+   * @param {Boolean} isHash - 1 = Hash , 0 = Data File
    */
-  stamp(plain) {
+  stamp(plain, isHash) {
     return new Promise((resolve, reject) => {
-      // Read plain
       let fileTimestamp;
-      try {
-        const ctx = new Context.StreamDeserialization(plain);
-        fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
-      } catch (err) {
-        return reject(err);
+      if (isHash !== undefined && isHash === true) {
+        // Read Hash
+        try {
+          fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromHash(new Ops.OpSHA256(), plain);
+        } catch (err) {
+          return reject(err);
+        }
+      } else {
+        // Read from file stream
+        try {
+          const ctx = new Context.StreamDeserialization(plain);
+          fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
+        } catch (err) {
+          return reject(err);
+        }
       }
 
       /* Add nonce:

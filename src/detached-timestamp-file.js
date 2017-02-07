@@ -92,6 +92,16 @@ class DetachedTimestampFile {
   }
 
   /**
+   * Read the Detached Timestamp File from hash.
+   * @param {Op} fileHashOp - The file hash operation.
+   * @param {int[]} fdHash - The hash file.
+   * @return {DetachedTimestampFile} The generated DetachedTimestampFile object.
+   */
+  static fromHash(fileHashOp, fdHash) {
+    return new DetachedTimestampFile(fileHashOp, new Timestamp(fdHash));
+  }
+
+  /**
    * Print the object.
    * @return {string} The output.
    */
