@@ -17,7 +17,6 @@ const Notary = require('./notary.js');
 const Insight = require('./insight.js');
 const Merkle = require('./merkle.js');
 
-
 module.exports = {
 
   /**
@@ -120,18 +119,16 @@ module.exports = {
     });
   },
 
-
   /**
    * Create timestamp with the aid of a remote calendar for multiple files.
    * @exports OpenTimestamps/stamp
    * @param {ArrayBuffer[]} plains - The array of plain array buffer to stamp.
    * @param {Boolean} isHash - 1 = Hash , 0 = Data File
    */
-   multistamp(plains, isHash) {
+  multistamp(plains, isHash) {
     return new Promise((resolve, reject) => {
-
-      let fileTimestamps=[];
-      let merkleRoots=[];
+      const fileTimestamps = [];
+      const merkleRoots = [];
 
       for (const plain of plains) {
         let fileTimestamp;
@@ -184,7 +181,7 @@ module.exports = {
         merkleRoots.push(merkleRoot);
       }
 
-      const merkleTip  = Merkle.make_merkle_tree(merkleRoots);
+      const merkleTip = Merkle.makeMerkleTree(merkleRoots);
 
       // Calendars
       const calendarUrls = [];
@@ -198,7 +195,7 @@ module.exports = {
         }
         // Timestamp serialization
         const css = new Context.StreamSerialization();
-        fileTimestamp.serialize(css);
+        // fileTimestamp.serialize(css);
         resolve(css.getOutput());
       }).catch(err => {
         reject(err);

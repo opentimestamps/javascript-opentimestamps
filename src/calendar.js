@@ -49,7 +49,7 @@ class RemoteCalendar {
       url: this.url + '/digest',
       method: 'POST',
       headers: {
-        'Accept': 'application/vnd.opentimestamps.v1',
+        Accept: 'application/vnd.opentimestamps.v1',
         'User-Agent': 'javascript-opentimestamps',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
