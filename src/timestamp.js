@@ -323,6 +323,7 @@ class Timestamp {
     }
     return false;
   }
+
 }
 
 module.exports = Timestamp;

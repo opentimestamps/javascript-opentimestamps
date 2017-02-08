@@ -41,7 +41,6 @@ test('setup', assert => {
 });
 
 // INFO TESTS
-
 test('OpenTimestamps.info()', assert => {
   const otsInfoCalc = OpenTimestamps.info(incompleteOts);
   assert.false(otsInfoCalc === undefined);
@@ -57,7 +56,6 @@ test('OpenTimestamps.info()', assert => {
 });
 
 // STAMP TESTS FILE
-
 test('OpenTimestamps.stamp()', assert => {
   const timestampBytesPromise = OpenTimestamps.stamp(incomplete);
   timestampBytesPromise.then(timestampBytes => {
@@ -84,6 +82,31 @@ test('OpenTimestamps.stamp()', assert => {
     const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
     assert.false(detachedTimestampFile === undefined);
     assert.equals(sha256, Utils.bytesToHex(detachedTimestampFile.fileDigest()), 'checking hashes');
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
+
+// MULTISTAMP TESTS HASH
+test('OpenTimestamps.stamp()', assert => {
+  const sha256Incomplete = '05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9';
+  const ctxIncomplete = new Context.StreamDeserialization(incomplete);
+  const fdHashIncomplete = new Ops.OpSHA256().hashFd(ctxIncomplete);
+  assert.equals(sha256Incomplete, Utils.bytesToHex(fdHashIncomplete), 'checking hashes');
+
+  const sha256Helloworld = '03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340';
+  const ctxHelloworld = new Context.StreamDeserialization(helloworld);
+  const fdHashHelloworld = new Ops.OpSHA256().hashFd(ctxHelloworld);
+  assert.equals(sha256Helloworld, Utils.bytesToHex(fdHashHelloworld), 'checking hashes');
+
+  const timestampBytesPromise = OpenTimestamps.multistamp([fdHashIncomplete,fdHashHelloworld], true);
+  timestampBytesPromise.then(timestampBytes => {
+    const ctx = new Context.StreamDeserialization(timestampBytes);
+    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+    assert.false(detachedTimestampFile === undefined);
+    //assert.equals(sha256, Utils.bytesToHex(detachedTimestampFile.fileDigest()), 'checking hashes');
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);

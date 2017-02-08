@@ -15,6 +15,8 @@ const Ops = require('./ops.js');
 const Calendar = require('./calendar.js');
 const Notary = require('./notary.js');
 const Insight = require('./insight.js');
+const Merkle = require('./merkle.js');
+
 
 module.exports = {
 
@@ -97,6 +99,92 @@ module.exports = {
 
       // merkleTip  = make_merkle_tree(merkle_roots)
       const merkleTip = merkleRoot;
+
+      // Calendars
+      const calendarUrls = [];
+      calendarUrls.push('https://alice.btc.calendar.opentimestamps.org');
+      // calendarUrls.append('https://b.pool.opentimestamps.org');
+      calendarUrls.push('https://ots.eternitywall.it');
+
+      this.createTimestamp(merkleTip, calendarUrls).then(timestamp => {
+        if (timestamp === undefined) {
+          return reject();
+        }
+        // Timestamp serialization
+        const css = new Context.StreamSerialization();
+        fileTimestamp.serialize(css);
+        resolve(css.getOutput());
+      }).catch(err => {
+        reject(err);
+      });
+    });
+  },
+
+
+  /**
+   * Create timestamp with the aid of a remote calendar for multiple files.
+   * @exports OpenTimestamps/stamp
+   * @param {ArrayBuffer[]} plains - The array of plain array buffer to stamp.
+   * @param {Boolean} isHash - 1 = Hash , 0 = Data File
+   */
+   multistamp(plains, isHash) {
+    return new Promise((resolve, reject) => {
+
+      let fileTimestamps=[];
+      let merkleRoots=[];
+
+      for (const plain of plains) {
+        let fileTimestamp;
+        if (isHash !== undefined && isHash === true) {
+          // Read Hash
+          try {
+            fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromHash(new Ops.OpSHA256(), plain);
+          } catch (err) {
+            return reject(err);
+          }
+        } else {
+          // Read from file stream
+          try {
+            const ctx = new Context.StreamDeserialization(plain);
+            fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
+          } catch (err) {
+            return reject(err);
+          }
+        }
+
+        /* Add nonce:
+         * Remember that the files - and their timestamps - might get separated
+         * later, so if we didn't use a nonce for every file, the timestamp
+         * would leak information on the digests of adjacent files.
+         * */
+        let merkleRoot;
+        try {
+          const bytesRandom16 = Utils.randBytes(16);
+
+          // nonce_appended_stamp = file_timestamp.timestamp.ops.add(OpAppend(os.urandom(16)))
+          const opAppend = new Ops.OpAppend(Utils.arrayToBytes(bytesRandom16));
+          let nonceAppendedStamp = fileTimestamp.timestamp.ops.get(opAppend);
+          if (nonceAppendedStamp === undefined) {
+            nonceAppendedStamp = new Timestamp(opAppend.call(fileTimestamp.timestamp.msg));
+            fileTimestamp.timestamp.ops.set(opAppend, nonceAppendedStamp);
+          }
+
+          // merkle_root = nonce_appended_stamp.ops.add(OpSHA256())
+          const opSHA256 = new Ops.OpSHA256();
+          merkleRoot = nonceAppendedStamp.ops.get(opSHA256);
+          if (merkleRoot === undefined) {
+            merkleRoot = new Timestamp(opSHA256.call(nonceAppendedStamp.msg));
+            nonceAppendedStamp.ops.set(opSHA256, merkleRoot);
+          }
+        } catch (err) {
+          return reject(err);
+        }
+
+        fileTimestamps.push(fileTimestamp);
+        merkleRoots.push(merkleRoot);
+      }
+
+      const merkleTip  = Merkle.make_merkle_tree(merkleRoots);
 
       // Calendars
       const calendarUrls = [];
