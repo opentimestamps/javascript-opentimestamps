@@ -150,9 +150,9 @@ class StreamSerializationContext {
   }
 
   writeBytes(value) {
-    for (const x of value) {
+    value.forEach(x => {
       this.writeByte(x);
-    }
+    });
   }
 
   writeVarbytes(value) {

@@ -38,7 +38,7 @@ module.exports = {
       const firstLine = 'File ' + hashOp + ' hash: ' + fileHash + '\n';
       return firstLine + 'Timestamp:\n' + detachedTimestampFile.timestamp.strTree();
     } catch (err) {
-      return 'Error deserialization';
+      return 'Error deserialization ' + err;
     }
   },
 
@@ -130,7 +130,7 @@ module.exports = {
       const fileTimestamps = [];
       const merkleRoots = [];
 
-      for (const plain of plains) {
+      plains.forEach(plain => {
         let fileTimestamp;
         if (isHash !== undefined && isHash === true) {
           // Read Hash
@@ -179,7 +179,7 @@ module.exports = {
 
         fileTimestamps.push(fileTimestamp);
         merkleRoots.push(merkleRoot);
-      }
+      });
 
       const merkleTip = Merkle.makeMerkleTree(merkleRoots);
 
@@ -212,18 +212,18 @@ module.exports = {
     // setup_bitcoin : not used
 
     const res = [];
-    for (const calendarUrl of calendarUrls) {
+    calendarUrls.forEach(calendarUrl => {
       const remote = new Calendar.RemoteCalendar(calendarUrl);
       res.push(remote.submit(timestamp.msg));
-    }
+    });
     return new Promise((resolve, reject) => {
       Promise.all(res.map(Utils.softFail)).then(results => {
         // console.log('results=' + results);
-        for (const resultTimestamp of results) {
+        results.forEach(resultTimestamp => {
           if (resultTimestamp !== undefined) {
             timestamp.merge(resultTimestamp);
           }
-        }
+        });
         // console.log(Timestamp.strTreeExtended(timestamp));
         return resolve(timestamp);
       }).catch(err => {
@@ -281,42 +281,46 @@ module.exports = {
   verifyTimestamp(timestamp) {
     return new Promise((resolve, reject) => {
       // upgradeTimestamp(timestamp, args);
+      let found = false;
 
-      for (const [msg, attestation] of timestamp.allAttestations()) {
-        if (attestation instanceof Notary.PendingAttestation) {
-          // console.log('PendingAttestation: pass ');
-        } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-          // console.log('Request to insight ');
-          const insight = new Insight.MultiInsight();
+      timestamp.allAttestations().forEach((attestation, msg) => {
+        if (!found) { // Verify only the first BitcoinBlockHeaderAttestation
+          if (attestation instanceof Notary.PendingAttestation) {
+            // console.log('PendingAttestation: pass ');
+          } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
+            found = true;
+            // console.log('Request to insight ');
+            const insight = new Insight.MultiInsight();
 
-          insight.blockhash(attestation.height).then(blockHash => {
-            insight.block(blockHash).then(blockInfo => {
-              const merkle = Utils.hexToBytes(blockInfo.merkleroot);
-              const message = msg.reverse();
+            insight.blockhash(attestation.height).then(blockHash => {
+              insight.block(blockHash).then(blockInfo => {
+                const merkle = Utils.hexToBytes(blockInfo.merkleroot);
+                const message = msg.reverse();
 
-              // console.log('merkleroot: ' + Utils.bytesToHex(merkle));
-              // console.log('msg: ' + Utils.bytesToHex(message));
-              // console.log('Time: ' + (new Date(blockInfo.time * 1000)));
+                // console.log('merkleroot: ' + Utils.bytesToHex(merkle));
+                // console.log('msg: ' + Utils.bytesToHex(message));
+                // console.log('Time: ' + (new Date(blockInfo.time * 1000)));
 
-              // One Bitcoin attestation is enought
-              if (Utils.arrEq(merkle, message)) {
-                resolve(blockInfo.time);
-              } else {
-                resolve();
-              }
+                // One Bitcoin attestation is enought
+                if (Utils.arrEq(merkle, message)) {
+                  resolve(blockInfo.time);
+                } else {
+                  resolve();
+                }
+              }).catch(err => {
+                console.error('Error: ' + err);
+                reject(err);
+              });
             }).catch(err => {
               console.error('Error: ' + err);
               reject(err);
             });
-          }).catch(err => {
-            console.error('Error: ' + err);
-            reject(err);
-          });
-          // Verify only the first BitcoinBlockHeaderAttestation
-          return;
+          }
         }
+      });
+      if (!found) {
+        resolve();
       }
-      resolve();
     });
   },
 
@@ -380,8 +384,8 @@ module.exports = {
     const self = this;
 
     // console.log(timestamp.directlyVerified().length);
-    for (const subStamp of timestamp.directlyVerified()) {
-      for (const attestation of subStamp.attestations) {
+    timestamp.directlyVerified().forEach(subStamp => {
+      subStamp.attestations.forEach(attestation => {
         if (attestation instanceof Notary.PendingAttestation) {
           const calendarUrl = attestation.uri;
           // var calendarUrl = calendarUrls[0];
@@ -394,19 +398,19 @@ module.exports = {
           // promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations));
           promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations));
         }
-      }
-    }
+      });
+    });
 
     return new Promise((resolve, reject) => {
       Promise.all(promises).then(results => {
         // console.log('Timestamp before merged');
         // console.log(Timestamp.strTreeExtended(timestamp));
 
-        for (const result of results) {
+        results.forEach(result => {
           if (result !== undefined) {
             result.subStamp.merge(result.upgradedStamp);
           }
-        }
+        });
         // console.log('Timestamp merged');
         // console.log(Timestamp.strTreeExtended(timestamp));
         if (results.length === 0) {

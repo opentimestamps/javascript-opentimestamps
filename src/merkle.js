@@ -87,7 +87,8 @@ class Merkle {
       }
 
       nextStamps = [];
-      for (const stamp of stamps) {
+      for (let i = 0; i < stamps.size; i++) {
+        const stamp = stamps[i];
         if (prevStamp === undefined) {
           prevStamp = stamp;
         } else {
@@ -95,6 +96,7 @@ class Merkle {
           prevStamp = undefined;
         }
       }
+
       if (prevStamp !== undefined) {
         nextStamps.push(prevStamp);
       }

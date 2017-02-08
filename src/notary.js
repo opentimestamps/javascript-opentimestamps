@@ -146,7 +146,7 @@ class PendingAttestation extends TimeAttestation {
   }
 
   serializePayload(ctx) {
-    ctx.writeVarbytes(this.uri);
+    ctx.writeVarbytes(Utils.charsToBytes(this.uri));
   }
   toString() {
     return 'PendingAttestation(\'' + this.uri + '\')';

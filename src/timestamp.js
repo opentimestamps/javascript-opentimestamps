@@ -103,14 +103,14 @@ class Timestamp {
 
       // all op/stamp
       let counter = 0;
-      for (const [op, stamp] of this.ops) {
+      this.ops.forEach((stamp, op) => {
         if (counter < this.ops.size - 1) {
           ctx.writeBytes([0xff]);
           counter++;
         }
         op.serialize(ctx);
         stamp.serialize(ctx);
-      }
+      });
 
       // last op/stamp
       /* let lastOp;
@@ -138,11 +138,11 @@ class Timestamp {
       return;
     }
 
-    for (const attestation of other.attestations) {
+    other.attestations.forEach(attestation => {
       this.attestations.push(attestation);
-    }
+    });
 
-    for (const [otherOp, otherOpStamp] of other.ops) {
+    other.ops.forEach((otherOpStamp, otherOp) => {
       // ourOpStamp = self.ops.add(otherOp)
       let ourOpStamp = this.ops.get(otherOp);
       if (ourOpStamp === undefined) {
@@ -150,7 +150,7 @@ class Timestamp {
         this.ops.set(otherOp, ourOpStamp);
       }
       ourOpStamp.merge(otherOpStamp);
-    }
+    });
   }
 
   /**
@@ -159,15 +159,15 @@ class Timestamp {
    */
   allAttestations() {
     const map = new Map();
-    for (const attestation of this.attestations) {
+    this.attestations.forEach(attestation => {
       map.set(this.msg, attestation);
-    }
-    for (const [, opStamp] of this.ops) {
+    });
+    this.ops.forEach(opStamp => {
       const subMap = opStamp.allAttestations();
-      for (const [a, b] of subMap) {
+      subMap.forEach((b, a) => {
         map.set(a, b);
-      }
-    }
+      });
+    });
     return map;
   }
 
@@ -181,19 +181,19 @@ class Timestamp {
     output += Timestamp.indention(indent) + 'msg: ' + Utils.bytesToHex(this.msg) + '\n';
     output += Timestamp.indention(indent) + this.attestations.length + ' attestations: \n';
     let i = 0;
-    for (const attestation of this.attestations) {
+    this.attestations.forEach(attestation => {
       output += Timestamp.indention(indent) + '[' + i + '] ' + attestation.toString() + '\n';
       i++;
-    }
+    });
 
     i = 0;
     output += Timestamp.indention(indent) + this.ops.size + ' ops: \n';
-    for (const [op, stamp] of this.ops) {
+    this.ops.forEach((stamp, op) => {
       output += Timestamp.indention(indent) + '[' + i + '] op: ' + op.toString() + '\n';
       output += Timestamp.indention(indent) + '[' + i + '] timestamp: \n';
       output += stamp.toString(indent + 1);
       i++;
-    }
+    });
     output += '\n';
     return output;
   }
@@ -219,29 +219,29 @@ class Timestamp {
   strTree(indent = 0) {
     let output = '';
     if (this.attestations.length > 0) {
-      for (const attestation of this.attestations) {
+      this.attestations.forEach(attestation => {
         output += Timestamp.indention(indent);
         output += 'verify ' + attestation.toString() + '\n';
-      }
+      });
     }
 
     if (this.ops.size > 1) {
-      for (const [op, timestamp] of this.ops) {
+      this.ops.forEach((timestamp, op) => {
         output += Timestamp.indention(indent);
         output += ' -> ';
         output += op.toString() + '\n';
         output += timestamp.strTree(indent + 1);
-      }
+      });
     } else if (this.ops.size > 0) {
       // output += Timestamp.indention(indent);
-      for (const [op, timestamp] of this.ops) {
+      this.ops.forEach((timestamp, op) => {
         output += Timestamp.indention(indent);
         output += op.toString() + '\n';
 
         // output += ' ( ' + Utils.bytesToHex(this.msg) + ' ) ';
         // output += '\n';
         output += timestamp.strTree(indent);
-      }
+      });
     }
     return output;
   }
@@ -254,34 +254,34 @@ class Timestamp {
   static strTreeExtended(timestamp, indent = 0) {
     let output = '';
     if (timestamp.attestations.length > 0) {
-      for (const attestation of timestamp.attestations) {
+      timestamp.attestations.forEach(attestation => {
         output += Timestamp.indention(indent);
         output += 'verify ' + attestation.toString();
         output += ' (' + Utils.bytesToHex(timestamp.msg) + ') ';
                 // output += " ["+Utils.bytesToHex(timestamp.msg)+"] ";
         output += '\n';
-      }
+      });
     }
 
     if (timestamp.ops.size > 1) {
-      for (const [op, ts] of timestamp.ops) {
+      timestamp.ops.forEach((ts, op) => {
         output += Timestamp.indention(indent);
         output += ' -> ';
         output += op.toString();
         output += ' (' + Utils.bytesToHex(timestamp.msg) + ') ';
         output += '\n';
         output += Timestamp.strTreeExtended(ts, indent + 1);
-      }
+      });
     } else if (timestamp.ops.size > 0) {
       output += Timestamp.indention(indent);
-      for (const [op, ts] of timestamp.ops) {
+      timestamp.ops.forEach((ts, op) => {
         output += Timestamp.indention(indent);
         output += op.toString();
 
         output += ' ( ' + Utils.bytesToHex(timestamp.msg) + ' ) ';
         output += '\n';
         output += Timestamp.strTreeExtended(ts, indent);
-      }
+      });
     }
     return output;
   }
@@ -294,10 +294,10 @@ class Timestamp {
       return new Array(this);
     }
     let array = [];
-    for (const [, value] of this.ops) {
+    this.ops.forEach(value => {
       const result = value.directlyVerified();
       array = array.concat(result);
-    }
+    });
     return array;
   }
 
@@ -306,9 +306,9 @@ class Timestamp {
    */
   getAttestations() {
     const set = new Set();
-    for (const [, attestation] of this.allAttestations()) {
+    this.allAttestations().forEach(attestation => {
       set.add(attestation);
-    }
+    });
     return set;
   }
 
@@ -316,11 +316,11 @@ class Timestamp {
    * @return {boolean} True if the timestamp is complete, False otherwise.
    */
   isTimestampComplete() {
-    for (const [, attestation] of this.allAttestations()) {
+    this.allAttestations().forEach(attestation => {
       if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
         return true;
       }
-    }
+    });
     return false;
   }
 

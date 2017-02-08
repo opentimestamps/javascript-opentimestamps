@@ -121,53 +121,61 @@ class MultiInsight {
 
   constructor() {
     this.insights = [];
-    for (const url of urls) {
+    urls.forEach(url => {
       this.insights.push(new Insight(url));
-    }
+    });
   }
 
   blockhash(height) {
     const res = [];
-    for (const insight of this.insights) {
+    this.insights.forEach(insight => {
       res.push(insight.blockhash(height));
-    }
+    });
     return new Promise((resolve, reject) => {
       Promise.all(res.map(Utils.softFail)).then(results => {
         // console.log('results=' + results);
         const set = new Set();
-        for (const result of results) {
-          if (result !== undefined) {
+        let found = false;
+        results.forEach(result => {
+          if (result !== undefined && !found) {
             if (set.has(result)) {
               // return if two results are equal
-              return resolve(result);
+              resolve(result);
+              found = true;
             }
             set.add(result);
           }
+        });
+        if (!found) {
+          reject();
         }
-        reject();
       });
     });
   }
 
   block(hash) {
     const res = [];
-    for (const insight of this.insights) {
+    this.insights.forEach(insight => {
       res.push(insight.block(hash));
-    }
+    });
     return new Promise((resolve, reject) => {
       Promise.all(res.map(Utils.softFail)).then(results => {
         // console.log('results=' + results);
         const resultSet = new Set();
-        for (const result of results) {
-          if (result !== undefined) {
+        let found = false;
+        results.forEach(result => {
+          if (result !== undefined && !found) {
             if (resultSet.has(JSON.stringify(result))) {
               // return if two results are equal
-              return resolve(result);
+              resolve(result);
+              found = true;
             }
             resultSet.add(JSON.stringify(result));
           }
+        });
+        if (!found) {
+          reject();
         }
-        reject();
       });
     });
   }
