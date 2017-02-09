@@ -181,7 +181,19 @@ module.exports = {
         merkleRoots.push(merkleRoot);
       });
 
+      console.log('fileTimestamps');
+      fileTimestamps.forEach(fileTimestamp => {
+        console.log('> ', Timestamp.strTreeExtended(fileTimestamp.timestamp));
+      });
+      console.log('merkleRoots');
+      merkleRoots.forEach(merkleRoot => {
+        console.log('> ', Timestamp.strTreeExtended(merkleRoot));
+      });
+
       const merkleTip = Merkle.makeMerkleTree(merkleRoots);
+
+      console.log('merkleTip');
+      console.log('> ', Timestamp.strTreeExtended(merkleTip));
 
       // Calendars
       const calendarUrls = [];
@@ -193,12 +205,15 @@ module.exports = {
         if (timestamp === undefined) {
           return reject();
         }
+        console.log('Timestamp');
+        console.log(Timestamp.strTreeExtended(timestamp));
         // Timestamps serialization
         const proofs = [];
         fileTimestamps.forEach(fileTimestamp => {
           const css = new Context.StreamSerialization();
           fileTimestamp.serialize(css);
           proofs.push(css.getOutput());
+          console.log(Utils.bytesToHex(Utils.arrayToBytes(css.getOutput())));
         });
         resolve(proofs);
       }).catch(err => {

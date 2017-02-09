@@ -11,7 +11,7 @@ const Timestamp = require('./timestamp.js');
 const Ops = require('./ops.js');
 
 class Merkle {
-    /** Concatenate left and right, then perform a unary operation on them left and right can be either timestamps or bytes.
+  /** Concatenate left and right, then perform a unary operation on them left and right can be either timestamps or bytes.
      * Appropriate intermediary append/prepend operations will be created as needed for left and right.
      * */
 
@@ -22,31 +22,26 @@ class Merkle {
     if (!(right instanceof Timestamp)) {
       right = new Timestamp(right);
     }
-        // leftAppendStamp = left.ops.add(OpAppend(right.msg))
-    const opAppend = new Ops.OpAppend();
-    let leftAppendStamp = left.ops.get(opAppend);
-    if (leftAppendStamp === undefined) {
-      leftAppendStamp = new Timestamp(opAppend.call(left.msg));
-      left.ops.set(opAppend, leftAppendStamp);
-    }
-        // rightPrependStamp = right.ops.add(OpPrepend(left.msg))
+
+    // rightPrependStamp = right.ops.add(OpPrepend(left.msg))
     const opPrepend = new Ops.OpPrepend();
     let rightPrependStamp = right.ops.get(opPrepend);
     if (rightPrependStamp === undefined) {
-      rightPrependStamp = new Timestamp(opPrepend.call(right.msg));
+      rightPrependStamp = new Timestamp(opPrepend.call(left.msg));
       right.ops.set(opPrepend, rightPrependStamp);
     }
-        // Left and right should produce the same thing, so we can set the timestamp
-        // of the left to the right.
-    left.ops[new Ops.OpPrepend(right.msg)] = rightPrependStamp;
 
-        // return rightPrependStamp.ops.add(unaryOpCls())
+    // return rightPrependStamp.ops.add(unaryOpCls())
     const opUnary = new UnaryOpCls();
-    let res = right.ops.get(opUnary);
+    let res = rightPrependStamp.ops.get(opUnary);
     if (res === undefined) {
       res = new Timestamp(opUnary.call(rightPrependStamp.msg));
       rightPrependStamp.ops.set(opUnary, res);
     }
+    // leftAppendStamp = left.ops.add(OpAppend(right.msg))
+    const opAppend = new Ops.OpAppend();
+    left.ops.set(opAppend, rightPrependStamp);
+
     return res;
   }
 
@@ -111,16 +106,15 @@ class Merkle {
 
   static makeMerkleTree(timestamps) {
     let stamps = timestamps;
-    const nextStamps = [];
     let prevStamp;
+    let exit = false;
 
-    while (stamps.length > 0) {
-      prevStamp = undefined;
-      if (stamps.length > 0) {
-        prevStamp = stamps.shift();
-      }
+    while (!exit) {
+      prevStamp = stamps[0];
+      const subStamps = stamps.slice(1, stamps.length);
 
-      for (const stamp in stamps) {
+      const nextStamps = [];
+      for (const stamp of subStamps) {
         if (prevStamp === undefined) {
           prevStamp = stamp;
         } else {
@@ -129,7 +123,9 @@ class Merkle {
         }
       }
 
-      if (nextStamps.length > 0) {
+      if (nextStamps.length === 0) {
+        exit = true;
+      } else {
         if (prevStamp !== undefined) {
           nextStamps.push(prevStamp);
         }

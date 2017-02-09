@@ -253,6 +253,7 @@ class Timestamp {
    */
   static strTreeExtended(timestamp, indent = 0) {
     let output = '';
+
     if (timestamp.attestations.length > 0) {
       timestamp.attestations.forEach(attestation => {
         output += Timestamp.indention(indent);
