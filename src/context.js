@@ -36,7 +36,7 @@ class StreamDeserializationContext {
     const output = new ByteBuffer(l);
     this.buffer.copyTo(output, 0, this.counter, l + this.counter);
     this.counter += l;
-    return Utils.arrayToBytes(output.buffer);
+    return Utils.arrayToBytes(Object.prototype.hasOwnProperty.call(output, 'view') ? output.view : output.buffer);  // different behaviours of buffer object between node and browsers
   }
   readBool() {
     const b = this.read(1)[0];
@@ -101,7 +101,8 @@ class StreamSerializationContext {
     this.buffer.clear();
   }
   getOutput() {
-    const output = this.buffer.buffer.subarray(0, this.buffer.offset);
+    const buffer = Object.prototype.hasOwnProperty.call(this.buffer, 'view') ? this.buffer.view : this.buffer.buffer;
+    const output = buffer.subarray(0, this.buffer.offset);
     return output;
   }
 
