@@ -33,6 +33,16 @@ switch (args[0]) {
     }
     stamp(args[1]);
     break;
+  case 'multistamp':
+  case 'S':
+    if (args.length < 2) {
+      console.log('Create timestamp with the aid of a remote calendar.\n');
+      console.log(title + ': bad options number ');
+      break;
+    }
+    args.shift();
+    multistamp(args);
+    break;
   case 'verify':
   case 'v':
 
@@ -69,6 +79,7 @@ function showHelp() {
         'Usage: ' + title + ' [options] {stamp,s,upgrade,u,verify,v,info} [arguments]\n\n' +
         'Subcommands:\n' +
         's, stamp FILE       \tCreate timestamp with the aid of a remote calendar, the output receipt will be saved with .ots\n' +
+        'S, multistamp FILES       \tCreate timestamp with the aid of a remote calendar, the output receipt will be saved with .ots\n' +
         'i, info FILE_OTS \tShow information on a timestamp.\n' +
         'v, verify FILE_OTS\tVerify the timestamp attestations, expect original file present in the same directory without .ots\n' +
         'u, upgrade FILE_OTS\tUpgrade remote calendar timestamps to be locally verifiable.\n\n' +
@@ -121,6 +132,49 @@ function stamp(argsFile) {
           });
         }
       });
+    }).catch(err => {
+      console.log('Error: ' + err);
+    });
+  }).catch(err => {
+    console.log('Error: ' + err);
+  });
+}
+
+function multistamp(argsFiles) {
+  const filePromises = [];
+  argsFiles.forEach(argsFile => {
+    filePromises.push(Utils.readFilePromise(argsFile, null));
+  });
+
+  Promise.all(filePromises).then(values => {
+    const timestampBytesPromise = OpenTimestamps.multistamp(values);
+    timestampBytesPromise.then(timestams => {
+      timestams.forEach(timestamp => {
+        const ctx = new Context.StreamDeserialization(timestamp);
+        const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+        if (detachedTimestampFile === undefined) {
+          console.error('Invalid timestamp');
+        } else {
+          console.log('STAMP result : ');
+          console.log(Utils.bytesToHex(detachedTimestampFile.timestamp.msg));
+        }
+      });
+
+/*
+      const buffer = new Buffer(timestampBytes);
+      const otsFilename = argsFile + '.ots';
+      fs.exists(otsFilename, fileExist => {
+        if (fileExist) {
+          console.log('The timestamp proof \'' + otsFilename + '\' already exists');
+        } else {
+          fs.writeFile(otsFilename, buffer, 'binary', err => {
+            if (err) {
+              return console.log(err);
+            }
+            console.log('The timestamp proof \'' + otsFilename + '\' has been created!');
+          });
+        }
+      }); */
     }).catch(err => {
       console.log('Error: ' + err);
     });

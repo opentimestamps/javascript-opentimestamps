@@ -92,30 +92,42 @@ test('OpenTimestamps.stamp()', assert => {
 });
 
 // MULTISTAMP TESTS HASH
-/*
+
 test('OpenTimestamps.multistamp()', assert => {
-  const sha256Incomplete = '05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9';
-  const ctxIncomplete = new Context.StreamDeserialization(incomplete);
-  const fdHashIncomplete = new Ops.OpSHA256().hashFd(ctxIncomplete);
-  assert.equals(sha256Incomplete, Utils.bytesToHex(fdHashIncomplete), 'checking hashes');
+  const files = [
+    incomplete
+  ];
+  const sha256 = [
+    '05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9',
+    '03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340'
+  ];
+  const fdHashes = [];
+  files.forEach(file => {
+    const fdHash = new Ops.OpSHA256().hashFd(new Context.StreamDeserialization(file));
+    fdHashes.push(fdHash);
+  });
+  files.forEach((files, i) => {
+    assert.equals(sha256[i], Utils.bytesToHex(fdHashes[i]), 'checking hashes');
+  });
 
-  const sha256Helloworld = '03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340';
-  const ctxHelloworld = new Context.StreamDeserialization(helloworld);
-  const fdHashHelloworld = new Ops.OpSHA256().hashFd(ctxHelloworld);
-  assert.equals(sha256Helloworld, Utils.bytesToHex(fdHashHelloworld), 'checking hashes');
+  const timestampBytesPromise = OpenTimestamps.multistamp(fdHashes, true);
+  timestampBytesPromise.then(timestamps => {
+    assert.false(timestamps === undefined);
+    assert.equals(timestamps.length, fdHashes.length);
 
-  const timestampBytesPromise = OpenTimestamps.multistamp([fdHashIncomplete, fdHashHelloworld], true);
-  timestampBytesPromise.then(timestampBytes => {
-    const ctx = new Context.StreamDeserialization(timestampBytes);
-    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-    assert.false(detachedTimestampFile === undefined);
-    // assert.equals(sha256, Utils.bytesToHex(detachedTimestampFile.fileDigest()), 'checking hashes');
+    timestamps.forEach((timestamp, i) => {
+      const ctx = new Context.StreamDeserialization(timestamps[i]);
+      const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+      assert.false(detachedTimestampFile === undefined);
+      assert.equals(sha256[i], Utils.bytesToHex(detachedTimestampFile.fileDigest()), 'checking hashes');
+    });
+
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
   });
 });
-*/
+
 // VERIFY TESTS
 
 test('OpenTimestamps.verify()', assert => {

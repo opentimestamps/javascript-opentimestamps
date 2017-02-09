@@ -193,10 +193,14 @@ module.exports = {
         if (timestamp === undefined) {
           return reject();
         }
-        // Timestamp serialization
-        const css = new Context.StreamSerialization();
-        // fileTimestamp.serialize(css);
-        resolve(css.getOutput());
+        // Timestamps serialization
+        const proofs = [];
+        fileTimestamps.forEach(fileTimestamp => {
+          const css = new Context.StreamSerialization();
+          fileTimestamp.serialize(css);
+          proofs.push(css.getOutput());
+        });
+        resolve(proofs);
       }).catch(err => {
         reject(err);
       });
