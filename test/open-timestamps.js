@@ -1,12 +1,15 @@
 
 const test = require('tape');
+const rp = require('request-promise');
 const Utils = require('../src/utils.js');
 const OpenTimestamps = require('../src/open-timestamps.js');
 const DetachedTimestampFile = require('../src/detached-timestamp-file.js');
 const Context = require('../src/context.js');
 const Ops = require('../src/ops.js');
+
 // const Timestamp = require('../timestamp.js');
 
+const baseUrl = 'https://raw.githubusercontent.com/eternitywall/javascript-opentimestamps/master';
 let incompleteOtsInfo;
 let incompleteOts;
 let incomplete;
@@ -16,15 +19,15 @@ let merkle2Ots;
 let merkle2OtsInfo;
 
 test('setup', assert => {
-  const incompleteOtsInfoPromise = Utils.readFilePromise('./examples/incomplete.txt.ots.info', 'utf8');
-  const incompleteOtsPromise = Utils.readFilePromise('./examples/incomplete.txt.ots', null);
-  const incompletePromise = Utils.readFilePromise('./examples/incomplete.txt', null);
+  const incompleteOtsInfoPromise = rp(baseUrl + '/examples/incomplete.txt.ots.info');
+  const incompleteOtsPromise = rp({url: baseUrl + '/examples/incomplete.txt.ots', encoding: null});
+  const incompletePromise = rp(baseUrl + '/examples/incomplete.txt');
 
-  const helloworldOtsPromise = Utils.readFilePromise('./examples/hello-world.txt.ots', null);
-  const helloworldPromise = Utils.readFilePromise('./examples/hello-world.txt', null);
+  const helloworldOtsPromise = rp({url: baseUrl + '/examples/hello-world.txt.ots', encoding: null});
+  const helloworldPromise = rp(baseUrl + '/examples/hello-world.txt');
 
-  const merkle2OtsPromise = Utils.readFilePromise('./examples/merkle2.txt.ots', null);
-  const merkle2OtsInfoPromise = Utils.readFilePromise('./examples/merkle2.txt.ots.info', 'utf8');
+  const merkle2OtsPromise = rp({url: baseUrl + '/examples/merkle2.txt.ots', encoding: null});
+  const merkle2OtsInfoPromise = rp(baseUrl + '/examples/merkle2.txt.ots.info');
 
   Promise.all([incompleteOtsInfoPromise, incompleteOtsPromise, incompletePromise, helloworldOtsPromise, helloworldPromise, merkle2OtsPromise, merkle2OtsInfoPromise]).then(values => {
     incompleteOtsInfo = values[0];
