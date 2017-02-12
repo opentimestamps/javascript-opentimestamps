@@ -29,6 +29,9 @@
     "esnext": true,
     "space": true
   },
+  "bin": {
+    "ots-cli.js": "./ots-cli.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/eternitywall/javascript-opentimestamps.git"
