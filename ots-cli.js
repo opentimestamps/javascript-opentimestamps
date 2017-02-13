@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const fs = require('fs');
 const OpenTimestamps = require('./src/open-timestamps.js');
 const Context = require('./src/context.js');
