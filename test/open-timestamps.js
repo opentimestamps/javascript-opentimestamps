@@ -19,15 +19,15 @@ let merkle2Ots;
 let merkle2OtsInfo;
 
 test('setup', assert => {
-  const incompleteOtsInfoPromise = rp(baseUrl + '/examples/incomplete.txt.ots.info');
+  const incompleteOtsInfoPromise = rp({url: baseUrl + '/examples/incomplete.txt.ots.info', encoding: null});
   const incompleteOtsPromise = rp({url: baseUrl + '/examples/incomplete.txt.ots', encoding: null});
-  const incompletePromise = rp(baseUrl + '/examples/incomplete.txt');
+  const incompletePromise = rp({url: baseUrl + '/examples/incomplete.txt', encoding: null});
 
   const helloworldOtsPromise = rp({url: baseUrl + '/examples/hello-world.txt.ots', encoding: null});
-  const helloworldPromise = rp(baseUrl + '/examples/hello-world.txt');
+  const helloworldPromise = rp({url: baseUrl + '/examples/hello-world.txt', encoding: null});
 
   const merkle2OtsPromise = rp({url: baseUrl + '/examples/merkle2.txt.ots', encoding: null});
-  const merkle2OtsInfoPromise = rp(baseUrl + '/examples/merkle2.txt.ots.info');
+  const merkle2OtsInfoPromise = rp({url: baseUrl + '/examples/merkle2.txt.ots.info', encoding: null});
 
   Promise.all([incompleteOtsInfoPromise, incompleteOtsPromise, incompletePromise, helloworldOtsPromise, helloworldPromise, merkle2OtsPromise, merkle2OtsInfoPromise]).then(values => {
     incompleteOtsInfo = values[0];
@@ -48,17 +48,18 @@ test('OpenTimestamps.info()', assert => {
   const otsInfoCalc = OpenTimestamps.info(incompleteOts);
   assert.false(otsInfoCalc === undefined);
   assert.false(incompleteOts === undefined);
-  assert.equals(incompleteOtsInfo, otsInfoCalc, 'ots info match');
+  assert.true(incompleteOtsInfo.equals(new Buffer(otsInfoCalc)));
 
   const merkle2OtsInfoCalc = OpenTimestamps.info(merkle2Ots);
   assert.false(merkle2OtsInfoCalc === undefined);
   assert.false(merkle2Ots === undefined);
-  assert.equals(merkle2OtsInfo, merkle2OtsInfoCalc, 'ots info match on merkle2');
+  assert.true(merkle2OtsInfo.equals(new Buffer(merkle2OtsInfoCalc)));
 
   assert.end();
 });
 
 // STAMP TESTS FILE
+
 test('OpenTimestamps.stamp()', assert => {
   const timestampBytesPromise = OpenTimestamps.stamp(incomplete);
   timestampBytesPromise.then(timestampBytes => {
