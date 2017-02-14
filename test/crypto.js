@@ -5,14 +5,9 @@ const Utils = require('../src/utils.js');
 const DetachedTimestampFile = require('../src/detached-timestamp-file.js');
 
 function sha256(buffer) {
-  try {
-    const ctx = new Context.StreamDeserialization(buffer);
-    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
-    return detachedTimestampFile.fileDigest();
-  } catch (err) {
-    console.log(err);
-    return;
-  }
+  const ctx = new Context.StreamDeserialization(buffer);
+  const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
+  return detachedTimestampFile.fileDigest();
 }
 
 test('Crypto.1M()', assert => {
@@ -20,9 +15,13 @@ test('Crypto.1M()', assert => {
   const size = 1 * 1024 * 1024;
   const arrayBuffer = new Uint8Array(size);
 
-  const fileDigest = sha256(arrayBuffer);
-  assert.equals(hash, Utils.bytesToHex(fileDigest), 'checking hashes');
-  assert.end();
+  try {
+    const fileDigest = sha256(arrayBuffer);
+    assert.equals(hash, Utils.bytesToHex(fileDigest), 'checking hashes');
+    assert.end();
+  } catch (err) {
+    assert.fail('err=' + err);
+  }
 });
 
 test('Crypto.10M()', assert => {
@@ -30,9 +29,13 @@ test('Crypto.10M()', assert => {
   const size = 10 * 1024 * 1024;
   const arrayBuffer = new Uint8Array(size);
 
-  const fileDigest = sha256(arrayBuffer);
-  assert.equals(hash, Utils.bytesToHex(fileDigest), 'checking hashes');
-  assert.end();
+  try {
+    const fileDigest = sha256(arrayBuffer);
+    assert.equals(hash, Utils.bytesToHex(fileDigest), 'checking hashes');
+    assert.end();
+  } catch (err) {
+    assert.fail('err=' + err);
+  }
 });
 
 test('Crypto.100M()', assert => {
@@ -40,19 +43,27 @@ test('Crypto.100M()', assert => {
   const size = 100 * 1024 * 1024;
   const arrayBuffer = new Uint8Array(size);
 
-  const fileDigest = sha256(new Buffer(arrayBuffer));
-  assert.equals(hash, Utils.bytesToHex(fileDigest), 'checking hashes');
-  assert.end();
+  try {
+    const fileDigest = sha256(arrayBuffer);
+    assert.equals(hash, Utils.bytesToHex(fileDigest), 'checking hashes');
+    assert.end();
+  } catch (err) {
+    assert.fail('err=' + err);
+  }
 });
-
+/*
 test('Crypto.300M()', assert => {
   const hash = '17a88af83717f68b8bd97873ffcf022c8aed703416fe9b08e0fa9e3287692bf0';
   const size = 300 * 1024 * 1024;
   const arrayBuffer = new Uint8Array(size);
 
-  const fileDigest = sha256(arrayBuffer);
-  assert.equals(hash, Utils.bytesToHex(fileDigest), 'checking hashes');
-  assert.end();
+  try {
+    const fileDigest = sha256(arrayBuffer);
+    assert.equals(hash, Utils.bytesToHex(fileDigest), 'checking hashes');
+    assert.end();
+  } catch (err) {
+    assert.fail('err=' + err);
+  }
 });
 
 test('Crypto.600M()', assert => {
@@ -60,7 +71,12 @@ test('Crypto.600M()', assert => {
   const size = 600 * 1024 * 1024;
   const arrayBuffer = new Uint8Array(size);
 
-  const fileDigest = sha256(arrayBuffer);
-  assert.equals(hash, Utils.bytesToHex(fileDigest), 'checking hashes');
-  assert.end();
+  try {
+    const fileDigest = sha256(arrayBuffer);
+    assert.equals(hash, Utils.bytesToHex(fileDigest), 'checking hashes');
+    assert.end();
+  } catch (err) {
+    assert.fail('err=' + err);
+  }
 });
+*/
