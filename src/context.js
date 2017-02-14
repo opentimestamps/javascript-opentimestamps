@@ -20,9 +20,10 @@ class StreamDeserializationContext {
       this.buffer = stream;
     } else if (stream instanceof String) {
       this.buffer = new Buffer(stream);
-    } else {
-      //Avoid using extended native objects
-      this.buffer = Uint8Array.from(stream);
+    } else if (stream instanceof Array) {
+      // Avoid using extended native objects
+      // const uint8Array = Uint8Array.from(stream);
+      this.buffer = new Buffer(stream);
     }
     this.counter = 0;
   }
