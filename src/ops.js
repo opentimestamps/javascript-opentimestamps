@@ -305,11 +305,18 @@ class CryptOp extends OpUnary {
   }
 
   hashFd(ctx) {
-    const hasher = crypto.createHash(this._HASHLIB_NAME());
+    /* const hasher = crypto.createHash(this._HASHLIB_NAME());
     let chunk = ctx.read(1048576);
+    console.log(chunk.length);
     while (chunk !== undefined && chunk.length > 0) {
-      hasher.update(new Buffer(chunk));
+      hasher.update(Uint8Array.from(chunk));
       chunk = ctx.read(1048576); // (2**20) = 1MB chunks
+    } */
+    const hasher = crypto.createHash(this._HASHLIB_NAME());
+    let chunk = ctx.readBuffer(1048576);
+    while (chunk !== undefined && chunk.length > 0) {
+      hasher.update(chunk);
+      chunk = ctx.readBuffer(1048576); // (2**20) = 1MB chunks
     }
 
     // from buffer to array

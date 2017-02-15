@@ -1,5 +1,4 @@
 const test = require('tape');
-const ByteBuffer = require('bytebuffer');
 const Utils = require('../src/utils.js');
 
 test('utils.js test', assert => {
@@ -12,9 +11,8 @@ test('utils.js test', assert => {
 });
 
 test('utils.js arraybuffer test', assert => {
-  const buffer = ByteBuffer.fromHex('00');
-  const param = Object.prototype.hasOwnProperty.call(buffer, 'view') ? buffer.view : buffer.buffer;
-  const arr = Utils.arrayToBytes(param);
+  const buffer = Buffer.from('00', 'hex');
+  const arr = Utils.arrayToBytes(buffer);
   assert.true(arr[0] === 0);
   assert.end();
 });

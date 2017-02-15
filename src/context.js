@@ -7,36 +7,63 @@
  * @license LPGL3
  */
 
-const ByteBuffer = require('bytebuffer');
-const Utils = require('./utils.js');
-
 /** Class representing Stream Deserialization Context for input buffer. */
 class StreamDeserializationContext {
 
-  constructor(streamBytes) {
-    this.buffer = ByteBuffer.wrap(streamBytes);
+  constructor(stream) {
+    this.buffer = [];
+    if (stream instanceof Buffer) {
+      this.buffer = stream;
+    } else if (stream instanceof ArrayBuffer) {
+      this.buffer = stream;
+    } else if (stream instanceof Uint8Array) {
+      this.buffer = stream;
+    } else if (stream instanceof String) {
+      this.buffer = new Buffer(stream);
+    } else if (stream instanceof Array) {
+      // Avoid using extended native objects
+      // const uint8Array = Uint8Array.from(stream);
+      this.buffer = new Buffer(stream);
+    }
     this.counter = 0;
   }
 
   getOutput() {
-    return this.buffer.buffer;
+    return this.buffer;
   }
 
   getCounter() {
-    return this.buffer.capacity();
+    return this.counter;
+  }
+
+  readBuffer(l) {
+    if (this.counter === this.buffer.length) {
+      return undefined;
+    }
+    if (l > this.buffer.length) {
+      l = this.buffer.length;
+    }
+    // const uint8Array = new Uint8Array(this.buffer,this.counter,l);
+    const uint8Array = this.buffer.slice(this.counter, this.counter + l);
+    this.counter += l;
+    return uint8Array;
   }
 
   read(l) {
-    if (this.counter === this.buffer.capacity()) {
+    if (this.counter === this.buffer.length) {
       return undefined;
     }
-    if (l > this.buffer.capacity()) {
-      l = this.buffer.capacity();
+    if (l > this.buffer.length) {
+      l = this.buffer.length;
     }
-    const output = new ByteBuffer(l);
-    this.buffer.copyTo(output, 0, this.counter, l + this.counter);
+    // const uint8Array = new Uint8Array(this.buffer,this.counter,l);
+    const uint8Array = this.buffer.slice(this.counter, this.counter + l);
+    this.counter += l;
+    return Array.from(uint8Array);
+    /* this.buffer.copyTo(output, 0, this.counter, l + this.counter);
     this.counter += l;
     return Utils.arrayToBytes(Object.prototype.hasOwnProperty.call(output, 'view') ? output.view : output.buffer);  // different behaviours of buffer object between node and browsers
+    */
   }
   readBool() {
     const b = this.read(1)[0];
@@ -59,7 +86,7 @@ class StreamDeserializationContext {
   }
   readBytes(expectedLength) {
     if (expectedLength === undefined) {
-      expectedLength = this.read_varuint();
+      expectedLength = this.readVarbytes();
     }
     return this.read(expectedLength);
   }
@@ -97,17 +124,12 @@ class StreamDeserializationContext {
 class StreamSerializationContext {
 
   constructor() {
-    this.buffer = new ByteBuffer(1024 * 4);
-    this.buffer.clear();
+    this.buffer = new Uint8Array(1024 * 4);
+    this.length = 0;
   }
   getOutput() {
-    const buffer = Object.prototype.hasOwnProperty.call(this.buffer, 'view') ? this.buffer.view : this.buffer.buffer;
-    const output = buffer.subarray(0, this.buffer.offset);
+    const output = this.buffer.slice(0, this.length);
     return output;
-  }
-
-  getCounter() {
-    return this.buffer.capacity();
   }
 
   writeBool(value) {
@@ -136,18 +158,20 @@ class StreamSerializationContext {
     }
   }
   writeByte(value) {
-    if (this.buffer.offset >= this.buffer.limit - 1) {
-      const newLenght = this.buffer.capacity() * 2;
-      const swapBuffer = new ByteBuffer(newLenght);
-      this.buffer.copyTo(swapBuffer, 0);
+    if (this.counter >= this.length) {
+      const newLenght = this.length * 2;
+      const swapBuffer = new Uint8Array(newLenght);
+      swapBuffer.set(this.buffer, 0);
       this.buffer = swapBuffer;
+      this.length = newLenght;
     }
 
     if (isNaN(value)) {
-      this.buffer.writeByte(value.codePointAt());
+      this.buffer[this.length] = value.codePointAt();
     } else {
-      this.buffer.writeByte(value);
+      this.buffer[this.length] = value;
     }
+    this.length++;
   }
 
   writeBytes(value) {
