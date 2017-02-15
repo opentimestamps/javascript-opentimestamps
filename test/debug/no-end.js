@@ -1,6 +1,6 @@
-var test = require('tape');
+const test = require('tape');
 
-test('test with no end', function (t) {
+test('test with no end', t => {
   t.true(true);
 });
 
