@@ -1,6 +1,10 @@
 
 # javascript-opentimestamps
 
+
+![OpenTimestamps logo](https://raw.githubusercontent.com/opentimestamps/logo/master/white-bg/website-horizontal-350x75.png)
+
+
 [![Build Status](https://travis-ci.org/eternitywall/javascript-opentimestamps.svg?branch=master)](https://travis-ci.org/eternitywall/javascript-opentimestamps)
 
 This repo host the javascript implementation of OpenTimestamps.
