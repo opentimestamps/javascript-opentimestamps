@@ -18,6 +18,8 @@ class StreamDeserializationContext {
       this.buffer = stream;
     } else if (stream instanceof Uint8Array) {
       this.buffer = stream;
+    } else if (typeof (stream) === 'string') {
+      this.buffer = new Buffer(stream);
     } else if (stream instanceof String) {
       this.buffer = new Buffer(stream);
     } else if (stream instanceof Array) {
