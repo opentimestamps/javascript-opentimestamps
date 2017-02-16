@@ -194,7 +194,7 @@ function verify(argsFileOts) {
     const fileOts = values[1];
 
     console.log('Assuming target filename is \'' + argsFile + '\'');
-    const verifyPromise = OpenTimestamps.verify(fileOts, file);
+    const verifyPromise = OpenTimestamps.verify(fileOts, file, false);
     verifyPromise.then(result => {
       if (result === undefined) {
         console.log('Pending or Bad attestation');

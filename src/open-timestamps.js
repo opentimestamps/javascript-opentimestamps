@@ -54,7 +54,7 @@ module.exports = {
       if (isHash !== undefined && isHash === true) {
         // Read Hash
         try {
-          fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromHash(new Ops.OpSHA256(), plain);
+          fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromHash(new Ops.OpSHA256(), Array.from(plain));
         } catch (err) {
           return reject(err);
         }
@@ -257,7 +257,7 @@ module.exports = {
    * @param {ArrayBuffer} ots - The ots array buffer containing the proof to verify.
    * @param {ArrayBuffer} plain - The plain array buffer to verify.
    */
-  verify(ots, plain) {
+  verify(ots, plain, isHash) {
     // Read OTS
     let detachedTimestamp;
     try {
@@ -269,15 +269,26 @@ module.exports = {
       });
     }
 
-    // Read plain
     let actualFileDigest;
-    try {
-      const ctxHashfd = new Context.StreamDeserialization(plain);
-      actualFileDigest = detachedTimestamp.fileHashOp.hashFd(ctxHashfd);
-    } catch (err) {
-      return new Promise((resolve, reject) => {
-        reject(err);
-      });
+    if (isHash === undefined || !isHash) {
+      // Read from file stream
+      try {
+        const ctxHashfd = new Context.StreamDeserialization(plain);
+        actualFileDigest = detachedTimestamp.fileHashOp.hashFd(ctxHashfd);
+      } catch (err) {
+        return new Promise((resolve, reject) => {
+          reject(err);
+        });
+      }
+    } else {
+      // Read Hash
+      try {
+        actualFileDigest = Array.from(plain);
+      } catch (err) {
+        return new Promise((resolve, reject) => {
+          reject(err);
+        });
+      }
     }
 
     const detachedFileDigest = detachedTimestamp.fileDigest();

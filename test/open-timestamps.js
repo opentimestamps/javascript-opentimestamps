@@ -132,7 +132,7 @@ test('OpenTimestamps.multistamp()', assert => {
 // VERIFY TESTS
 
 test('OpenTimestamps.verify()', assert => {
-  const verifyPromise = OpenTimestamps.verify(incompleteOts, incomplete);
+  const verifyPromise = OpenTimestamps.verify(incompleteOts, incomplete, false);
   verifyPromise.then(result => {
     assert.true(result === undefined);
     assert.end();
@@ -142,7 +142,7 @@ test('OpenTimestamps.verify()', assert => {
 });
 
 test('OpenTimestamps.verify()', assert => {
-  const verifyPromise = OpenTimestamps.verify(helloworldOts, helloworld);
+  const verifyPromise = OpenTimestamps.verify(helloworldOts, helloworld, false);
   verifyPromise.then(result => {
     assert.true(result !== undefined);
     assert.end();
