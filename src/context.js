@@ -19,9 +19,9 @@ class StreamDeserializationContext {
     } else if (stream instanceof Uint8Array) {
       this.buffer = stream;
     } else if (typeof (stream) === 'string') {
-      this.buffer = new Buffer(stream);
+      this.buffer = Buffer.from(stream, 'binary');
     } else if (stream instanceof String) {
-      this.buffer = new Buffer(stream);
+      this.buffer = Buffer.from(stream, 'binary');
     } else if (stream instanceof Array) {
       // Avoid using extended native objects
       // const uint8Array = Uint8Array.from(stream);
