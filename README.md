@@ -21,7 +21,7 @@ Documentation available at https://eternitywall.com/docs/javascript-opentimestam
 Using npm:
 
 ```shell
-$ npm install javascript-opentimestamps
+$ npm install -g javascript-opentimestamps
 ```
 
 Using Browserify:
