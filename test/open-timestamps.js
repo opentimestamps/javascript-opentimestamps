@@ -134,7 +134,7 @@ test('OpenTimestamps.multistamp()', assert => {
 test('OpenTimestamps.verify()', assert => {
   const verifyPromise = OpenTimestamps.verify(incompleteOts, incomplete, false);
   verifyPromise.then(result => {
-    assert.true(result === undefined);
+    assert.true(result === undefined); // verify on python call upgrade, in this case result should be 1473227803
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -145,6 +145,7 @@ test('OpenTimestamps.verify()', assert => {
   const verifyPromise = OpenTimestamps.verify(helloworldOts, helloworld, false);
   verifyPromise.then(result => {
     assert.true(result !== undefined);
+    assert.equal(result, 1432827678);
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
