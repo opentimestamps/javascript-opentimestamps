@@ -115,7 +115,7 @@ class Insight {
 }
 
 // const urls = ['https://notexisting.it', 'https://search.bitaccess.co/insight-api', 'https://search.bitaccess.co/insight-api', 'https://insight.bitpay.com/api'];
-const urls = ['https://search.bitaccess.co/insight-api', 'https://search.bitaccess.co/insight-api', 'https://insight.bitpay.com/api'];
+const urls = ['https://www.localbitcoinschain.com/api', 'https://search.bitaccess.co/insight-api', 'https://insight.bitpay.com/api'];
 
 class MultiInsight {
 
