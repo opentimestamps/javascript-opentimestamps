@@ -133,7 +133,7 @@ class StreamSerializationContext {
     const output = this.buffer.slice(0, this.length);
     return output;
   }
-  getLenght(){
+  getLenght() {
     return this.length;
   }
 
