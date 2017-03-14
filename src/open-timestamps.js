@@ -16,6 +16,7 @@ const Calendar = require('./calendar.js');
 const Notary = require('./notary.js');
 const Insight = require('./insight.js');
 const Merkle = require('./merkle.js');
+const Bitcoin = require('./bitcoin.js');
 
 module.exports = {
 
@@ -319,31 +320,47 @@ module.exports = {
             // console.log('PendingAttestation: pass ');
           } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
             found = true;
-            // console.log('Request to insight ');
-            const insight = new Insight.MultiInsight();
 
-            insight.blockhash(attestation.height).then(blockHash => {
-              insight.block(blockHash).then(blockInfo => {
-                const merkle = Utils.hexToBytes(blockInfo.merkleroot);
+            // Check for local bitcoin configuration
+            Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
+              const bitcoin = new Bitcoin.BitcoinNode(properties);
+              bitcoin.getBlockHeader(0).then(blockHeader => {
+                const merkle = Utils.hexToBytes(blockHeader.getMerkleroot());
                 const message = msg.reverse();
-
-                // console.log('merkleroot: ' + Utils.bytesToHex(merkle));
-                // console.log('msg: ' + Utils.bytesToHex(message));
-                // console.log('Time: ' + (new Date(blockInfo.time * 1000)));
-
                 // One Bitcoin attestation is enought
                 if (Utils.arrEq(merkle, message)) {
-                  resolve(blockInfo.time);
+                  resolve(blockHeader.time);
                 } else {
                   resolve();
                 }
               }).catch(err => {
                 console.error('Error: ' + err);
+                resolve();
+              });
+            }).catch(() => {
+              // There is no local node available
+
+              // Request to insight
+              const insight = new Insight.MultiInsight();
+              insight.blockhash(attestation.height).then(blockHash => {
+                insight.block(blockHash).then(blockInfo => {
+                  const merkle = Utils.hexToBytes(blockInfo.merkleroot);
+                  const message = msg.reverse();
+
+                  // One Bitcoin attestation is enought
+                  if (Utils.arrEq(merkle, message)) {
+                    resolve(blockInfo.time);
+                  } else {
+                    resolve();
+                  }
+                }).catch(err => {
+                  console.error('Error: ' + err);
+                  reject(err);
+                });
+              }).catch(err => {
+                console.error('Error: ' + err);
                 reject(err);
               });
-            }).catch(err => {
-              console.error('Error: ' + err);
-              reject(err);
             });
           }
         }
