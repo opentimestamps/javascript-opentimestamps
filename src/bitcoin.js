@@ -10,6 +10,7 @@
 const properties = require('properties');
 const requestPromise = require('request-promise');
 const Promise = require('promise');
+const Utils = require('./utils.js');
 
 /** Class representing Bitcoin Header Interface */
 class BlockHeader {
@@ -44,28 +45,47 @@ class BitcoinNode {
   }
 
   static readBitcoinConf() {
-    return new Promise(resolve => {
-      const home = process.env.HOME;
-      const list = ['/.bitcoin/bitcoin.conf', '\\AppData\\Roaming\\Bitcoin\\bitcoin.conf', '/Library/Application Support/Bitcoin/bitcoin.conf'];
-      list.forEach(dir => {
-        const file = home + dir;
+    const home = process.env.HOME;
+    const list = ['/.bitcoin/bitcoin.conf', '\\AppData\\Roaming\\Bitcoin\\bitcoin.conf', '/Library/Application Support/Bitcoin/bitcoin.conf'];
+    const promises = [];
+
+    list.forEach(dir => {
+      const file = home + dir;
+
+      const promise = new Promise((resolve, reject) => {
         properties.parse(file, {path: true}, (error, obj) => {
           if (error) {
-            return;
+            return reject(error);
           }
-          if (obj === null) {
-            return;
+          if (obj === undefined || obj.length === 0) {
+            return reject(new Error('File empty'));
           }
-          if (obj.rpcuser !== null && obj.rpcpassword !== null) {
-            if (obj.rpcconnect === null) {
+          if (obj.rpcuser !== undefined && obj.rpcpassword !== undefined) {
+            if (obj.rpcconnect === undefined) {
               obj.rpcconnect = '127.0.0.1';
             }
-            if (obj.rpcport === null) {
+            if (obj.rpcport === undefined) {
               obj.rpcport = '8332';
             }
           }
-          resolve(obj);
+          return resolve(obj);
         });
+      });
+      promises.push(promise);
+    });
+
+    return new Promise((resolve, reject) => {
+      Promise.all(promises.map(Utils.softFail)).then(results => {
+        if (results === undefined || results.length === 0) {
+          return reject();
+        }
+
+        results.forEach(prop => {
+          if (!(prop instanceof Error) && prop.rpcuser !== undefined && prop.rpcpassword !== undefined) {
+            return resolve(prop);
+          }
+        });
+        reject();
       });
     });
   }
