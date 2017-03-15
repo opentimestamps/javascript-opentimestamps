@@ -342,7 +342,7 @@ module.exports = {
               // Request to insight
               const insight = new Insight.MultiInsight();
               insight.blockhash(attestation.height).then(blockHash => {
-                console.log("Lite-client verification, assuming block " + blockHash + " is valid");
+                console.log('Lite-client verification, assuming block ' + blockHash + ' is valid');
                 insight.block(blockHash).then(blockInfo => {
                   const merkle = Utils.hexToBytes(blockInfo.merkleroot);
                   const message = msg.reverse();
