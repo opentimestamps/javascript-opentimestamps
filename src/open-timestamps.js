@@ -324,7 +324,7 @@ module.exports = {
             // Check for local bitcoin configuration
             Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
               const bitcoin = new Bitcoin.BitcoinNode(properties);
-              bitcoin.getBlockHeader(0).then(blockHeader => {
+              bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
                 const merkle = Utils.hexToBytes(blockHeader.getMerkleroot());
                 const message = msg.reverse();
                 // One Bitcoin attestation is enought
@@ -339,7 +339,7 @@ module.exports = {
               });
             }).catch(() => {
               // There is no local node available
-
+              console.log('Error: ');
               // Request to insight
               const insight = new Insight.MultiInsight();
               insight.blockhash(attestation.height).then(blockHash => {
