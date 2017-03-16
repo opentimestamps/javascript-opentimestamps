@@ -293,8 +293,8 @@ class CryptOp extends OpUnary {
 
   call(msg) {
     let shasum;
-    if (this._HASHLIB_NAME() === 'keccak') {
-      shasum = keccak('keccak').update(new Buffer(msg));
+    if (this._HASHLIB_NAME() === new OpKeccak()._HASHLIB_NAME() ) {
+      shasum = keccak(this._HASHLIB_NAME()).update(new Buffer(msg));
     } else {
       shasum = crypto.createHash(this._HASHLIB_NAME()).update(new Buffer(msg));
     }
@@ -312,8 +312,8 @@ class CryptOp extends OpUnary {
 
   hashFd(ctx) {
     let hasher;
-    if (this._HASHLIB_NAME() === 'keccak') {
-      hasher = keccak('keccak');
+    if (this._HASHLIB_NAME() === new OpKeccak()._HASHLIB_NAME() ) {
+      hasher = keccak(this._HASHLIB_NAME());
     } else {
       hasher = crypto.createHash(this._HASHLIB_NAME());
     }
@@ -432,10 +432,10 @@ class OpKeccak extends CryptOp {
     return 0x67;
   }
   _TAG_NAME() {
-    return 'keccak';
+    return 'keccak256';
   }
   _HASHLIB_NAME() {
-    return 'keccak';
+    return 'keccak256';
   }
   _DIGEST_LENGTH() {
     return 32;
