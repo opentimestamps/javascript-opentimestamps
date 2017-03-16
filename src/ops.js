@@ -8,6 +8,7 @@
  */
 
 const crypto = require('crypto');
+const keccak = require('keccak');
 const Utils = require('./utils.js');
 
 const _SUBCLS_BY_TAG = new Map();
@@ -291,10 +292,15 @@ class CryptOp extends OpUnary {
   }
 
   call(msg) {
-    const shasum = crypto.createHash(this._HASHLIB_NAME()).update(new Buffer(msg));
+    var shasum ;
+    if(this._HASHLIB_NAME() === 'keccak') {
+      shasum = keccak('keccak').update(new Buffer(msg));
+    } else {
+      shasum = crypto.createHash(this._HASHLIB_NAME()).update(new Buffer(msg));
+    }
     const hashDigest = shasum.digest();
-        // from buffer to array
     const output = [hashDigest.length];
+    // from buffer to array
     for (let i = 0; i < hashDigest.length; i++) {
       output[i] = hashDigest[i];
     }
@@ -305,20 +311,17 @@ class CryptOp extends OpUnary {
   }
 
   hashFd(ctx) {
-    /* const hasher = crypto.createHash(this._HASHLIB_NAME());
-    let chunk = ctx.read(1048576);
-    console.log(chunk.length);
-    while (chunk !== undefined && chunk.length > 0) {
-      hasher.update(Uint8Array.from(chunk));
-      chunk = ctx.read(1048576); // (2**20) = 1MB chunks
-    } */
-    const hasher = crypto.createHash(this._HASHLIB_NAME());
+    var hasher;
+    if(this._HASHLIB_NAME() === 'keccak'){
+      hasher = keccak('keccak');
+    } else {
+      hasher = crypto.createHash(this._HASHLIB_NAME());
+    }
     let chunk = ctx.readBuffer(1048576);
     while (chunk !== undefined && chunk.length > 0) {
       hasher.update(chunk);
       chunk = ctx.readBuffer(1048576); // (2**20) = 1MB chunks
     }
-
     // from buffer to array
     const hashDigest = hasher.digest();
     const output = [hashDigest.length];
@@ -417,6 +420,34 @@ class OpSHA256 extends CryptOp {
   }
 }
 
+/**
+ * Cryptographic Keccak operation
+ * Cryptographic operation tag numbers taken from RFC4880, although it's not
+ * guaranteed that they'll continue to match that RFC in the future.
+ * @extends CryptOp
+ */
+class OpKeccak extends CryptOp {
+
+  _TAG() {
+    return 0x67;
+  }
+  _TAG_NAME() {
+    return 'keccak';
+  }
+  _HASHLIB_NAME() {
+    return 'keccak';
+  }
+  _DIGEST_LENGTH() {
+    return 32;
+  }
+  static deserializeFromTag(ctx, tag) {
+    return super.deserializeFromTag(ctx, tag);
+  }
+  call(msg) {
+    return super.call(msg);
+  }
+}
+
 _SUBCLS_BY_TAG.set(new OpAppend()._TAG(), OpAppend);
 _SUBCLS_BY_TAG.set(new OpPrepend()._TAG(), OpPrepend);
 _SUBCLS_BY_TAG.set(new OpReverse()._TAG(), OpReverse);
@@ -424,6 +455,7 @@ _SUBCLS_BY_TAG.set(new OpHexlify()._TAG(), OpHexlify);
 _SUBCLS_BY_TAG.set(new OpSHA1()._TAG(), OpSHA1);
 _SUBCLS_BY_TAG.set(new OpRIPEMD160()._TAG(), OpRIPEMD160);
 _SUBCLS_BY_TAG.set(new OpSHA256()._TAG(), OpSHA256);
+_SUBCLS_BY_TAG.set(new OpKeccak()._TAG(), OpKeccak);
 
 module.exports = {
   Op,
@@ -434,5 +466,6 @@ module.exports = {
   OpSHA1,
   OpRIPEMD160,
   OpSHA256,
+  OpKeccak,
   CryptOp
 };
