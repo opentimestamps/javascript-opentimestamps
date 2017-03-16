@@ -426,7 +426,7 @@ class OpSHA256 extends CryptOp {
  * guaranteed that they'll continue to match that RFC in the future.
  * @extends CryptOp
  */
-class OpKeccak extends CryptOp {
+class OpKeccak256 extends CryptOp {
 
   _TAG() {
     return 0x67;
@@ -455,7 +455,7 @@ _SUBCLS_BY_TAG.set(new OpHexlify()._TAG(), OpHexlify);
 _SUBCLS_BY_TAG.set(new OpSHA1()._TAG(), OpSHA1);
 _SUBCLS_BY_TAG.set(new OpRIPEMD160()._TAG(), OpRIPEMD160);
 _SUBCLS_BY_TAG.set(new OpSHA256()._TAG(), OpSHA256);
-_SUBCLS_BY_TAG.set(new OpKeccak()._TAG(), OpKeccak);
+_SUBCLS_BY_TAG.set(new OpKeccak256()._TAG(), OpKeccak256);
 
 module.exports = {
   Op,
@@ -466,6 +466,6 @@ module.exports = {
   OpSHA1,
   OpRIPEMD160,
   OpSHA256,
-  OpKeccak,
+  OpKeccak256,
   CryptOp
 };
