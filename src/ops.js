@@ -292,8 +292,8 @@ class CryptOp extends OpUnary {
   }
 
   call(msg) {
-    var shasum ;
-    if(this._HASHLIB_NAME() === 'keccak') {
+    let shasum;
+    if (this._HASHLIB_NAME() === 'keccak') {
       shasum = keccak('keccak').update(new Buffer(msg));
     } else {
       shasum = crypto.createHash(this._HASHLIB_NAME()).update(new Buffer(msg));
@@ -311,8 +311,8 @@ class CryptOp extends OpUnary {
   }
 
   hashFd(ctx) {
-    var hasher;
-    if(this._HASHLIB_NAME() === 'keccak'){
+    let hasher;
+    if (this._HASHLIB_NAME() === 'keccak') {
       hasher = keccak('keccak');
     } else {
       hasher = crypto.createHash(this._HASHLIB_NAME());

@@ -38,11 +38,11 @@ class TimeAttestation {
 
     /* eslint no-use-before-define: ["error", { "classes": false }] */
     if (Utils.arrEq(tag, new PendingAttestation()._TAG()) === true) {
-      // console.log('tag(PendingAttestation)');
       return PendingAttestation.deserialize(ctxPayload);
     } else if (Utils.arrEq(tag, new BitcoinBlockHeaderAttestation()._TAG()) === true) {
-      // console.log('tag(BitcoinBlockHeaderAttestation)');
       return BitcoinBlockHeaderAttestation.deserialize(ctxPayload);
+    } else if (Utils.arrEq(tag, new EthereumBlockHeaderAttestation()._TAG()) === true) {
+      return EthereumBlockHeaderAttestation.deserialize(ctxPayload);
     }
     return UnknownAttestation.deserialize(ctxPayload, tag);
   }
@@ -201,9 +201,34 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
   }
 }
 
+class EthereumBlockHeaderAttestation extends TimeAttestation {
+
+  _TAG() {
+    return [0x30, 0xfe, 0x80, 0x87, 0xb5, 0xc7, 0xea, 0xd7];
+  }
+
+  constructor(height_) {
+    super();
+    this.height = height_;
+  }
+
+  static deserialize(ctxPayload) {
+    const height = ctxPayload.readVaruint();
+    return new EthereumBlockHeaderAttestation(height);
+  }
+
+  serializePayload(ctx) {
+    ctx.writeVaruint(this.height);
+  }
+  toString() {
+    return 'EthereumBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')';
+  }
+}
+
 module.exports = {
   TimeAttestation,
   UnknownAttestation,
   PendingAttestation,
-  BitcoinBlockHeaderAttestation
+  BitcoinBlockHeaderAttestation,
+  EthereumBlockHeaderAttestation
 };
