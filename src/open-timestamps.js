@@ -7,6 +7,7 @@
  * @license LPGL3
  */
 
+const Web3 = require('web3');
 const Context = require('./context.js');
 const DetachedTimestampFile = require('./detached-timestamp-file.js');
 const Timestamp = require('./timestamp.js');
@@ -318,6 +319,18 @@ module.exports = {
         if (!found) { // Verify only the first BitcoinBlockHeaderAttestation
           if (attestation instanceof Notary.PendingAttestation) {
             // console.log('PendingAttestation: pass ');
+          } else if (attestation instanceof Notary.EthereumBlockHeaderAttestation) {
+            found = true;
+            try {
+              const web3 = new Web3();
+              web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
+              const block = web3.eth.getBlock(attestation.height);
+              const attestedTime = attestation.verifyAgainstBlockheader(msg, block);
+              // console.log("Success! Ethereum attests data existed as of " % time.strftime('%c %Z', time.localtime(attestedTime)))
+              return resolve(attestedTime);
+            } catch (err) {
+              return reject(err);
+            }
           } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
             found = true;
 

@@ -12,7 +12,8 @@
     "properties": "^1.2.1",
     "randomstring": "^1.1.5",
     "request": "^2.79.0",
-    "request-promise": "^4.1.1"
+    "request-promise": "^4.1.1",
+    "web3": "^0.18.2"
   },
   "devDependencies": {
     "tape": "^4.6.3",

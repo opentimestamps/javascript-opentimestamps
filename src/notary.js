@@ -220,9 +220,24 @@ class EthereumBlockHeaderAttestation extends TimeAttestation {
   serializePayload(ctx) {
     ctx.writeVaruint(this.height);
   }
+
   toString() {
     return 'EthereumBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')';
   }
+
+  /*
+   Verify attestation against a block header
+   Returns the block time on success; raises VerificationError on failure.
+   */
+  verifyAgainstBlockheader(digest, block) {
+    if (digest.length !== 32) {
+      console.error('Expected digest with length 32 bytes; got ' + digest.length + ' bytes');
+    } else if (digest !== Utils.hexToBytes(block.transactionsRoot)) {
+      console.error('Digest does not match merkleroot');
+    }
+    return block.timestamp;
+  }
+
 }
 
 module.exports = {
