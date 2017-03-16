@@ -21,7 +21,7 @@
     "tap-parser": "~3.0.4",
     "jsdoc": "^3.4.3",
     "xo": "^0.17.0",
-    "browserify": "^14.0.0",
+    "browserify": "14.0.0",
     "tape-run": "2.1.6",
     "faucet": "0.0.1"
   },
