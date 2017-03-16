@@ -346,9 +346,6 @@ module.exports = {
                 } else {
                   resolve();
                 }
-              }).catch(err => {
-                console.error('Error: ' + err);
-                resolve();
               });
             }).catch(() => {
               // There is no local node available
