@@ -175,7 +175,6 @@ module.exports = {
             merkleRoot = new Timestamp(opSHA256.call(nonceAppendedStamp.msg));
             nonceAppendedStamp.ops.set(opSHA256, merkleRoot);
           }
-
         } catch (err) {
           return reject(err);
         }
@@ -207,7 +206,6 @@ module.exports = {
           const css = new Context.StreamSerialization();
           fileTimestamp.serialize(css);
           proofs.push(css.getOutput());
-
 
           console.log('FileTimestamp');
           console.log(Utils.bytesToHex(Utils.arrayToBytes(css.getOutput())));

@@ -2,9 +2,8 @@
 const OpenTimestamps = require('../src/open-timestamps.js');
 const Context = require('../src/context.js');
 const Utils = require('../src/utils.js');
-const Timestamp = require('../src/timestamp.js');
 const DetachedTimestampFile = require('../src/detached-timestamp-file.js');
-const Ops = require('../src/Ops.js');
+const Ops = require('../src/ops.js');
 
 let helloworldOts;
 let helloworld;
@@ -22,23 +21,20 @@ Promise.all([helloworldOtsPromise, helloworldPromise, incompleteOtsPromise, inco
   incompleteOts = values[2];
   incomplete = values[3];
 
-
-  //stamp(helloworld);
-  /*info(helloworldOts);
+  // stamp(helloworld);
+  info(helloworldOts);
   verify(helloworldOts, helloworld);
   upgrade(helloworldOts);
 
   stamp(incomplete);
   info(incompleteOts);
   verify(incompleteOts, incomplete);
-  upgrade(incompleteOts);*/
+  upgrade(incompleteOts);
 
   multistamp();
-
 }).catch(err => {
   console.log('err=' + err);
 });
-
 
 function info(ots) {
   console.log('INFO');
@@ -90,7 +86,7 @@ function stamp(plain) {
   });
 }
 
-function multistamp(){
+function multistamp() {
   const files = [
     incomplete,
     helloworld
@@ -105,18 +101,18 @@ function multistamp(){
     fdHashes.push(fdHash);
   });
   files.forEach((files, i) => {
-    if (!Utils.arrEq(sha256[i], Utils.bytesToHex(fdHashes[i]))){
+    if (!Utils.arrEq(sha256[i], Utils.bytesToHex(fdHashes[i]))) {
       console.error('error checking hashes');
     }
   });
 
   const timestampBytesPromise = OpenTimestamps.multistamp(fdHashes, true);
   timestampBytesPromise.then(timestamps => {
-    if(timestamps === undefined){
+    if (timestamps === undefined) {
       console.error('timestamps undefined');
       return;
     }
-    if(timestamps.length !== fdHashes.length){
+    if (timestamps.length !== fdHashes.length) {
       console.error('timestamps size invalid');
       return;
     }
@@ -128,14 +124,13 @@ function multistamp(){
       console.log('MULTISTAMP result : ');
       console.log(Utils.bytesToHex(detachedTimestampFile.fileDigest()));
 
-      if(detachedTimestampFile === undefined){
+      if (detachedTimestampFile === undefined) {
         console.error('detachedTimestampFile undefined');
       }
       if (!Utils.arrEq(sha256[i], Utils.bytesToHex(detachedTimestampFile.fileDigest()))) {
         console.error('error checking hashes');
       }
     });
-
   }).catch(err => {
     console.error('err=' + err);
   });

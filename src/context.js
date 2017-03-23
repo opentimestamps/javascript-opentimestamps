@@ -93,7 +93,6 @@ class StreamDeserializationContext {
     return this.read(expectedLength);
   }
   readVarbytes(maxLen, minLen = 0) {
-
     const l = this.readVaruint();
     if (l > maxLen) {
       console.error('varbytes max length exceeded;');

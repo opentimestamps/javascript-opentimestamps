@@ -31,9 +31,8 @@ class Merkle {
       right.ops.set(opPrepend, rightPrependStamp);
     }
 
-
-    //Left and right should produce the same thing, so we can set the timestamp of the left to the right.
-    //left.ops[OpAppend(right.msg)] = right_prepend_stamp
+    // Left and right should produce the same thing, so we can set the timestamp of the left to the right.
+    // left.ops[OpAppend(right.msg)] = right_prepend_stamp
     // leftAppendStamp = left.ops.add(OpAppend(right.msg))
     const opAppend = new Ops.OpAppend(right.msg);
     let leftPrependStamp = left.ops.get(opAppend);
