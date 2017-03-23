@@ -21,7 +21,7 @@ Promise.all([helloworldOtsPromise, helloworldPromise, incompleteOtsPromise, inco
   incompleteOts = values[2];
   incomplete = values[3];
 
-  // stamp(helloworld);
+  stamp(helloworld);
   info(helloworldOts);
   verify(helloworldOts, helloworld);
   upgrade(helloworldOts);
@@ -30,7 +30,6 @@ Promise.all([helloworldOtsPromise, helloworldPromise, incompleteOtsPromise, inco
   info(incompleteOts);
   verify(incompleteOts, incomplete);
   upgrade(incompleteOts);
-
   multistamp();
 }).catch(err => {
   console.log('err=' + err);
