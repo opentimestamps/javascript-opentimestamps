@@ -175,6 +175,7 @@ module.exports = {
             merkleRoot = new Timestamp(opSHA256.call(nonceAppendedStamp.msg));
             nonceAppendedStamp.ops.set(opSHA256, merkleRoot);
           }
+
         } catch (err) {
           return reject(err);
         }
@@ -183,19 +184,7 @@ module.exports = {
         merkleRoots.push(merkleRoot);
       });
 
-      console.log('fileTimestamps');
-      fileTimestamps.forEach(fileTimestamp => {
-        console.log('> ', Timestamp.strTreeExtended(fileTimestamp.timestamp));
-      });
-      console.log('merkleRoots');
-      merkleRoots.forEach(merkleRoot => {
-        console.log('> ', Timestamp.strTreeExtended(merkleRoot));
-      });
-
       const merkleTip = Merkle.makeMerkleTree(merkleRoots);
-
-      console.log('merkleTip');
-      console.log('> ', Timestamp.strTreeExtended(merkleTip));
 
       // Calendars
       const calendarUrls = [];
@@ -209,14 +198,22 @@ module.exports = {
         }
         console.log('Timestamp');
         console.log(Timestamp.strTreeExtended(timestamp));
+        console.log(timestamp.toString());
+
         // Timestamps serialization
         const proofs = [];
+
         fileTimestamps.forEach(fileTimestamp => {
           const css = new Context.StreamSerialization();
           fileTimestamp.serialize(css);
           proofs.push(css.getOutput());
+
+
+          console.log('FileTimestamp');
           console.log(Utils.bytesToHex(Utils.arrayToBytes(css.getOutput())));
+          console.log(fileTimestamp.toString());
         });
+
         resolve(proofs);
       }).catch(err => {
         reject(err);

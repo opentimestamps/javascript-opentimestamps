@@ -96,7 +96,8 @@ test('OpenTimestamps.stamp()', assert => {
 
 test('OpenTimestamps.multistamp()', assert => {
   const files = [
-    incomplete
+      incomplete,
+      helloworld
   ];
   const sha256 = [
     '05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9',

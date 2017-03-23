@@ -24,12 +24,24 @@ class Merkle {
     }
 
     // rightPrependStamp = right.ops.add(OpPrepend(left.msg))
-    const opPrepend = new Ops.OpPrepend();
+    const opPrepend = new Ops.OpPrepend(left.msg);
     let rightPrependStamp = right.ops.get(opPrepend);
     if (rightPrependStamp === undefined) {
       rightPrependStamp = new Timestamp(opPrepend.call(left.msg));
       right.ops.set(opPrepend, rightPrependStamp);
     }
+
+
+    //Left and right should produce the same thing, so we can set the timestamp of the left to the right.
+    //left.ops[OpAppend(right.msg)] = right_prepend_stamp
+    // leftAppendStamp = left.ops.add(OpAppend(right.msg))
+    const opAppend = new Ops.OpAppend(right.msg);
+    let leftPrependStamp = left.ops.get(opAppend);
+    if (leftPrependStamp === undefined) {
+      leftPrependStamp = new Timestamp(opAppend.call(right.msg));
+      left.ops.set(opAppend, leftPrependStamp);
+    }
+    left.ops.set(opAppend, rightPrependStamp);
 
     // return rightPrependStamp.ops.add(unaryOpCls())
     const opUnary = new UnaryOpCls();
@@ -38,9 +50,6 @@ class Merkle {
       res = new Timestamp(opUnary.call(rightPrependStamp.msg));
       rightPrependStamp.ops.set(opUnary, res);
     }
-    // leftAppendStamp = left.ops.add(OpAppend(right.msg))
-    const opAppend = new Ops.OpAppend();
-    left.ops.set(opAppend, rightPrependStamp);
 
     return res;
   }

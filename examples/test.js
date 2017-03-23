@@ -2,10 +2,9 @@
 const OpenTimestamps = require('../src/open-timestamps.js');
 const Context = require('../src/context.js');
 const Utils = require('../src/utils.js');
-// const Timestamp = require('../timestamp.js');
+const Timestamp = require('../src/timestamp.js');
 const DetachedTimestampFile = require('../src/detached-timestamp-file.js');
-// const ByteBuffer = require('bytebuffer');
-// const DetachedTimestampFile = require('../detached-timestamp-file.js');
+const Ops = require('../src/Ops.js');
 
 let helloworldOts;
 let helloworld;
@@ -17,29 +16,29 @@ const helloworldPromise = Utils.readFilePromise('./examples/hello-world.txt', nu
 const incompleteOtsPromise = Utils.readFilePromise('./examples/incomplete.txt.ots', null);
 const incompletePromise = Utils.readFilePromise('./examples/incomplete.txt', null);
 
-Promise.all([helloworldOtsPromise, helloworldPromise]).then(values => {
+Promise.all([helloworldOtsPromise, helloworldPromise, incompleteOtsPromise, incompletePromise]).then(values => {
   helloworldOts = values[0];
   helloworld = values[1];
+  incompleteOts = values[2];
+  incomplete = values[3];
 
-  stamp(helloworld);
-  info(helloworldOts);
+
+  //stamp(helloworld);
+  /*info(helloworldOts);
   verify(helloworldOts, helloworld);
   upgrade(helloworldOts);
-}).catch(err => {
-  console.log('err=' + err);
-});
-
-Promise.all([incompleteOtsPromise, incompletePromise]).then(values => {
-  incompleteOts = values[0];
-  incomplete = values[1];
 
   stamp(incomplete);
   info(incompleteOts);
   verify(incompleteOts, incomplete);
-  upgrade(incompleteOts);
+  upgrade(incompleteOts);*/
+
+  multistamp();
+
 }).catch(err => {
   console.log('err=' + err);
 });
+
 
 function info(ots) {
   console.log('INFO');
@@ -87,7 +86,57 @@ function stamp(plain) {
     const ctx = new Context.StreamDeserialization(timestampBytes);
     const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
     console.log('STAMP result : ');
-    // console.log('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9');
-    console.log(Utils.bytesToHex(detachedTimestampFile.timestamp.msg));
+    console.log(Utils.bytesToHex(detachedTimestampFile.fileDigest()));
+  });
+}
+
+function multistamp(){
+  const files = [
+    incomplete,
+    helloworld
+  ];
+  const sha256 = [
+    '05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9',
+    '03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340'
+  ];
+  const fdHashes = [];
+  files.forEach(file => {
+    const fdHash = new Ops.OpSHA256().hashFd(new Context.StreamDeserialization(file));
+    fdHashes.push(fdHash);
+  });
+  files.forEach((files, i) => {
+    if (!Utils.arrEq(sha256[i], Utils.bytesToHex(fdHashes[i]))){
+      console.error('error checking hashes');
+    }
+  });
+
+  const timestampBytesPromise = OpenTimestamps.multistamp(fdHashes, true);
+  timestampBytesPromise.then(timestamps => {
+    if(timestamps === undefined){
+      console.error('timestamps undefined');
+      return;
+    }
+    if(timestamps.length !== fdHashes.length){
+      console.error('timestamps size invalid');
+      return;
+    }
+
+    timestamps.forEach((timestamp, i) => {
+      const ctx = new Context.StreamDeserialization(timestamps[i]);
+      const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+
+      console.log('MULTISTAMP result : ');
+      console.log(Utils.bytesToHex(detachedTimestampFile.fileDigest()));
+
+      if(detachedTimestampFile === undefined){
+        console.error('detachedTimestampFile undefined');
+      }
+      if (!Utils.arrEq(sha256[i], Utils.bytesToHex(detachedTimestampFile.fileDigest()))) {
+        console.error('error checking hashes');
+      }
+    });
+
+  }).catch(err => {
+    console.error('err=' + err);
   });
 }
