@@ -195,9 +195,6 @@ module.exports = {
         if (timestamp === undefined) {
           return reject();
         }
-        console.log('Timestamp');
-        console.log(Timestamp.strTreeExtended(timestamp));
-        console.log(timestamp.toString());
 
         // Timestamps serialization
         const proofs = [];
@@ -206,10 +203,6 @@ module.exports = {
           const css = new Context.StreamSerialization();
           fileTimestamp.serialize(css);
           proofs.push(css.getOutput());
-
-          console.log('FileTimestamp');
-          console.log(Utils.bytesToHex(Utils.arrayToBytes(css.getOutput())));
-          console.log(fileTimestamp.toString());
         });
 
         resolve(proofs);

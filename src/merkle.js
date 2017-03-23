@@ -27,7 +27,7 @@ class Merkle {
     const opPrepend = new Ops.OpPrepend(left.msg);
     let rightPrependStamp = right.ops.get(opPrepend);
     if (rightPrependStamp === undefined) {
-      rightPrependStamp = new Timestamp(opPrepend.call(left.msg));
+      rightPrependStamp = new Timestamp(opPrepend.call(right.msg));
       right.ops.set(opPrepend, rightPrependStamp);
     }
 
@@ -37,7 +37,7 @@ class Merkle {
     const opAppend = new Ops.OpAppend(right.msg);
     let leftPrependStamp = left.ops.get(opAppend);
     if (leftPrependStamp === undefined) {
-      leftPrependStamp = new Timestamp(opAppend.call(right.msg));
+      leftPrependStamp = new Timestamp(opAppend.call(left.msg));
       left.ops.set(opAppend, leftPrependStamp);
     }
     left.ops.set(opAppend, rightPrependStamp);
