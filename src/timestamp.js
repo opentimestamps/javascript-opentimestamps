@@ -102,7 +102,7 @@ class Timestamp {
       }
 
       // all op/stamp
-      var index=0;
+      let index = 0;
       this.ops.forEach((stamp, op) => {
         if (index < this.ops.size - 1) {
           ctx.writeBytes([0xff]);
