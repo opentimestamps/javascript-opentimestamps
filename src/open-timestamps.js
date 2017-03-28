@@ -32,15 +32,32 @@ module.exports = {
       return 'No ots file';
     }
 
+    let timestamp;
+    let hashOp;
+    let firstLine;
+
+    if (ots instanceof Array) {
+      // Deserialize timestamp from file
+      try {
+        const ctx = new Context.StreamDeserialization(ots);
+        const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+        timestamp = detachedTimestampFile.timestamp;
+        hashOp = detachedTimestampFile.fileHashOp._HASHLIB_NAME();
+        const fileHash = Utils.bytesToHex(timestamp.msg);
+        firstLine = 'File ' + hashOp + ' hash: ' + fileHash + '\n';
+      } catch (err) {
+        return 'Error deserialization ' + err;
+      }
+    } else if (ots instanceof Timestamp) {
+      timestamp = ots;
+      const fileHash = Utils.bytesToHex(timestamp.msg);
+      firstLine = ' hash: ' + fileHash + '\n';
+    }
+
     try {
-      const ctx = new Context.StreamDeserialization(ots);
-      const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-      const fileHash = Utils.bytesToHex(detachedTimestampFile.timestamp.msg);
-      const hashOp = detachedTimestampFile.fileHashOp._HASHLIB_NAME();
-      const firstLine = 'File ' + hashOp + ' hash: ' + fileHash + '\n';
-      return firstLine + 'Timestamp:\n' + detachedTimestampFile.timestamp.strTree();
+      return firstLine + 'Timestamp:\n' + timestamp.strTree();
     } catch (err) {
-      return 'Error deserialization ' + err;
+      return 'Error parsing info ' + err;
     }
   },
 
