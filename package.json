@@ -9,7 +9,6 @@
     "bytebuffer": "^5.0.1",
     "crypto": "0.0.3",
     "fs": "0.0.1-security",
-    "iconv-lite": "^0.4.15",
     "keccak": "^1.2.0",
     "promise": "^7.1.1",
     "properties": "^1.2.1",

@@ -9,7 +9,6 @@
 
 const requestPromise = require('request-promise');
 const Promise = require('promise');
-const iconv = require('iconv-lite');
 /*
 const bitcoin = require('bitcoinjs-lib') // v2.x.x
 const bitcoinMessage = require('bitcoinjs-message');
@@ -88,8 +87,7 @@ class RemoteCalendar {
       console.log(signature);
 */
       const privateKey = bitcore.PrivateKey.fromWIF(this.key);
-      const message = iconv.encode(digest, 'us-ascii').toString();
-      // eslint-disable-next-line no-use-before-define import/no-extraneous-dependencies
+      const message = digest.toString('hex');
       const signature = Message(message).sign(privateKey);
       console.log(signature);
 
