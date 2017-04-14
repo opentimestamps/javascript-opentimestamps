@@ -4,10 +4,12 @@
   "description": "JS Porting of OpenTimestamps",
   "main": "open-timestamps.js",
   "dependencies": {
+    "bitcore-lib": "^0.13.7",
     "bitcore-message": "^1.0.4",
     "bytebuffer": "^5.0.1",
     "crypto": "0.0.3",
     "fs": "0.0.1-security",
+    "iconv-lite": "^0.4.15",
     "keccak": "^1.2.0",
     "promise": "^7.1.1",
     "properties": "^1.2.1",
@@ -31,7 +33,10 @@
   },
   "xo": {
     "esnext": true,
-    "space": true
+    "space": true,
+    "rules": {
+      "new-cap": 0
+    }
   },
   "bin": {
     "ots-cli.js": "./ots-cli.js"

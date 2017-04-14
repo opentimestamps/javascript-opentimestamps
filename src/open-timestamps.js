@@ -36,7 +36,11 @@ module.exports = {
     let hashOp;
     let firstLine;
 
-    if (ots instanceof Array) {
+    if (ots instanceof Timestamp) {
+      timestamp = ots;
+      const fileHash = Utils.bytesToHex(timestamp.msg);
+      firstLine = ' hash: ' + fileHash + '\n';
+    } else {
       // Deserialize timestamp from file
       try {
         const ctx = new Context.StreamDeserialization(ots);
@@ -48,10 +52,6 @@ module.exports = {
       } catch (err) {
         return 'Error deserialization ' + err;
       }
-    } else if (ots instanceof Timestamp) {
-      timestamp = ots;
-      const fileHash = Utils.bytesToHex(timestamp.msg);
-      firstLine = ' hash: ' + fileHash + '\n';
     }
 
     try {

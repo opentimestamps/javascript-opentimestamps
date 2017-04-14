@@ -9,11 +9,17 @@
 
 const requestPromise = require('request-promise');
 const Promise = require('promise');
+const iconv = require('iconv-lite');
+/*
+const bitcoin = require('bitcoinjs-lib') // v2.x.x
+const bitcoinMessage = require('bitcoinjs-message');
+*/
+delete global._bitcore;
+const bitcore = require('bitcore-lib');
 const Message = require('bitcore-message');
 const Utils = require('./utils.js');
 const Context = require('./context.js');
 const Timestamp = require('./timestamp.js');
-
 
 /** Class representing Remote Calendar server interface */
 class RemoteCalendar {
@@ -75,7 +81,19 @@ class RemoteCalendar {
       body: new Buffer(digest)
     };
     if (this.key !== undefined) {
-      options.headers['x-signature'] = Message(String(digest)).sign(this.key);
+      /* var privateKey = this.key.d.toBuffer(32);
+      var message = String(digest);
+      var messagePrefix = bitcoin.networks.bitcoin.messagePrefix;
+      var signature = bitcoinMessage.sign(message, messagePrefix, privateKey, this.key.compressed).toString('base64');
+      console.log(signature);
+*/
+      const privateKey = bitcore.PrivateKey.fromWIF(this.key);
+      const message = iconv.encode(digest, 'us-ascii').toString();
+      // eslint-disable-next-line no-use-before-define import/no-extraneous-dependencies
+      const signature = Message(message).sign(privateKey);
+      console.log(signature);
+
+      options.headers['x-signature'] = signature;
     }
 
     return new Promise((resolve, reject) => {
