@@ -1,4 +1,7 @@
 const test = require('tape');
+const properties = require('properties');
+const Promise = require('promise');
+const bitcore = require('bitcore-lib');
 const Calendar = require('../src/calendar.js');
 const Utils = require('../src/utils.js');
 // const Timestamp = require('../src/timestamp.js');
@@ -28,6 +31,64 @@ test('setup', assert => {
   });
 });
 */
+/*
+test('Calendar.submit()', assert => {
+  const calendar = new Calendar.RemoteCalendar('https://ots.eternitywall.it');
+  const digest = Utils.randBytes(32);
+  calendar.submit(digest).then(timestamp => {
+    assert.true(timestamp !== null);
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});*/
+
+function readSignatureFile(file) {
+  return new Promise((resolve, reject) => {
+    properties.parse(file, {path: true,variables: false}, (error, obj) => {
+      if (error) {
+        return reject(error);
+      }
+      if (obj === undefined || obj.length === 0) {
+        return reject(new Error('File empty'));
+      }
+      const map = new Map();
+      Object.entries(obj).forEach(item => {
+        const calendar = "https://"+item[0];
+        const wif = item[1];
+        const privateKey = bitcore.PrivateKey.fromWIF(wif);
+        map.set(calendar, privateKey);
+      });
+      return resolve(map);
+    });
+  });
+}
+test('Calendar.privateSubmit()', assert => {
+  const digest = Utils.randBytes(32);
+  readSignatureFile('../signature.wif')
+      .then(hashmap => {
+        let calendarUrl = '';
+        let signature = '';
+
+        // unsupported entries() method on iexplorer : https://developer.mozilla.org/it/docs/Web/JavaScript/Reference/Global_Objects/Map
+        hashmap.forEach((value, key) => {
+          calendarUrl = key;
+          signature = value;
+        });
+
+        const calendar = new Calendar.RemoteCalendar(calendarUrl);
+        calendar.setKey(signature);
+        return calendar.submit(digest);
+      }).then(timestamp => {
+        assert.true(timestamp !== null);
+        assert.end();
+      }).catch(err => {
+        assert.fail('err=' + err);
+        assert.true(timestamp !== null);
+        assert.end();
+      });
+});
+
 test('Calendar.getTimestamp()', assert => {
   const calendar = new Calendar.RemoteCalendar('https://alice.btc.calendar.opentimestamps.org');
   const commitmentOts = Utils.hexToBytes('57cfa5c46716df9bd9e83595bce439c58108d8fcc1678f30d4c6731c3f1fa6c79ed712c66fb1ac8d4e4eb0e7');

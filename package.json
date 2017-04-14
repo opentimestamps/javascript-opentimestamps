@@ -4,6 +4,7 @@
   "description": "JS Porting of OpenTimestamps",
   "main": "open-timestamps.js",
   "dependencies": {
+    "bitcore-message": "^1.0.4",
     "bytebuffer": "^5.0.1",
     "crypto": "0.0.3",
     "fs": "0.0.1-security",

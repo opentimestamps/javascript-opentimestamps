@@ -9,9 +9,11 @@
 
 const requestPromise = require('request-promise');
 const Promise = require('promise');
+const Message = require('bitcore-message');
 const Utils = require('./utils.js');
 const Context = require('./context.js');
 const Timestamp = require('./timestamp.js');
+
 
 /** Class representing Remote Calendar server interface */
 class RemoteCalendar {
@@ -22,6 +24,22 @@ class RemoteCalendar {
    */
   constructor(url) {
     this.url = url;
+  }
+
+  /**
+   * Set private key.
+   * @param key The private key.
+   */
+  setKey(key) {
+    this.key = key;
+  }
+
+  /**
+  * Get private key.
+  * @return The private key.
+  */
+  getKey() {
+    return this.key;
   }
 
   /**
@@ -56,6 +74,9 @@ class RemoteCalendar {
       encoding: null,
       body: new Buffer(digest)
     };
+    if (this.key !== undefined) {
+      options.headers['x-signature'] = Message(String(digest)).sign(this.key);
+    }
 
     return new Promise((resolve, reject) => {
       requestPromise(options)
