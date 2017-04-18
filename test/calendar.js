@@ -1,6 +1,4 @@
 const test = require('tape');
-const properties = require('properties');
-const Promise = require('promise');
 const Calendar = require('../src/calendar.js');
 const Utils = require('../src/utils.js');
 // const Timestamp = require('../src/timestamp.js');
@@ -42,28 +40,9 @@ test('Calendar.submit()', assert => {
   });
 }); */
 
-function readSignatureFile(file) {
-  return new Promise((resolve, reject) => {
-    properties.parse(file, {path: true, variables: false}, (error, obj) => {
-      if (error) {
-        return reject(error);
-      }
-      if (obj === undefined || obj.length === 0) {
-        return reject(new Error('File empty'));
-      }
-      const map = new Map();
-      Object.entries(obj).forEach(item => {
-        const calendar = 'https://' + item[0];
-        const wif = item[1];
-        map.set(calendar, wif);
-      });
-      return resolve(map);
-    });
-  });
-}
 test('Calendar.privateSubmit()', assert => {
   const digest = Utils.randBytes(32);
-  readSignatureFile('./signature.wif')
+  Utils.readSignatureFile('./signature.wif')
       .then(hashmap => {
         let calendarUrl = '';
         let signature = '';

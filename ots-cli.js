@@ -1,97 +1,109 @@
 #!/usr/bin/env node
 
+// Dependencies
 const fs = require('fs');
+const program = require('commander');
 const OpenTimestamps = require('./src/open-timestamps.js');
 const Context = require('./src/context.js');
 const Utils = require('./src/utils.js');
-// const Timestamp = require('nod ./timestamp.js');
 const DetachedTimestampFile = require('./src/detached-timestamp-file.js');
 
-const args = process.argv.slice(2);
+// Constants
 const path = process.argv[1].split('/');
 const title = path[path.length - 1];
 
-if (args[0] === null) {
-  showHelp();
+// Parse parameters
+
+program
+    .version(require('./package.json').version);
+
+program
+    .command('info [file_ots]')
+    .alias('i')
+    .description('Show information on a timestamp.')
+    .action(file => {
+      if (!file) {
+        console.log('Show information on a timestamp given as argument.');
+        console.log(title + ' info: bad options number ');
+        return;
+      }
+      info(file);
+    });
+
+program
+    .command('stamp [file]')
+    .alias('s')
+    .description('Create timestamp with the aid of a remote calendar, the output receipt will be saved with .ots .')
+    .action(file => {
+      if (!file) {
+        console.log('Create timestamp with the aid of a remote calendar.');
+        console.log(title + ' stamp: bad options number ');
+        return;
+      }
+      stamp(file);
+    });
+
+program
+    .command('multistamp [files...]')
+    .alias('M')
+    .option('-c, --calendar <url>', 'Create timestamp with the aid of a remote calendar. May be specified multiple times.')
+    .option('-m <int>', 'Commitments are sent to remote calendars in the event of timeout the timestamp is considered done if at least M calendars replied.')
+    .option('-k, --key <file>', 'Signature key file of private remote calendars.')
+    .description('Create timestamp with the aid of a remote calendar, the output receipt will be saved with .ots .')
+    .action((files, options) => {
+      if (!files && files.size() < 1) {
+        console.log('Create timestamp with the aid of a remote calendar.');
+        console.log(title + ' stamp: bad options number ');
+        return;
+      }
+
+      const parameters = {};
+      if (options.calendar) {
+        parameters.publicCalendars = options.calendar;
+      }
+      if (options.key) {
+        parameters.privateCalendars = Utils.readSignatureFile(options.key);
+      }
+      if (options.M) {
+        parameters.m = options.M;
+      }
+      console.log(options);
+      multistamp(files, parameters);
+    });
+
+program
+    .command('verify [file_ots]')
+    .alias('v')
+    .description('Verify the timestamp attestations, expect original file present in the same directory without .ots .')
+    .action(file => {
+      if (!file) {
+        console.log('Verify the timestamp attestations given as argument.');
+        console.log(title + ' verify: bad options number ');
+        return;
+      }
+      verify(file);
+    });
+
+program
+    .command('upgrade [file_ots]')
+    .alias('u')
+    .description('Upgrade remote calendar timestamps to be locally verifiable.')
+    .action(file => {
+      if (!file) {
+        console.log('Upgrade the timestamp attestations given as argument.');
+        console.log(title + ' upgrade: bad options number ');
+        return;
+      }
+      upgrade(file);
+    });
+
+program.parse(process.argv);
+
+if (program.args.length === 0) {
+  console.log(program.helpInformation());
 }
 
-// console.log('arguments: ', args);
-switch (args[0]) {
-  case 'info':
-  case 'i':
-    if (args.length !== 2) {
-      console.log('Show information on a timestamp given as argument.\n');
-      console.log(title + ' info: bad options number ');
-      break;
-    }
-    info(args[1]);
-    break;
-  case 'stamp':
-  case 's':
-    if (args.length !== 2) {
-      console.log('Create timestamp with the aid of a remote calendar.\n');
-      console.log(title + ': bad options number ');
-      break;
-    }
-    stamp(args[1]);
-    break;
-  case 'multistamp':
-  case 'S':
-    if (args.length < 2) {
-      console.log('Create timestamp with the aid of a remote calendar.\n');
-      console.log(title + ': bad options number ');
-      break;
-    }
-    args.shift();
-    multistamp(args);
-    break;
-  case 'verify':
-  case 'v':
-
-    if (args.length !== 2) {
-      console.log('Verify the timestamp attestations given as argument.\n');
-      console.log(title + ': bad options number ');
-      break;
-    }
-    verify(args[1]);
-    break;
-  case 'upgrade':
-  case 'u':
-    if (args.length !== 2) {
-      console.log('Upgrade remote calendar timestamps to be locally verifiable.\n');
-      console.log(title + ': bad options number ');
-      break;
-    }
-    upgrade(args[1]);
-    break;
-  case '--version':
-  case '-V':
-    console.log('Version: ' + title + ' v.' + require('./package.json').version + '\n');
-    break;
-  case '--help':
-  case '-h':
-    showHelp();
-    break;
-  default:
-    console.log(title + ': bad option: ' + args[0]);
-}
-
-function showHelp() {
-  console.log(
-        'Usage: ' + title + ' [options] {stamp,s,upgrade,u,verify,v,info} [arguments]\n\n' +
-        'Subcommands:\n' +
-        's, stamp FILE       \tCreate timestamp with the aid of a remote calendar, the output receipt will be saved with .ots\n' +
-        'S, multistamp FILES       \tCreate timestamp with the aid of a remote calendar, the output receipt will be saved with .ots\n' +
-        'i, info FILE_OTS \tShow information on a timestamp.\n' +
-        'v, verify FILE_OTS\tVerify the timestamp attestations, expect original file present in the same directory without .ots\n' +
-        'u, upgrade FILE_OTS\tUpgrade remote calendar timestamps to be locally verifiable.\n\n' +
-        'Options:\n' +
-        '-V, --version         \tprint ' + title + ' version.\n' +
-        '-h, --help         \tprint this help.\n' +
-        '\nLicense: LGPL.'
-    );
-}
-
+// FUNCTIONS
 function info(argsFileOts) {
   const otsPromise = Utils.readFilePromise(argsFileOts, null);
   Promise.all([otsPromise]).then(values => {
@@ -142,14 +154,14 @@ function stamp(argsFile) {
   });
 }
 
-function multistamp(argsFiles) {
+function multistamp(argsFiles, options) {
   const filePromises = [];
   argsFiles.forEach(argsFile => {
     filePromises.push(Utils.readFilePromise(argsFile, null));
   });
 
   Promise.all(filePromises).then(values => {
-    const timestampBytesPromise = OpenTimestamps.multistamp(values);
+    const timestampBytesPromise = OpenTimestamps.multistamp(values, options);
     timestampBytesPromise.then(timestams => {
       if (timestams === undefined) {
         console.error('Invalid timestamp');

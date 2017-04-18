@@ -141,10 +141,11 @@ module.exports = {
   /**
    * Create timestamp with the aid of a remote calendar for multiple files.
    * @exports OpenTimestamps/stamp
-   * @param {ArrayBuffer[]} plains - The array of plain array buffer to stamp.
-   * @param {Boolean} isHash - 1 = Hash , 0 = Data File
+   * @param {ArrayBuffer[]} plains - The array of files or hash to stamp.
+   * @param {Boolean} isHash - 1 = Hash , 0 = Data File.
+   * @param {Object} options - publicCalendars, Public calendar url list; m, At least M calendars replied; privateCalendars, Private calendar url list with secret key.
    */
-  multistamp(plains, isHash) {
+  multistamp(plains, isHash, options) {
     return new Promise((resolve, reject) => {
       const fileTimestamps = [];
       const merkleRoots = [];
@@ -202,13 +203,39 @@ module.exports = {
 
       const merkleTip = Merkle.makeMerkleTree(merkleRoots);
 
-      // Calendars
-      const calendarUrls = [];
-      calendarUrls.push('https://alice.btc.calendar.opentimestamps.org');
-      // calendarUrls.append('https://b.pool.opentimestamps.org');
-      calendarUrls.push('https://ots.eternitywall.it');
+      // Parse options
+      if (!options) {
+        options = {};
+      }
+      if (options.privateCalendars) {
+        options.publicCalendars = [];
+        if (!options.m || options.m === 0) {
+          options.m = options.privateCalendars.size();
+        } else if (options.m < 0 || options.m > options.publicCalendars.size()) {
+          console.log('m cannot be greater than available calendar neither less or equal 0');
+          return reject('m cannot be greater than available calendar neither less or equal 0');
+        }
+      } else {
+        // Parse options : public calendars
+        options.privateCalendars = [];
+        if (!options.publicCalendars || options.publicCalendars.length === 0) {
+          options.publicCalendars = [];
+          options.publicCalendars.push('https://alice.btc.calendar.opentimestamps.org');
+          options.publicCalendars.push('https://bob.btc.calendar.opentimestamps.org');
+          options.publicCalendars.push('https://ots.eternitywall.it');
+        }
+        if (!options.m || options.m === 0) {
+          options.m = 1;
+          if (options.publicCalendars.length >= 2) {
+            options.m = 2;
+          }
+        } else if (options.m < 0 || options.m > options.publicCalendars.size()) {
+          console.log('m cannot be greater than available calendar neither less or equal 0');
+          return reject('m cannot be greater than available calendar neither less or equal 0');
+        }
+      }
 
-      this.createTimestamp(merkleTip, calendarUrls).then(timestamp => {
+      this.createTimestamp(merkleTip, options.publicCalendars, options.m, options.privateCalendars).then(timestamp => {
         if (timestamp === undefined) {
           return reject();
         }
@@ -234,14 +261,21 @@ module.exports = {
    * @param {timestamp} timestamp - The timestamp.
    * @param {string[]} calendarUrls - List of calendar's to use.
    */
-  createTimestamp(timestamp, calendarUrls) {
-    // setup_bitcoin : not used
-
+  createTimestamp(timestamp, publicCalendars, m, privateCalendars) {
     const res = [];
-    calendarUrls.forEach(calendarUrl => {
-      const remote = new Calendar.RemoteCalendar(calendarUrl);
-      res.push(remote.submit(timestamp.msg));
-    });
+    if (publicCalendars) {
+      publicCalendars.forEach(calendar => {
+        const remote = new Calendar.RemoteCalendar(calendar);
+        res.push(remote.submit(timestamp.msg));
+      });
+    }
+    if (privateCalendars) {
+      privateCalendars.forEach(calendar => {
+        const remote = new Calendar.RemoteCalendar(calendar);
+        res.push(remote.submit(timestamp.msg));
+      });
+    }
+
     return new Promise((resolve, reject) => {
       Promise.all(res.map(Utils.softFail)).then(results => {
         // console.log('results=' + results);
