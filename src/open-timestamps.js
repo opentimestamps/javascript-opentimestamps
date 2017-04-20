@@ -122,7 +122,7 @@ module.exports = {
       const calendarUrls = [];
       calendarUrls.push('https://alice.btc.calendar.opentimestamps.org');
       // calendarUrls.append('https://b.pool.opentimestamps.org');
-      calendarUrls.push('https://ots.eternitywall.it');
+      calendarUrls.push('https://finney.calendar.eternitywall.com');
 
       this.createTimestamp(merkleTip, calendarUrls).then(timestamp => {
         if (timestamp === undefined) {
@@ -222,7 +222,7 @@ module.exports = {
           options.publicCalendars = [];
           options.publicCalendars.push('https://alice.btc.calendar.opentimestamps.org');
           options.publicCalendars.push('https://bob.btc.calendar.opentimestamps.org');
-          options.publicCalendars.push('https://ots.eternitywall.it');
+          options.publicCalendars.push('https://finney.calendar.eternitywall.com');
         }
         if (!options.m || options.m === 0) {
           options.m = 1;
@@ -473,7 +473,7 @@ module.exports = {
     const calendarUrls = [];
     // calendarUrls.push('https://alice.btc.calendar.opentimestamps.org');
     // calendarUrls.append('https://b.pool.opentimestamps.org');
-    calendarUrls.push('https://ots.eternitywall.it');
+    calendarUrls.push('https://finney.calendar.eternitywall.com');
 
     const existingAttestations = timestamp.getAttestations();
     const promises = [];

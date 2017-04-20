@@ -30,7 +30,7 @@ test('setup', assert => {
 */
 /*
 test('Calendar.submit()', assert => {
-  const calendar = new Calendar.RemoteCalendar('https://ots.eternitywall.it');
+  const calendar = new Calendar.RemoteCalendar('https://finney.calendar.eternitywall.com');
   const digest = Utils.randBytes(32);
   calendar.submit(digest).then(timestamp => {
     assert.true(timestamp !== null);
