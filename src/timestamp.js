@@ -198,6 +198,53 @@ class Timestamp {
     return output;
   }
 
+  toJson() {
+    const json = {};
+    if (this.attestations.length > 0) {
+      json.attestations = [];
+      this.attestations.forEach(attestation => {
+        const item = {};
+        if (attestation instanceof Notary.PendingAttestation) {
+          item.type = 'PendingAttestation';
+          item.param = attestation.uri;
+        } else if (attestation instanceof Notary.UnknownAttestation) {
+          item.type = 'UnknownAttestation';
+          item.param = attestation.payload;
+        } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
+          item.type = 'BitcoinBlockHeaderAttestation';
+          item.param = attestation.height;
+        } else if (attestation instanceof Notary.EthereumBlockHeaderAttestation) {
+          item.type = 'EthereumBlockHeaderAttestation';
+          item.param = attestation.height;
+        }
+        json.attestations.push(item);
+      });
+    }
+
+    if (this.ops.size > 1) {
+      json.ops = [];
+      this.ops.forEach((timestamp, op) => {
+        const item = {};
+        item.op = op._TAG_NAME();
+        item.arg = Utils.bytesToHex(op.arg);
+        item.result = Utils.bytesToHex(timestamp.msg);
+        item.timestamp = timestamp.toJson();
+        json.ops.push(item);
+      });
+    } else if (this.ops.size > 0) {
+      json.ops = [];
+      this.ops.forEach((timestamp, op) => {
+        const item = {};
+        item.op = op._TAG_NAME();
+        item.arg = Utils.bytesToHex(op.arg);
+        item.result = Utils.bytesToHex(timestamp.msg);
+        item.timestamp = timestamp.toJson();
+        json.ops.push(item);
+      });
+    }
+    return json;
+  }
+
   /**
    * Indention function for printing tree.
    * @param {int} pos - Initial hierarchical indention.

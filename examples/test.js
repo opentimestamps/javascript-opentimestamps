@@ -9,17 +9,20 @@ let helloworldOts;
 let helloworld;
 let incompleteOts;
 let incomplete;
+let merkle2;
 
 const helloworldOtsPromise = Utils.readFilePromise('./examples/hello-world.txt.ots', null);
 const helloworldPromise = Utils.readFilePromise('./examples/hello-world.txt', null);
 const incompleteOtsPromise = Utils.readFilePromise('./examples/incomplete.txt.ots', null);
 const incompletePromise = Utils.readFilePromise('./examples/incomplete.txt', null);
+const merkle2OtsPromise = Utils.readFilePromise('./examples/merkle2.txt.ots', null);
 
-Promise.all([helloworldOtsPromise, helloworldPromise, incompleteOtsPromise, incompletePromise]).then(values => {
+Promise.all([helloworldOtsPromise, helloworldPromise, incompleteOtsPromise, incompletePromise, merkle2OtsPromise]).then(values => {
   helloworldOts = values[0];
   helloworld = values[1];
   incompleteOts = values[2];
   incomplete = values[3];
+  merkle2 = values[4];
 
   stamp(helloworld);
   info(helloworldOts);
@@ -31,6 +34,8 @@ Promise.all([helloworldOtsPromise, helloworldPromise, incompleteOtsPromise, inco
   verify(incompleteOts, incomplete);
   upgrade(incompleteOts);
   multistamp();
+
+  json(merkle2);
 }).catch(err => {
   console.log('err=' + err);
 });
@@ -39,6 +44,12 @@ function info(ots) {
   console.log('INFO');
   const infoResult = OpenTimestamps.info(ots);
   console.log('INFO result : ' + infoResult);
+}
+
+function json(ots) {
+  console.log('JSON');
+  const jsonResult = OpenTimestamps.json(ots);
+  console.log(jsonResult);
 }
 
 function verify(ots, plain) {

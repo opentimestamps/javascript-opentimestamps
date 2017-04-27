@@ -62,6 +62,52 @@ module.exports = {
   },
 
   /**
+   * Show information on a timestamp.
+   * @exports OpenTimestamps/json
+   * @param {ArrayBuffer} ots - The ots array buffer.
+   */
+  json(ots) {
+    const json = {};
+
+    if (ots === undefined) {
+      json.result = 'KO';
+      json.error = 'No ots file';
+      return JSON.stringify(json);
+    }
+
+    let timestamp;
+    // let hashOp;
+
+    if (ots instanceof Timestamp) {
+      // Pass timestamp
+      timestamp = ots;
+      json.hash = Utils.bytesToHex(timestamp.msg);
+    } else {
+      // Deserialize timestamp from file
+      try {
+        const ctx = new Context.StreamDeserialization(ots);
+        const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+        timestamp = detachedTimestampFile.timestamp;
+        // hashOp = detachedTimestampFile.fileHashOp._HASHLIB_NAME();
+        json.hash = Utils.bytesToHex(timestamp.msg);
+      } catch (err) {
+        json.result = 'KO';
+        json.error = 'Error deserialization ' + err;
+        return JSON.stringify(json);
+      }
+    }
+
+    try {
+      json.result = 'OK';
+      json.timestamp = timestamp.toJson();
+    } catch (err) {
+      json.result = 'KO';
+      json.error = 'Error parsing info ' + err;
+    }
+    return JSON.stringify(json);
+  },
+
+  /**
    * Create timestamp with the aid of a remote calendar. May be specified multiple times.
    * @exports OpenTimestamps/stamp
    * @param {ArrayBuffer} plain - The plain array buffer to stamp.
