@@ -76,7 +76,6 @@ module.exports = {
     }
 
     let timestamp;
-    // let hashOp;
 
     if (ots instanceof Timestamp) {
       // Pass timestamp
@@ -88,8 +87,8 @@ module.exports = {
         const ctx = new Context.StreamDeserialization(ots);
         const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
         timestamp = detachedTimestampFile.timestamp;
-        // hashOp = detachedTimestampFile.fileHashOp._HASHLIB_NAME();
         json.hash = Utils.bytesToHex(timestamp.msg);
+        json.op = detachedTimestampFile.fileHashOp._HASHLIB_NAME();
       } catch (err) {
         json.result = 'KO';
         json.error = 'Error deserialization ' + err;

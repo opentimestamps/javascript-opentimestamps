@@ -198,6 +198,10 @@ class Timestamp {
     return output;
   }
 
+  /**
+   * Print as json hierarchical object.
+   * @return {string} The output json object.
+   */
   toJson() {
     const json = {};
     if (this.attestations.length > 0) {

@@ -9,6 +9,7 @@
 
 const Ops = require('./ops.js');
 const Timestamp = require('./timestamp.js');
+const Utils = require('./utils.js');
 
 /**
  * Header magic bytes
@@ -110,6 +111,17 @@ class DetachedTimestampFile {
     output += 'fileHashOp: ' + this.fileHashOp.toString() + '\n';
     output += 'timestamp: ' + this.timestamp.toString() + '\n';
     return output;
+  }
+
+  /**
+   * Print as json hierarchical object.
+   * @return {string} The output json object.
+   */
+  toJson() {
+    const json = {};
+    json.hash = Utils.bytesToHex(this.fileDigest());
+    json.op = this.fileHashOp._HASHLIB_NAME();
+    json.timestamp = this.timestamp.toJson();
   }
 
 }
