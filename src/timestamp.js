@@ -7,6 +7,8 @@
  * @license LPGL3
  */
 
+const bitcore = require('bitcore-lib');
+const Message = require('bitcore-message');
 const Utils = require('./utils.js');
 const Notary = require('./notary.js');
 const Ops = require('./ops.js');
@@ -202,12 +204,16 @@ class Timestamp {
    * Print as json hierarchical object.
    * @return {string} The output json object.
    */
-  toJson() {
+  toJson(fork) {
     const json = {};
+    if(!fork){
+      fork=0;
+    }
     if (this.attestations.length > 0) {
       json.attestations = [];
       this.attestations.forEach(attestation => {
         const item = {};
+        item.fork = fork;
         if (attestation instanceof Notary.PendingAttestation) {
           item.type = 'PendingAttestation';
           item.param = attestation.uri;
@@ -217,33 +223,46 @@ class Timestamp {
         } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
           item.type = 'BitcoinBlockHeaderAttestation';
           item.param = attestation.height;
+          item.merkle = Utils.bytesToHex(this.msg.reverse());
         } else if (attestation instanceof Notary.EthereumBlockHeaderAttestation) {
           item.type = 'EthereumBlockHeaderAttestation';
           item.param = attestation.height;
+          item.merkle = Utils.bytesToHex(this.msg.reverse());
         }
         json.attestations.push(item);
       });
     }
 
+
+    json.result = Utils.bytesToHex(this.msg);
+    try {
+      bitcore.Transaction(Utils.bytesToHex(this.msg));
+      json.tx = new Ops.OpSHA256().call( new Ops.OpSHA256().call(this.msg) );
+      json.tx = Utils.bytesToHex(json.tx.reverse());
+    }catch(err){
+    }
+
     if (this.ops.size > 1) {
+      fork++;
+    }
+    if (this.ops.size > 0) {
       json.ops = [];
+      var count=0;
       this.ops.forEach((timestamp, op) => {
         const item = {};
+        item.fork = fork + count;
         item.op = op._TAG_NAME();
         item.arg = Utils.bytesToHex(op.arg);
         item.result = Utils.bytesToHex(timestamp.msg);
-        item.timestamp = timestamp.toJson();
+        item.timestamp = timestamp.toJson(fork+count);
+        try {
+          bitcore.Transaction(Utils.bytesToHex(timestamp.msg));
+          item.tx = new Ops.OpSHA256().call( new Ops.OpSHA256().call(timestamp.msg) );
+          item.tx = Utils.bytesToHex(item.tx.reverse());
+        }catch(err){
+        }
         json.ops.push(item);
-      });
-    } else if (this.ops.size > 0) {
-      json.ops = [];
-      this.ops.forEach((timestamp, op) => {
-        const item = {};
-        item.op = op._TAG_NAME();
-        item.arg = Utils.bytesToHex(op.arg);
-        item.result = Utils.bytesToHex(timestamp.msg);
-        item.timestamp = timestamp.toJson();
-        json.ops.push(item);
+        count++;
       });
     }
     return json;
