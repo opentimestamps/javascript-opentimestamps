@@ -1,6 +1,6 @@
 {
   "name": "javascript-opentimestamps",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "JS Porting of OpenTimestamps",
   "main": "open-timestamps.js",
   "dependencies": {
