@@ -43,12 +43,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/eternitywall/javascript-opentimestamps.git"
+    "url": "git+https://github.com/opentimestamps/javascript-opentimestamps.git"
   },
   "author": "EternityWall",
   "license": "LPGL3",
   "bugs": {
-    "url": "https://github.com/eternitywall/javascript-opentimestamps/issues"
+    "url": "https://github.com/opentimestamps/javascript-opentimestamps/issues"
   },
-  "homepage": "https://github.com/eternitywall/javascript-opentimestamps#readme"
+  "homepage": "https://github.com/opentimestamps/javascript-opentimestamps#readme"
 }

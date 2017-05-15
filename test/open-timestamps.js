@@ -9,7 +9,7 @@ const Ops = require('../src/ops.js');
 
 // const Timestamp = require('../timestamp.js');
 
-const baseUrl = 'https://raw.githubusercontent.com/eternitywall/javascript-opentimestamps/master';
+const baseUrl = 'https://raw.githubusercontent.com/opentimestamps/javascript-opentimestamps/master';
 let incompleteOtsInfo;
 let incompleteOts;
 let incomplete;

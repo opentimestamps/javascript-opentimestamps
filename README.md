@@ -7,7 +7,7 @@
 [2]: https://raw.githubusercontent.com/opentimestamps/logo/master/white-bg/website-horizontal-350x75.png (OpenTimestamps logo)
 
 
-[![Build Status](https://travis-ci.org/eternitywall/javascript-opentimestamps.svg?branch=master)](https://travis-ci.org/eternitywall/javascript-opentimestamps)
+[![Build Status](https://travis-ci.org/opentimestamps/javascript-opentimestamps.svg?branch=master)](https://travis-ci.org/opentimestamps/javascript-opentimestamps)
 
 This repo host the javascript implementation of OpenTimestamps.
 
