@@ -291,12 +291,12 @@ class CryptOp extends OpUnary {
     return 0x00;
   }
 
-  call(msg) {
+  call(cls, msg) {
     let shasum;
-    if (this._HASHLIB_NAME() === 'keccak256') {
-      shasum = keccak(this._HASHLIB_NAME()).update(new Buffer(msg));
+    if (cls._HASHLIB_NAME() === 'keccak256') {
+      shasum = keccak(cls._HASHLIB_NAME()).update(new Buffer(msg));
     } else {
-      shasum = crypto.createHash(this._HASHLIB_NAME()).update(new Buffer(msg));
+      shasum = crypto.createHash(cls._HASHLIB_NAME()).update(new Buffer(msg));
     }
     const hashDigest = shasum.digest();
     const output = [hashDigest.length];
@@ -306,6 +306,7 @@ class CryptOp extends OpUnary {
     }
     return output;
   }
+
   static deserializeFromTag(ctx, tag) {
     return super.deserializeFromTag(ctx, tag);
   }
@@ -361,7 +362,7 @@ class OpSHA1 extends CryptOp {
     return super.deserializeFromTag(ctx, tag);
   }
   call(msg) {
-    return super.call(msg);
+    return super.call(this, msg);
   }
 }
 
@@ -388,7 +389,7 @@ class OpRIPEMD160 extends CryptOp {
     return super.deserializeFromTag(ctx, tag);
   }
   call(msg) {
-    return super.call(msg);
+    return super.call(this, msg);
   }
 }
 
@@ -416,7 +417,7 @@ class OpSHA256 extends CryptOp {
     return super.deserializeFromTag(ctx, tag);
   }
   call(msg) {
-    return super.call(msg);
+    return super.call(this, msg);
   }
 }
 
@@ -444,7 +445,7 @@ class OpKeccak256 extends CryptOp {
     return super.deserializeFromTag(ctx, tag);
   }
   call(msg) {
-    return super.call(msg);
+    return super.call(this, msg);
   }
 }
 
