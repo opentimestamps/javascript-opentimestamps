@@ -17,6 +17,14 @@ let helloworldOts;
 let helloworld;
 let merkle2Ots;
 let merkle2OtsInfo;
+let unknown;
+let unknownOts;
+let knownUnknown;
+let knownUnknownOts;
+let merkle3;
+let merkle3Ots;
+let badStamp;
+let badStampOts;
 
 test('setup', assert => {
   const incompleteOtsInfoPromise = rp({url: baseUrl + '/examples/incomplete.txt.ots.info', encoding: null});
@@ -29,7 +37,27 @@ test('setup', assert => {
   const merkle2OtsPromise = rp({url: baseUrl + '/examples/merkle2.txt.ots', encoding: null});
   const merkle2OtsInfoPromise = rp({url: baseUrl + '/examples/merkle2.txt.ots.info', encoding: null});
 
-  Promise.all([incompleteOtsInfoPromise, incompleteOtsPromise, incompletePromise, helloworldOtsPromise, helloworldPromise, merkle2OtsPromise, merkle2OtsInfoPromise]).then(values => {
+  const unknownPromise = rp({url: baseUrl + '/examples/unknown-notary.txt', encoding: null});
+  const unknownOtsPromise = rp({url: baseUrl + '/examples/unknown-notary.txt.ots', encoding: null});
+
+  const knownUnknownPromise = rp({url: baseUrl + '/examples/known-and-unknown-notary.txt', encoding: null});
+  const knownUnknownOtsPromise = rp({url: baseUrl + '/examples/known-and-unknown-notary.txt.ots', encoding: null});
+
+  const merkle3Promise = rp({url: baseUrl + '/examples/merkle3.txt', encoding: null});
+  const merkle3OtsPromise = rp({url: baseUrl + '/examples/merkle3.txt.ots', encoding: null});
+
+  const badStampPromise = rp({url: baseUrl + '/examples/bad-stamp.txt', encoding: null});
+  const badStampOtsPromise = rp({url: baseUrl + '/examples/bad-stamp.txt.ots', encoding: null});
+
+  Promise.all([
+    incompleteOtsInfoPromise, incompleteOtsPromise, incompletePromise,
+    helloworldOtsPromise, helloworldPromise,
+    merkle2OtsPromise, merkle2OtsInfoPromise,
+    unknownPromise, unknownOtsPromise,
+    knownUnknownPromise, knownUnknownOtsPromise,
+    merkle3Promise, merkle3OtsPromise,
+    badStampPromise, badStampOtsPromise
+  ]).then(values => {
     incompleteOtsInfo = values[0];
     incompleteOts = values[1];
     incomplete = values[2];
@@ -37,6 +65,14 @@ test('setup', assert => {
     helloworld = values[4];
     merkle2Ots = values[5];
     merkle2OtsInfo = values[6];
+    unknown = values[7];
+    unknownOts = values[8];
+    knownUnknown = values[9];
+    knownUnknownOts = values[10];
+    merkle3 = values[11];
+    merkle3Ots = values[12];
+    badStamp = values[13];
+    badStampOts = values[14];
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -49,12 +85,42 @@ test('OpenTimestamps.info()', assert => {
   assert.false(otsInfoCalc === undefined);
   assert.false(incompleteOts === undefined);
   assert.true(incompleteOtsInfo.equals(new Buffer(otsInfoCalc)));
+  assert.end();
+});
 
+test('OpenTimestamps.info()', assert => {
   const merkle2OtsInfoCalc = OpenTimestamps.info(merkle2Ots);
   assert.false(merkle2OtsInfoCalc === undefined);
   assert.false(merkle2Ots === undefined);
   assert.true(merkle2OtsInfo.equals(new Buffer(merkle2OtsInfoCalc)));
+  assert.end();
+});
 
+test('OpenTimestamps.info()', assert => {
+  const unknownInfoCalc = OpenTimestamps.info(unknownOts);
+  assert.false(unknownInfoCalc === undefined);
+  assert.false(unknownOts === undefined);
+  assert.end();
+});
+
+test('OpenTimestamps.info()', assert => {
+  const knownUnknownInfoCalc = OpenTimestamps.info(knownUnknownOts);
+  assert.false(knownUnknownInfoCalc === undefined);
+  assert.false(knownUnknownOts === undefined);
+  assert.end();
+});
+
+test('OpenTimestamps.info()', assert => {
+  const merkle3InfoCalc = OpenTimestamps.info(merkle3Ots);
+  assert.false(merkle3InfoCalc === undefined);
+  assert.false(merkle3Ots === undefined);
+  assert.end();
+});
+
+test('OpenTimestamps.info()', assert => {
+  const badStampInfoCalc = OpenTimestamps.info(badStampOts);
+  assert.false(badStampInfoCalc === undefined);
+  assert.false(badStampOts === undefined);
   assert.end();
 });
 
@@ -153,6 +219,52 @@ test('OpenTimestamps.verify()', assert => {
   });
 });
 
+test('OpenTimestamps.verify()', assert => {
+  const verifyPromise = OpenTimestamps.verify(unknownOts, unknown, false);
+  verifyPromise.then(result => {
+    assert.true(result === undefined);
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
+test('OpenTimestamps.verify()', assert => {
+  const verifyPromise = OpenTimestamps.verify(knownUnknownOts, knownUnknown, false);
+  verifyPromise.then(result => {
+    assert.true(result === undefined);
+    assert.true(knownUnknownOts !== undefined);
+    assert.true(knownUnknown !== undefined);
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
+test('OpenTimestamps.verify()', assert => {
+  const verifyPromise = OpenTimestamps.verify(badStampOts, badStamp, false);
+  verifyPromise.then(result => {
+    assert.true(result === undefined);
+    assert.true(badStamp !== undefined);
+    assert.true(badStampOts !== undefined);
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
+test('OpenTimestamps.verify()', assert => {
+  const verifyPromise = OpenTimestamps.verify(merkle3Ots, merkle3, false);
+  verifyPromise.then(result => {
+    assert.true(result === undefined);
+    assert.true(merkle3 !== undefined);
+    assert.true(merkle3Ots !== undefined);
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
 // UPGRADE TESTS
 
 test('OpenTimestamps.upgrade()', assert => {
@@ -173,6 +285,58 @@ test('OpenTimestamps.upgrade()', assert => {
     assert.true(timestampBytes !== null);
     assert.true(timestampBytes.length > 0);
     assert.true(helloworldOts.equals(timestampBytes));
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
+test('OpenTimestamps.upgrade()', assert => {
+  const upgradePromise = OpenTimestamps.upgrade(unknownOts);
+  upgradePromise.then(timestampBytes => {
+    assert.true(timestampBytes !== null);
+    assert.true(timestampBytes.length > 0);
+    assert.true(unknownOts !== null);
+    assert.true(unknownOts.equals(timestampBytes));
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
+test('OpenTimestamps.upgrade()', assert => {
+  const upgradePromise = OpenTimestamps.upgrade(knownUnknownOts);
+  upgradePromise.then(timestampBytes => {
+    assert.true(timestampBytes !== null);
+    assert.true(timestampBytes.length > 0);
+    assert.true(knownUnknownOts !== null);
+    assert.false(knownUnknownOts.equals(timestampBytes));
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
+test('OpenTimestamps.upgrade()', assert => {
+  const upgradePromise = OpenTimestamps.upgrade(merkle3Ots);
+  upgradePromise.then(timestampBytes => {
+    assert.true(timestampBytes !== null);
+    assert.true(timestampBytes.length > 0);
+    assert.true(merkle3Ots !== null);
+    assert.false(merkle3Ots.equals(timestampBytes));
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
+test('OpenTimestamps.upgrade()', assert => {
+  const upgradePromise = OpenTimestamps.upgrade(badStampOts);
+  upgradePromise.then(timestampBytes => {
+    assert.true(timestampBytes !== null);
+    assert.true(timestampBytes.length > 0);
+    assert.true(badStampOts !== null);
+    assert.true(badStampOts.equals(timestampBytes));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
