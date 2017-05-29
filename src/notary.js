@@ -65,9 +65,13 @@ class TimeAttestation {
  */
 class UnknownAttestation extends TimeAttestation {
 
+  _TAG() {
+    return this._tag;
+  }
+
   constructor(tag, payload) {
     super();
-    this._TAG = tag;
+    this._tag = tag;
     this.payload = payload;
   }
 
@@ -76,12 +80,12 @@ class UnknownAttestation extends TimeAttestation {
   }
 
   static deserialize(ctxPayload, tag) {
-    const payload = ctxPayload.readVarbytes(this._MAX_PAYLOAD_SIZE());
+    const payload = ctxPayload.readVarbytes(new TimeAttestation()._MAX_PAYLOAD_SIZE());
     return new UnknownAttestation(tag, payload);
   }
 
   toString() {
-    return 'UnknownAttestation ' + Utils.bytesToHex(this._TAG) + ' ' + Utils.bytesToHex(this.payload);
+    return 'UnknownAttestation ' + Utils.bytesToHex(this._TAG()) + ' ' + Utils.bytesToHex(this.payload);
   }
 }
 
