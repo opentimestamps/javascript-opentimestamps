@@ -80,7 +80,7 @@ class UnknownAttestation extends TimeAttestation {
   }
 
   static deserialize(ctxPayload, tag) {
-    const payload = ctxPayload.readVarbytes(new TimeAttestation()._MAX_PAYLOAD_SIZE());
+    const payload = ctxPayload.readBytes(new TimeAttestation()._MAX_PAYLOAD_SIZE());
     return new UnknownAttestation(tag, payload);
   }
 

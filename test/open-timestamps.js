@@ -297,7 +297,7 @@ test('OpenTimestamps.upgrade()', assert => {
     assert.true(timestampBytes !== null);
     assert.true(timestampBytes.length > 0);
     assert.true(unknownOts !== null);
-    // assert.true(unknownOts.equals(timestampBytes));
+    assert.true(unknownOts.equals(timestampBytes));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -310,7 +310,7 @@ test('OpenTimestamps.upgrade()', assert => {
     assert.true(timestampBytes !== null);
     assert.true(timestampBytes.length > 0);
     assert.true(knownUnknownOts !== null);
-  // assert.true(knownUnknownOts.equals(timestampBytes));
+    assert.false(knownUnknownOts.equals(timestampBytes));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -323,7 +323,7 @@ test('OpenTimestamps.upgrade()', assert => {
     assert.true(timestampBytes !== null);
     assert.true(timestampBytes.length > 0);
     assert.true(merkle3Ots !== null);
-// assert.true(merkle3Ots.equals(timestampBytes));
+    assert.false(merkle3Ots.equals(timestampBytes));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -336,7 +336,7 @@ test('OpenTimestamps.upgrade()', assert => {
     assert.true(timestampBytes !== null);
     assert.true(timestampBytes.length > 0);
     assert.true(badStampOts !== null);
-// assert.true(badStampOts.equals(timestampBytes));
+    assert.true(badStampOts.equals(timestampBytes));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
