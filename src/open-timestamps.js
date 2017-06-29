@@ -387,7 +387,32 @@ module.exports = {
     }
 
     // console.log(Timestamp.strTreeExtended(detachedTimestamp.timestamp, 0));
-    return this.verifyTimestamp(detachedTimestamp.timestamp);
+
+    const self = this;
+    return new Promise((resolve, reject) => {
+      if (detachedTimestamp.timestamp.isTimestampComplete()) {
+        // Timestamp completed
+        self.verifyTimestamp(detachedTimestamp.timestamp).then(attestedTime => {
+          return resolve(attestedTime);
+        }).catch(err => {
+          return reject(err);
+        });
+      } else {
+        // Timestamp not completed
+        self.upgradeTimestamp(detachedTimestamp.timestamp).then(changed => {
+          if (changed) {
+            console.log('Timestamp upgraded');
+          }
+          self.verifyTimestamp(detachedTimestamp.timestamp).then(attestedTime => {
+            return resolve(attestedTime);
+          }).catch(err => {
+            return reject(err);
+          });
+        }).catch(err => {
+          return reject(err);
+        });
+      }
+    });
   },
 
   /** Verify a timestamp.
