@@ -385,12 +385,13 @@ class Timestamp {
    * @return {boolean} True if the timestamp is complete, False otherwise.
    */
   isTimestampComplete() {
+    var found = false;
     this.allAttestations().forEach(attestation => {
       if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-        return true;
+        found = true;
       }
     });
-    return false;
+    return found;
   }
 
 }
