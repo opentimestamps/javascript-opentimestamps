@@ -6,7 +6,7 @@ const DetachedTimestampFile = require('../src/detached-timestamp-file.js');
 
 function sha256(buffer) {
   const ctx = new Context.StreamDeserialization(buffer);
-  const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
+  const detachedTimestampFile = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
   return detachedTimestampFile.fileDigest();
 }
 

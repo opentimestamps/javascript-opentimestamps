@@ -124,34 +124,46 @@ test('OpenTimestamps.info()', assert => {
   assert.end();
 });
 
-// STAMP TESTS FILE
+test('OpenTimestamps.DetachedTimestampFile()', assert => {
+  const detached1 = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), incomplete);
 
+  const ctx = new Context.StreamDeserialization(incomplete);
+  const detached2 = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
+
+  const ctx1 = new Context.StreamDeserialization(incomplete);
+  const fdHash = new Ops.OpSHA256().hashFd(ctx1);
+  const detached3 = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), fdHash);
+
+  assert.true(detached1.equals(detached2));
+  assert.true(detached2.equals(detached3));
+  assert.end();
+});
+
+// STAMP TESTS FILE
+/*
 test('OpenTimestamps.stamp()', assert => {
-  const timestampBytesPromise = OpenTimestamps.stamp(incomplete);
-  timestampBytesPromise.then(timestampBytes => {
+  /*var self = this;
+  var detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), incomplete);
+  OpenTimestamps.stamp(detached).then(timestampBytes => {
     const ctx = new Context.StreamDeserialization(timestampBytes);
-    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+    const detachedTimestampFile = DetachedTimestampFile.deserialize(ctx);
     assert.false(detachedTimestampFile === undefined);
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
   });
-});
+}); */
 
 // STAMP TESTS HASH
 test('OpenTimestamps.stamp()', assert => {
-  const sha256 = '05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9';
+  // Pass single input file
+  const sha256 = Utils.hexToBytes('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9');
+  const detached = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), sha256);
 
-  const ctx = new Context.StreamDeserialization(incomplete);
-  const fdHash = new Ops.OpSHA256().hashFd(ctx);
-  assert.equals(sha256, Utils.bytesToHex(fdHash), 'checking hashes');
-
-  const timestampBytesPromise = OpenTimestamps.stamp(fdHash, true);
-  timestampBytesPromise.then(timestampBytes => {
-    const ctx = new Context.StreamDeserialization(timestampBytes);
-    const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-    assert.false(detachedTimestampFile === undefined);
-    assert.equals(sha256, Utils.bytesToHex(detachedTimestampFile.fileDigest()), 'checking hashes');
+  OpenTimestamps.stamp(detached).then(resultTimestamp => {
+    assert.false(resultTimestamp === undefined);
+    assert.false(detached === undefined);
+    assert.true(Utils.arrEq(sha256, detached.fileDigest()));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -160,36 +172,32 @@ test('OpenTimestamps.stamp()', assert => {
 
 // MULTISTAMP TESTS HASH
 
-test('OpenTimestamps.multistamp()', assert => {
+test('OpenTimestamps.stamp()', assert => {
   const files = [
     incomplete,
     helloworld
   ];
   const sha256 = [
-    '05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9',
-    '03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340'
+    Utils.hexToBytes('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9'),
+    Utils.hexToBytes('03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340')
   ];
-  const fdHashes = [];
+  const detaches = [];
   files.forEach(file => {
-    const fdHash = new Ops.OpSHA256().hashFd(new Context.StreamDeserialization(file));
-    fdHashes.push(fdHash);
+    const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(file));
+    detaches.push(detached);
   });
   files.forEach((files, i) => {
-    assert.equals(sha256[i], Utils.bytesToHex(fdHashes[i]), 'checking hashes');
+    assert.true(Utils.arrEq(sha256[i], detaches[i].fileDigest()));
   });
 
-  const timestampBytesPromise = OpenTimestamps.multistamp(fdHashes, true);
-  timestampBytesPromise.then(timestamps => {
-    assert.false(timestamps === undefined);
-    assert.equals(timestamps.length, fdHashes.length);
+  OpenTimestamps.stamp(detaches).then(resultTimestamp => {
+    assert.false(resultTimestamp === undefined);
+    assert.equals(detaches.length, files.length);
 
-    timestamps.forEach((timestamp, i) => {
-      const ctx = new Context.StreamDeserialization(timestamps[i]);
-      const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-      assert.false(detachedTimestampFile === undefined);
-      assert.equals(sha256[i], Utils.bytesToHex(detachedTimestampFile.fileDigest()), 'checking hashes');
+    detaches.forEach((timestamp, i) => {
+      assert.false(timestamp === undefined);
+      assert.true(Utils.arrEq(sha256[i], timestamp.fileDigest()));
     });
-
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -199,8 +207,9 @@ test('OpenTimestamps.multistamp()', assert => {
 // VERIFY TESTS
 
 test('OpenTimestamps.verify()', assert => {
-  const verifyPromise = OpenTimestamps.verify(incompleteOts, incomplete, false);
-  verifyPromise.then(result => {
+  const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(incomplete));
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(incompleteOts));
+  OpenTimestamps.verify(detachedOts, detached).then(result => {
     assert.equal(result, 1473227803); // verify on python call upgrade, in this case result should be 1473227803
     assert.end();
   }).catch(err => {
@@ -209,8 +218,9 @@ test('OpenTimestamps.verify()', assert => {
 });
 
 test('OpenTimestamps.verify()', assert => {
-  const verifyPromise = OpenTimestamps.verify(helloworldOts, helloworld, false);
-  verifyPromise.then(result => {
+  const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(helloworld));
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts));
+  OpenTimestamps.verify(detachedOts, detached).then(result => {
     assert.true(result !== undefined);
     assert.equal(result, 1432827678);
     assert.end();
@@ -220,8 +230,9 @@ test('OpenTimestamps.verify()', assert => {
 });
 
 test('OpenTimestamps.verify()', assert => {
-  const verifyPromise = OpenTimestamps.verify(unknownOts, unknown, false);
-  verifyPromise.then(result => {
+  const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(unknown));
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(unknownOts));
+  OpenTimestamps.verify(detachedOts, detached).then(result => {
     assert.true(result === undefined);
     assert.end();
   }).catch(err => {
@@ -230,11 +241,12 @@ test('OpenTimestamps.verify()', assert => {
 });
 
 test('OpenTimestamps.verify()', assert => {
-  const verifyPromise = OpenTimestamps.verify(knownUnknownOts, knownUnknown, false);
-  verifyPromise.then(result => {
+  const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(knownUnknown));
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(knownUnknownOts));
+  OpenTimestamps.verify(detachedOts, detached).then(result => {
     assert.true(result !== undefined);
-    assert.true(knownUnknownOts !== undefined);
-    assert.true(knownUnknown !== undefined);
+    assert.true(detached !== undefined);
+    assert.true(detachedOts !== undefined);
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -242,11 +254,12 @@ test('OpenTimestamps.verify()', assert => {
 });
 
 test('OpenTimestamps.verify()', assert => {
-  const verifyPromise = OpenTimestamps.verify(badStampOts, badStamp, false);
-  verifyPromise.then(result => {
+  const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(badStamp));
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(badStampOts));
+  OpenTimestamps.verify(detachedOts, detached).then(result => {
     assert.true(result === undefined);
-    assert.true(badStamp !== undefined);
-    assert.true(badStampOts !== undefined);
+    assert.true(detached !== undefined);
+    assert.true(detachedOts !== undefined);
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -254,11 +267,12 @@ test('OpenTimestamps.verify()', assert => {
 });
 
 test('OpenTimestamps.verify()', assert => {
-  const verifyPromise = OpenTimestamps.verify(merkle3Ots, merkle3, false);
-  verifyPromise.then(result => {
+  const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(merkle3));
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(merkle3Ots));
+  OpenTimestamps.verify(detachedOts, detached).then(result => {
     assert.true(result !== undefined);
-    assert.true(merkle3 !== undefined);
-    assert.true(merkle3Ots !== undefined);
+    assert.true(detached !== undefined);
+    assert.true(detachedOts !== undefined);
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -268,11 +282,13 @@ test('OpenTimestamps.verify()', assert => {
 // UPGRADE TESTS
 
 test('OpenTimestamps.upgrade()', assert => {
-  const upgradePromise = OpenTimestamps.upgrade(incompleteOts);
-  upgradePromise.then(timestampBytes => {
-    assert.true(timestampBytes !== null);
-    assert.true(timestampBytes.length > 0);
-    assert.false(incompleteOts.equals(timestampBytes));
+  const detached = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(incompleteOts));
+  const detachedBefore = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(incompleteOts));
+
+  OpenTimestamps.upgrade(detached).then(changed => {
+    assert.true(detached !== null);
+    assert.true(changed);
+    assert.false(detached.equals(detachedBefore));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -280,11 +296,13 @@ test('OpenTimestamps.upgrade()', assert => {
 });
 
 test('OpenTimestamps.upgrade()', assert => {
-  const upgradePromise = OpenTimestamps.upgrade(helloworldOts);
-  upgradePromise.then(timestampBytes => {
-    assert.true(timestampBytes !== null);
-    assert.true(timestampBytes.length > 0);
-    assert.true(helloworldOts.equals(timestampBytes));
+  const detached = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts));
+  const detachedBefore = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts));
+
+  OpenTimestamps.upgrade(detached).then(changed => {
+    assert.true(detached !== null);
+    assert.false(changed);
+    assert.true(detached.equals(detachedBefore));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -292,12 +310,13 @@ test('OpenTimestamps.upgrade()', assert => {
 });
 
 test('OpenTimestamps.upgrade()', assert => {
-  const upgradePromise = OpenTimestamps.upgrade(unknownOts);
-  upgradePromise.then(timestampBytes => {
-    assert.true(timestampBytes !== null);
-    assert.true(timestampBytes.length > 0);
-    assert.true(unknownOts !== null);
-    assert.true(unknownOts.equals(timestampBytes));
+  const detached = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(unknownOts));
+  const detachedBefore = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(unknownOts));
+
+  OpenTimestamps.upgrade(detached).then(changed => {
+    assert.true(detached !== null);
+    assert.false(changed);
+    assert.true(detached.equals(detachedBefore));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -305,12 +324,13 @@ test('OpenTimestamps.upgrade()', assert => {
 });
 
 test('OpenTimestamps.upgrade()', assert => {
-  const upgradePromise = OpenTimestamps.upgrade(knownUnknownOts);
-  upgradePromise.then(timestampBytes => {
-    assert.true(timestampBytes !== null);
-    assert.true(timestampBytes.length > 0);
-    assert.true(knownUnknownOts !== null);
-    assert.false(knownUnknownOts.equals(timestampBytes));
+  const detached = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(knownUnknownOts));
+  const detachedBefore = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(knownUnknownOts));
+
+  OpenTimestamps.upgrade(detached).then(changed => {
+    assert.true(detached !== null);
+    assert.true(changed);
+    assert.false(detached.equals(detachedBefore));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -318,12 +338,13 @@ test('OpenTimestamps.upgrade()', assert => {
 });
 
 test('OpenTimestamps.upgrade()', assert => {
-  const upgradePromise = OpenTimestamps.upgrade(merkle3Ots);
-  upgradePromise.then(timestampBytes => {
-    assert.true(timestampBytes !== null);
-    assert.true(timestampBytes.length > 0);
-    assert.true(merkle3Ots !== null);
-    assert.false(merkle3Ots.equals(timestampBytes));
+  const detached = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(merkle3Ots));
+  const detachedBefore = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(merkle3Ots));
+
+  OpenTimestamps.upgrade(detached).then(changed => {
+    assert.true(detached !== null);
+    assert.true(changed);
+    assert.false(detached.equals(detachedBefore));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -331,12 +352,13 @@ test('OpenTimestamps.upgrade()', assert => {
 });
 
 test('OpenTimestamps.upgrade()', assert => {
-  const upgradePromise = OpenTimestamps.upgrade(badStampOts);
-  upgradePromise.then(timestampBytes => {
-    assert.true(timestampBytes !== null);
-    assert.true(timestampBytes.length > 0);
-    assert.true(badStampOts !== null);
-    assert.true(badStampOts.equals(timestampBytes));
+  const detached = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(badStampOts));
+  const detachedBefore = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(badStampOts));
+
+  OpenTimestamps.upgrade(detached).then(changed => {
+    assert.true(detached !== null);
+    assert.false(changed);
+    assert.true(detached.equals(detachedBefore));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
