@@ -163,6 +163,9 @@ class OpAppend extends OpBinary {
   static deserializeFromTag(ctx, tag) {
     return super.deserializeFromTag(ctx, tag);
   }
+  equals(another) {
+    return (another instanceof OpAppend) && Utils.arrEq(this.arg, another.arg);
+  }
 }
 
 /**
@@ -189,6 +192,9 @@ class OpPrepend extends OpBinary {
   }
   static deserializeFromTag(ctx, tag) {
     return super.deserializeFromTag(ctx, tag);
+  }
+  equals(another) {
+    return (another instanceof OpPrepend) && Utils.arrEq(this.arg, another.arg);
   }
 }
 
@@ -244,6 +250,9 @@ class OpReverse extends OpUnary {
   static deserializeFromTag(ctx, tag) {
     return super.deserializeFromTag(ctx, tag);
   }
+  equals(another) {
+    return (another instanceof OpReverse) && Utils.arrEq(this.arg, another.arg);
+  }
 }
 
 /**
@@ -275,6 +284,9 @@ class OpHexlify extends OpUnary {
   }
   static deserializeFromTag(ctx, tag) {
     return super.deserializeFromTag(ctx, tag);
+  }
+  equals(another) {
+    return (another instanceof OpHexlify) && Utils.arrEq(this.arg, another.arg);
   }
 }
 
@@ -364,6 +376,9 @@ class OpSHA1 extends CryptOp {
   call(msg) {
     return super.call(this, msg);
   }
+  equals(another) {
+    return another instanceof OpSHA1;
+  }
 }
 
 /**
@@ -390,6 +405,9 @@ class OpRIPEMD160 extends CryptOp {
   }
   call(msg) {
     return super.call(this, msg);
+  }
+  equals(another) {
+    return another instanceof OpRIPEMD160;
   }
 }
 
@@ -419,6 +437,10 @@ class OpSHA256 extends CryptOp {
   call(msg) {
     return super.call(this, msg);
   }
+
+  equals(another) {
+    return another instanceof OpSHA256;
+  }
 }
 
 /**
@@ -446,6 +468,10 @@ class OpKeccak256 extends CryptOp {
   }
   call(msg) {
     return super.call(this, msg);
+  }
+
+  equals(another) {
+    return another instanceof OpKeccak256;
   }
 }
 

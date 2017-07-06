@@ -87,6 +87,11 @@ class UnknownAttestation extends TimeAttestation {
   toString() {
     return 'UnknownAttestation ' + Utils.bytesToHex(this._TAG()) + ' ' + Utils.bytesToHex(this.payload);
   }
+  equals(another) {
+    return (another instanceof UnknownAttestation) &&
+        (Utils.arrEq(this._TAG(), another._TAG())) &&
+        (Utils.arrEq(this.payload, another.payload));
+  }
 }
 
 /**
@@ -155,6 +160,11 @@ class PendingAttestation extends TimeAttestation {
   toString() {
     return 'PendingAttestation(\'' + this.uri + '\')';
   }
+  equals(another) {
+    return (another instanceof PendingAttestation) &&
+        (Utils.arrEq(this._TAG(), another._TAG())) &&
+        (this.uri === another.uri);
+  }
 }
 
 /**
@@ -203,6 +213,11 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
   toString() {
     return 'BitcoinBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')';
   }
+  equals(another) {
+    return (another instanceof BitcoinBlockHeaderAttestation) &&
+        (Utils.arrEq(this._TAG(), another._TAG())) &&
+        (this.height === another.height);
+  }
 }
 
 class EthereumBlockHeaderAttestation extends TimeAttestation {
@@ -240,6 +255,12 @@ class EthereumBlockHeaderAttestation extends TimeAttestation {
       console.error('Digest does not match merkleroot');
     }
     return block.timestamp;
+  }
+
+  equals(another) {
+    return (another instanceof EthereumBlockHeaderAttestation) &&
+        (Utils.arrEq(this._TAG(), another._TAG())) &&
+        (this.height === another.height);
   }
 
 }

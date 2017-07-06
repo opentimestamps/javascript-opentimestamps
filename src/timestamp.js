@@ -31,6 +31,10 @@ class Timestamp {
     this.ops = new Map();
   }
 
+  getDigest() {
+    return this.msg;
+  }
+
   /**
    * Deserialize a Timestamp.
    * Because the serialization format doesn't include the message that the
@@ -394,6 +398,61 @@ class Timestamp {
     return found;
   }
 
+  /**  Compare timestamps
+   * @param timestamp the timestamp to compare with
+   * @return Returns true if timestamps are equals
+   */
+  equals(another) {
+    if (!(another instanceof Timestamp)) {
+      return false;
+    }
+    if (Utils.arrEq(this.getDigest(), another.getDigest()) === false) {
+      return false;
+    }
+
+    // Check attestations
+    if (this.getAttestations().size !== another.getAttestations().size) {
+      return false;
+    }
+    if (this.attestations.length !== another.attestations.length) {
+      return false;
+    }
+
+    for (let i = 0; i < this.attestations.length; i++) {
+      const a1 = this.attestations[i];
+      const a2 = another.attestations[i];
+      if (!(a1.equals(a2))) {
+        return false;
+      }
+    }
+
+    // Check operations
+    if (this.ops.size !== another.ops.size) {
+      return false;
+    }
+
+    let it1 = this.ops.keys();
+    let it2 = this.ops.keys();
+    for (let i = 0; i < this.ops.size; i++) {
+      const op1 = it1.next().value;
+      const op2 = it2.next().value;
+      if (!(op1.equals(op2))) {
+        return false;
+      }
+    }
+
+    it1 = this.ops.values();
+    it2 = this.ops.values();
+    for (let i = 0; i < this.ops.size; i++) {
+      const t1 = it1.next().value;
+      const t2 = it2.next().value;
+      if (!(t1.equals(t2))) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
 
 module.exports = Timestamp;
