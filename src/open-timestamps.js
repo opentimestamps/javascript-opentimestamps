@@ -24,35 +24,19 @@ module.exports = {
   /**
    * Show information on a timestamp.
    * @exports OpenTimestamps/info
-   * @param {ArrayBuffer} ots - The ots array buffer.
+   * @param {DetachedTimestampFile} detached - The array of detached file to stamp.
+   * @return {String} The message to print.
    */
-  info(ots) {
-    if (ots === undefined) {
-      console.error('No ots file');
-      return 'No ots file';
+  info(detached) {
+    if ((detached === undefined) && !(detached instanceof DetachedTimestampFile)) {
+      console.error('Invalid input');
+      return 'Invalid input';
     }
 
-    let timestamp;
-    let hashOp;
-    let firstLine;
-
-    if (ots instanceof Timestamp) {
-      timestamp = ots;
-      const fileHash = Utils.bytesToHex(timestamp.msg);
-      firstLine = ' hash: ' + fileHash + '\n';
-    } else {
-      // Deserialize timestamp from file
-      try {
-        const ctx = new Context.StreamDeserialization(ots);
-        const detachedTimestampFile = DetachedTimestampFile.deserialize(ctx);
-        timestamp = detachedTimestampFile.timestamp;
-        hashOp = detachedTimestampFile.fileHashOp._HASHLIB_NAME();
-        const fileHash = Utils.bytesToHex(timestamp.msg);
-        firstLine = 'File ' + hashOp + ' hash: ' + fileHash + '\n';
-      } catch (err) {
-        return 'Error deserialization ' + err;
-      }
-    }
+    const timestamp = detached.timestamp;
+    const hashOp = detached.fileHashOp._HASHLIB_NAME();
+    const fileHash = Utils.bytesToHex(detached.fileDigest());
+    const firstLine = 'File ' + hashOp + ' hash: ' + fileHash + '\n';
 
     try {
       return firstLine + 'Timestamp:\n' + timestamp.strTree();
@@ -206,7 +190,7 @@ module.exports = {
         if (timestamp === undefined) {
           return reject();
         }
-        resolve(timestamp);
+        resolve();
       }).catch(err => {
         reject(err);
       });

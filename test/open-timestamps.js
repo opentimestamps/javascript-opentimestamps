@@ -81,7 +81,8 @@ test('setup', assert => {
 
 // INFO TESTS
 test('OpenTimestamps.info()', assert => {
-  const otsInfoCalc = OpenTimestamps.info(incompleteOts);
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(incompleteOts));
+  const otsInfoCalc = OpenTimestamps.info(detachedOts);
   assert.false(otsInfoCalc === undefined);
   assert.false(incompleteOts === undefined);
   assert.true(incompleteOtsInfo.equals(new Buffer(otsInfoCalc)));
@@ -89,7 +90,8 @@ test('OpenTimestamps.info()', assert => {
 });
 
 test('OpenTimestamps.info()', assert => {
-  const merkle2OtsInfoCalc = OpenTimestamps.info(merkle2Ots);
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(merkle2Ots));
+  const merkle2OtsInfoCalc = OpenTimestamps.info(detachedOts);
   assert.false(merkle2OtsInfoCalc === undefined);
   assert.false(merkle2Ots === undefined);
   assert.true(merkle2OtsInfo.equals(new Buffer(merkle2OtsInfoCalc)));
@@ -97,28 +99,32 @@ test('OpenTimestamps.info()', assert => {
 });
 
 test('OpenTimestamps.info()', assert => {
-  const unknownInfoCalc = OpenTimestamps.info(unknownOts);
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(unknownOts));
+  const unknownInfoCalc = OpenTimestamps.info(detachedOts);
   assert.false(unknownInfoCalc === undefined);
   assert.false(unknownOts === undefined);
   assert.end();
 });
 
 test('OpenTimestamps.info()', assert => {
-  const knownUnknownInfoCalc = OpenTimestamps.info(knownUnknownOts);
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(knownUnknownOts));
+  const knownUnknownInfoCalc = OpenTimestamps.info(detachedOts);
   assert.false(knownUnknownInfoCalc === undefined);
   assert.false(knownUnknownOts === undefined);
   assert.end();
 });
 
 test('OpenTimestamps.info()', assert => {
-  const merkle3InfoCalc = OpenTimestamps.info(merkle3Ots);
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(merkle3Ots));
+  const merkle3InfoCalc = OpenTimestamps.info(detachedOts);
   assert.false(merkle3InfoCalc === undefined);
   assert.false(merkle3Ots === undefined);
   assert.end();
 });
 
 test('OpenTimestamps.info()', assert => {
-  const badStampInfoCalc = OpenTimestamps.info(badStampOts);
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(badStampOts));
+  const badStampInfoCalc = OpenTimestamps.info(detachedOts);
   assert.false(badStampInfoCalc === undefined);
   assert.false(badStampOts === undefined);
   assert.end();
@@ -144,8 +150,7 @@ test('OpenTimestamps.DetachedTimestampFile()', assert => {
 test('OpenTimestamps.stamp()', assert => {
   const sha256 = Utils.hexToBytes('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9');
   const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), incomplete);
-  OpenTimestamps.stamp(detached).then(resultTimestamp => {
-    assert.false(resultTimestamp === undefined);
+  OpenTimestamps.stamp(detached).then(() => {
     assert.false(detached === undefined);
     assert.true(Utils.arrEq(sha256, detached.fileDigest()));
     assert.end();
@@ -160,8 +165,7 @@ test('OpenTimestamps.stamp()', assert => {
   const sha256 = Utils.hexToBytes('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9');
   const detached = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), sha256);
 
-  OpenTimestamps.stamp(detached).then(resultTimestamp => {
-    assert.false(resultTimestamp === undefined);
+  OpenTimestamps.stamp(detached).then(() => {
     assert.false(detached === undefined);
     assert.true(Utils.arrEq(sha256, detached.fileDigest()));
     assert.end();
@@ -190,8 +194,7 @@ test('OpenTimestamps.stamp()', assert => {
     assert.true(Utils.arrEq(sha256[i], detaches[i].fileDigest()));
   });
 
-  OpenTimestamps.stamp(detaches).then(resultTimestamp => {
-    assert.false(resultTimestamp === undefined);
+  OpenTimestamps.stamp(detaches).then(() => {
     assert.equals(detaches.length, files.length);
 
     detaches.forEach((timestamp, i) => {
