@@ -140,19 +140,20 @@ test('OpenTimestamps.DetachedTimestampFile()', assert => {
 });
 
 // STAMP TESTS FILE
-/*
+
 test('OpenTimestamps.stamp()', assert => {
-  /*var self = this;
+  var self = this;
+  const sha256 = Utils.hexToBytes('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9');
   var detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), incomplete);
-  OpenTimestamps.stamp(detached).then(timestampBytes => {
-    const ctx = new Context.StreamDeserialization(timestampBytes);
-    const detachedTimestampFile = DetachedTimestampFile.deserialize(ctx);
-    assert.false(detachedTimestampFile === undefined);
+  OpenTimestamps.stamp(detached).then(resultTimestamp => {
+    assert.false(resultTimestamp === undefined);
+    assert.false(detached === undefined);
+    assert.true(Utils.arrEq(sha256, detached.fileDigest()));
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
   });
-}); */
+});
 
 // STAMP TESTS HASH
 test('OpenTimestamps.stamp()', assert => {
