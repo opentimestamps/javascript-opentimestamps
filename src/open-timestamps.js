@@ -44,7 +44,7 @@ module.exports = {
       // Deserialize timestamp from file
       try {
         const ctx = new Context.StreamDeserialization(ots);
-        const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+        const detachedTimestampFile = DetachedTimestampFile.deserialize(ctx);
         timestamp = detachedTimestampFile.timestamp;
         hashOp = detachedTimestampFile.fileHashOp._HASHLIB_NAME();
         const fileHash = Utils.bytesToHex(timestamp.msg);
@@ -85,7 +85,7 @@ module.exports = {
       // Deserialize timestamp from file
       try {
         const ctx = new Context.StreamDeserialization(ots);
-        const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
+        const detachedTimestampFile = DetachedTimestampFile.deserialize(ctx);
         timestamp = detachedTimestampFile.timestamp;
         json.hash = Utils.bytesToHex(timestamp.msg);
         json.op = detachedTimestampFile.fileHashOp._HASHLIB_NAME();
@@ -107,111 +107,31 @@ module.exports = {
   },
 
   /**
-   * Create timestamp with the aid of a remote calendar. May be specified multiple times.
+   * Create timestamp with the aid of a remote calendar for one or multiple files.
    * @exports OpenTimestamps/stamp
-   * @param {ArrayBuffer} plain - The plain array buffer to stamp.
-   * @param {Boolean} isHash - 1 = Hash , 0 = Data File
-   */
-  stamp(plain, isHash) {
-    return new Promise((resolve, reject) => {
-      let fileTimestamp;
-      if (isHash !== undefined && isHash === true) {
-        // Read Hash
-        try {
-          fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromHash(new Ops.OpSHA256(), Array.from(plain));
-        } catch (err) {
-          return reject(err);
-        }
-      } else {
-        // Read from file stream
-        try {
-          const ctx = new Context.StreamDeserialization(plain);
-          fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
-        } catch (err) {
-          return reject(err);
-        }
-      }
-
-      /* Add nonce:
-       * Remember that the files - and their timestamps - might get separated
-       * later, so if we didn't use a nonce for every file, the timestamp
-       * would leak information on the digests of adjacent files.
-       * */
-      let merkleRoot;
-      try {
-        const bytesRandom16 = Utils.randBytes(16);
-
-        // nonce_appended_stamp = file_timestamp.timestamp.ops.add(OpAppend(os.urandom(16)))
-        const opAppend = new Ops.OpAppend(Utils.arrayToBytes(bytesRandom16));
-        let nonceAppendedStamp = fileTimestamp.timestamp.ops.get(opAppend);
-        if (nonceAppendedStamp === undefined) {
-          nonceAppendedStamp = new Timestamp(opAppend.call(fileTimestamp.timestamp.msg));
-          fileTimestamp.timestamp.ops.set(opAppend, nonceAppendedStamp);
-        }
-
-        // merkle_root = nonce_appended_stamp.ops.add(OpSHA256())
-        const opSHA256 = new Ops.OpSHA256();
-        merkleRoot = nonceAppendedStamp.ops.get(opSHA256);
-        if (merkleRoot === undefined) {
-          merkleRoot = new Timestamp(opSHA256.call(nonceAppendedStamp.msg));
-          nonceAppendedStamp.ops.set(opSHA256, merkleRoot);
-        }
-      } catch (err) {
-        return reject(err);
-      }
-
-      // merkleTip  = make_merkle_tree(merkle_roots)
-      const merkleTip = merkleRoot;
-
-      // Calendars
-      const calendarUrls = [];
-      calendarUrls.push('https://alice.btc.calendar.opentimestamps.org');
-      // calendarUrls.append('https://b.pool.opentimestamps.org');
-      calendarUrls.push('https://finney.calendar.eternitywall.com');
-
-      this.createTimestamp(merkleTip, calendarUrls).then(timestamp => {
-        if (timestamp === undefined) {
-          return reject();
-        }
-        // Timestamp serialization
-        const css = new Context.StreamSerialization();
-        fileTimestamp.serialize(css);
-        resolve(css.getOutput());
-      }).catch(err => {
-        reject(err);
-      });
-    });
-  },
-
-  /**
-   * Create timestamp with the aid of a remote calendar for multiple files.
-   * @exports OpenTimestamps/stamp
-   * @param {ArrayBuffer[]} plains - The array of files or hash to stamp.
-   * @param {Boolean} isHash - 1 = Hash , 0 = Data File.
+   * @param {DetachedTimestampFile[]} detaches - The array of detached file to stamp.
    * @param {Object} options - publicCalendars, Public calendar url list; m, At least M calendars replied; privateCalendars, Private calendar url list with secret key.
    */
-  multistamp(plains, isHash, options) {
+  stamp(detaches, options) {
     return new Promise((resolve, reject) => {
       const fileTimestamps = [];
       const merkleRoots = [];
 
-      plains.forEach(plain => {
-        let fileTimestamp;
-        if (isHash !== undefined && isHash === true) {
-          // Read Hash
-          try {
-            fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromHash(new Ops.OpSHA256(), plain);
-          } catch (err) {
-            return reject(err);
-          }
-        } else {
-          // Read from file stream
-          try {
-            const ctx = new Context.StreamDeserialization(plain);
-            fileTimestamp = DetachedTimestampFile.DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), ctx);
-          } catch (err) {
-            return reject(err);
-          }
+      // Parse input detaches
+      let detachedList;
+      if (detaches instanceof DetachedTimestampFile) {
+        detachedList = [detaches];
+      } else if (detaches instanceof Array) {
+        detachedList = detaches;
+      } else {
+        return reject('Invalid input');
+      }
+
+      // Fill merkle tree leaf
+      detachedList.forEach(fileTimestamp => {
+        if (!(fileTimestamp instanceof DetachedTimestampFile)) {
+          console.error('Invalid input');
+          return reject('Invalid input');
         }
 
         /* Add nonce:
@@ -246,6 +166,7 @@ module.exports = {
         merkleRoots.push(merkleRoot);
       });
 
+      // Build merkle tree
       const merkleTip = Merkle.makeMerkleTree(merkleRoots);
 
       // Parse options
@@ -280,21 +201,12 @@ module.exports = {
         }
       }
 
+      // Build timestamp from the merkle root
       this.createTimestamp(merkleTip, options.publicCalendars, options.m, options.privateCalendars).then(timestamp => {
         if (timestamp === undefined) {
           return reject();
         }
-
-        // Timestamps serialization
-        const proofs = [];
-
-        fileTimestamps.forEach(fileTimestamp => {
-          const css = new Context.StreamSerialization();
-          fileTimestamp.serialize(css);
-          proofs.push(css.getOutput());
-        });
-
-        resolve(proofs);
+        resolve(timestamp);
       }).catch(err => {
         reject(err);
       });
@@ -340,70 +252,35 @@ module.exports = {
   /**
    * Verify a timestamp.
    * @exports OpenTimestamps/verify
-   * @param {ArrayBuffer} ots - The ots array buffer containing the proof to verify.
-   * @param {ArrayBuffer} plain - The plain array buffer to verify.
+   * @param {DetachedTimestampFile} detachedStamped - The detached of stamped file.
+   * @param {DetachedTimestampFile} detachedOriginal - The detached of original file.
    */
-  verify(ots, plain, isHash) {
-    // Read OTS
-    let detachedTimestamp;
-    try {
-      const ctx = new Context.StreamDeserialization(ots);
-      detachedTimestamp = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-    } catch (err) {
-      return new Promise((resolve, reject) => {
-        reject(err);
-      });
-    }
-
-    let actualFileDigest;
-    if (isHash === undefined || !isHash) {
-      // Read from file stream
-      try {
-        const ctxHashfd = new Context.StreamDeserialization(plain);
-        actualFileDigest = detachedTimestamp.fileHashOp.hashFd(ctxHashfd);
-      } catch (err) {
-        return new Promise((resolve, reject) => {
-          reject(err);
-        });
-      }
-    } else {
-      // Read Hash
-      try {
-        actualFileDigest = Array.from(plain);
-      } catch (err) {
-        return new Promise((resolve, reject) => {
-          reject(err);
-        });
-      }
-    }
-
-    const detachedFileDigest = detachedTimestamp.fileDigest();
-    if (!Utils.arrEq(actualFileDigest, detachedFileDigest)) {
-      console.error('Expected digest ' + Utils.bytesToHex(detachedTimestamp.fileDigest()));
+  verify(detachedStamped, detachedOriginal) {
+    // Compare stamped vs original detached file
+    if (!Utils.arrEq(detachedStamped.fileDigest(), detachedOriginal.fileDigest())) {
+      console.error('Expected digest ' + Utils.bytesToHex(detachedStamped.fileDigest()));
       console.error('File does not match original!');
       return new Promise((resolve, reject) => {
-        reject();
+        reject('File does not match original!');
       });
     }
-
-    // console.log(Timestamp.strTreeExtended(detachedTimestamp.timestamp, 0));
 
     const self = this;
     return new Promise((resolve, reject) => {
-      if (detachedTimestamp.timestamp.isTimestampComplete()) {
+      if (detachedStamped.timestamp.isTimestampComplete()) {
         // Timestamp completed
-        self.verifyTimestamp(detachedTimestamp.timestamp).then(attestedTime => {
+        self.verifyTimestamp(detachedStamped.timestamp).then(attestedTime => {
           return resolve(attestedTime);
         }).catch(err => {
           return reject(err);
         });
       } else {
         // Timestamp not completed
-        self.upgradeTimestamp(detachedTimestamp.timestamp).then(changed => {
+        self.upgradeTimestamp(detachedStamped.timestamp).then(changed => {
           if (changed) {
             console.log('Timestamp upgraded');
           }
-          self.verifyTimestamp(detachedTimestamp.timestamp).then(attestedTime => {
+          self.verifyTimestamp(detachedStamped.timestamp).then(attestedTime => {
             return resolve(attestedTime);
           }).catch(err => {
             return reject(err);
@@ -491,40 +368,24 @@ module.exports = {
   },
 
   /** Upgrade a timestamp.
-   * @param {ArrayBuffer} ots - The ots array buffer containing the proof to verify.
+   * @param {DetachedTimestampFile} detached - The DetachedTimestampFile object.
    * @return {Promise} resolve(changed) : changed = True if the timestamp has changed, False otherwise.
    */
-  upgrade(ots) {
+  upgrade(detached) {
     return new Promise((resolve, reject) => {
-      // Read DetachedTimestampFile
-      let detachedTimestampFile;
-      try {
-        const ctx = new Context.StreamDeserialization(ots);
-        detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-      } catch (err) {
-        return reject(err);
-      }
-
       // Upgrade timestamp
-      this.upgradeTimestamp(detachedTimestampFile.timestamp).then(changed => {
+      this.upgradeTimestamp(detached.timestamp).then(changed => {
         if (changed) {
           // console.log('Timestamp upgraded');
         }
 
-        if (detachedTimestampFile.timestamp.isTimestampComplete()) {
+        if (detached.timestamp.isTimestampComplete()) {
           // console.log('Timestamp complete');
         } else {
           // console.log('Timestamp not complete');
         }
 
-        // serialization
-        try {
-          const css = new Context.StreamSerialization();
-          detachedTimestampFile.serialize(css);
-          resolve(new Buffer(css.getOutput()));
-        } catch (err) {
-          reject(err);
-        }
+        resolve(changed);
       }).catch(err => {
         reject(err);
       });
