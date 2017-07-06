@@ -70,10 +70,24 @@ class DetachedTimestampFile {
 
   /**
    * Deserialize a Timestamp File.
-   * @param {StreamDeserializationContext} ctx - The stream deserialization context.
+   * @param {StreamDeserializationContext} buffer - The stream deserialization context.
    * @return {DetachedTimestampFile} The generated DetachedTimestampFile object.
    */
-  static deserialize(ctx) {
+  static deserialize(buffer) {
+    // If ctx is a buffer, build the StreamDeserialization obj
+    let ctx;
+    if (buffer instanceof Context.StreamDeserialization) {
+      ctx = buffer;
+    } else if (buffer instanceof Array) {
+      ctx = new Context.StreamDeserialization(buffer);
+    } else if (buffer instanceof Uint8Array) {
+      ctx = new Context.StreamDeserialization(Array.from(buffer));
+    } else if (buffer instanceof ArrayBuffer) {
+      ctx = new Context.StreamDeserialization(Array.from(buffer));
+    } else {
+      throw new Error('StreamDeserialization deserialize: Invalid param');
+    }
+
     ctx.assertMagic(HEADER_MAGIC);
     ctx.readVaruint();
 
