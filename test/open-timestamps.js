@@ -81,7 +81,8 @@ test('setup', assert => {
 
 // INFO TESTS
 test('OpenTimestamps.info()', assert => {
-  const otsInfoCalc = OpenTimestamps.info(incompleteOts);
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(incompleteOts));
+  const otsInfoCalc = OpenTimestamps.info(detachedOts);
   assert.false(otsInfoCalc === undefined);
   assert.false(incompleteOts === undefined);
   assert.true(incompleteOtsInfo.equals(new Buffer(otsInfoCalc)));
@@ -89,7 +90,8 @@ test('OpenTimestamps.info()', assert => {
 });
 
 test('OpenTimestamps.info()', assert => {
-  const merkle2OtsInfoCalc = OpenTimestamps.info(merkle2Ots);
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(merkle2Ots));
+  const merkle2OtsInfoCalc = OpenTimestamps.info(detachedOts);
   assert.false(merkle2OtsInfoCalc === undefined);
   assert.false(merkle2Ots === undefined);
   assert.true(merkle2OtsInfo.equals(new Buffer(merkle2OtsInfoCalc)));
@@ -97,28 +99,32 @@ test('OpenTimestamps.info()', assert => {
 });
 
 test('OpenTimestamps.info()', assert => {
-  const unknownInfoCalc = OpenTimestamps.info(unknownOts);
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(unknownOts));
+  const unknownInfoCalc = OpenTimestamps.info(detachedOts);
   assert.false(unknownInfoCalc === undefined);
   assert.false(unknownOts === undefined);
   assert.end();
 });
 
 test('OpenTimestamps.info()', assert => {
-  const knownUnknownInfoCalc = OpenTimestamps.info(knownUnknownOts);
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(knownUnknownOts));
+  const knownUnknownInfoCalc = OpenTimestamps.info(detachedOts);
   assert.false(knownUnknownInfoCalc === undefined);
   assert.false(knownUnknownOts === undefined);
   assert.end();
 });
 
 test('OpenTimestamps.info()', assert => {
-  const merkle3InfoCalc = OpenTimestamps.info(merkle3Ots);
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(merkle3Ots));
+  const merkle3InfoCalc = OpenTimestamps.info(detachedOts);
   assert.false(merkle3InfoCalc === undefined);
   assert.false(merkle3Ots === undefined);
   assert.end();
 });
 
 test('OpenTimestamps.info()', assert => {
-  const badStampInfoCalc = OpenTimestamps.info(badStampOts);
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(badStampOts));
+  const badStampInfoCalc = OpenTimestamps.info(detachedOts);
   assert.false(badStampInfoCalc === undefined);
   assert.false(badStampOts === undefined);
   assert.end();

@@ -33,9 +33,9 @@ module.exports = {
       return 'Invalid input';
     }
 
-    const timestamp = detached.fileDigest();
+    const timestamp = detached.timestamp;
     const hashOp = detached.fileHashOp._HASHLIB_NAME();
-    const fileHash = Utils.bytesToHex(timestamp.msg);
+    const fileHash = Utils.bytesToHex(detached.fileDigest());
     const firstLine = 'File ' + hashOp + ' hash: ' + fileHash + '\n';
 
     try {
