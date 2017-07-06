@@ -28,21 +28,15 @@ module.exports = {
    * @return {String} The message to print.
    */
   info(detached) {
-    if ((detached === undefined)) {
+    if ((detached === undefined) && !(detached instanceof DetachedTimestampFile)) {
       console.error('Invalid input');
       return 'Invalid input';
     }
 
-    let firstLine = "";
-    let timestamp;
-
-    if (detached instanceof DetachedTimestampFile) {
-      const timestamp = detached.fileDigest();
-      const hashOp = detached.fileHashOp._HASHLIB_NAME();
-      const fileHash = Utils.bytesToHex(timestamp.msg);
-      firstLine = 'File ' + hashOp + ' hash: ' + fileHash + '\n';
-    } else if (detached instanceof Timestamp) {
-    }
+    const timestamp = detached.fileDigest();
+    const hashOp = detached.fileHashOp._HASHLIB_NAME();
+    const fileHash = Utils.bytesToHex(timestamp.msg);
+    const firstLine = 'File ' + hashOp + ' hash: ' + fileHash + '\n';
 
     try {
       return firstLine + 'Timestamp:\n' + timestamp.strTree();
