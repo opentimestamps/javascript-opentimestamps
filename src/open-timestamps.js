@@ -190,7 +190,7 @@ module.exports = {
         if (timestamp === undefined) {
           return reject();
         }
-        resolve(timestamp);
+        resolve();
       }).catch(err => {
         reject(err);
       });
