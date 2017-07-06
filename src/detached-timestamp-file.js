@@ -10,6 +10,7 @@
 const Ops = require('./ops.js');
 const Timestamp = require('./timestamp.js');
 const Utils = require('./utils.js');
+const Context = require('./context.js');
 
 /**
  * Header magic bytes
@@ -39,6 +40,9 @@ const MAJOR_VERSION = 1;
 class DetachedTimestampFile {
 
   constructor(fileHashOp, timestamp) {
+    if (!(fileHashOp instanceof Ops.Op) || !(timestamp instanceof Timestamp)) {
+      throw new Error('DetachedTimestampFile: Invalid params');
+    }
     this.fileHashOp = fileHashOp;
     this.timestamp = timestamp;
   }
@@ -84,21 +88,44 @@ class DetachedTimestampFile {
   /**
    * Read the Detached Timestamp File from bytes.
    * @param {Op} fileHashOp - The file hash operation.
-   * @param {StreamDeserializationContext} ctx - The stream deserialization context.
+   * @param {StreamDeserialization} ctx - The stream deserialization context.
    * @return {DetachedTimestampFile} The generated DetachedTimestampFile object.
    */
-  static fromBytes(fileHashOp, ctx) {
-    const fdHash = fileHashOp.hashFd(ctx);
+  static fromBytes(fileHashOp, buffer) {
+    if (!(fileHashOp instanceof Ops.Op)) {
+      throw new Error('DetachedTimestampFile: Invalid fileHashOp param');
+    }
+    let fdHash;
+    if (buffer instanceof Context.StreamDeserialization) {
+      fdHash = fileHashOp.hashFd(buffer);
+    } else if (buffer instanceof Array) {
+      const ctx = new Context.StreamDeserialization(buffer);
+      fdHash = fileHashOp.hashFd(ctx);
+    } else if (buffer instanceof Uint8Array) {
+      const ctx = new Context.StreamDeserialization(Array.from(buffer));
+      fdHash = fileHashOp.hashFd(ctx);
+    } else if (buffer instanceof ArrayBuffer) {
+      const ctx = new Context.StreamDeserialization(Array.from(buffer));
+      fdHash = fileHashOp.hashFd(ctx);
+    } else {
+      throw new Error('DetachedTimestampFile: Invalid buffer param');
+    }
     return new DetachedTimestampFile(fileHashOp, new Timestamp(fdHash));
   }
 
   /**
    * Read the Detached Timestamp File from hash.
    * @param {Op} fileHashOp - The file hash operation.
-   * @param {int[]} fdHash - The hash file.
+   * @param {int[]} fdHash - The hash of the file.
    * @return {DetachedTimestampFile} The generated DetachedTimestampFile object.
    */
   static fromHash(fileHashOp, fdHash) {
+    if (!(fileHashOp instanceof Ops.Op)) {
+      throw new Error('DetachedTimestampFile: Invalid fileHashOpss param');
+    }
+    if (!(fdHash instanceof Array)) {
+      throw new Error('DetachedTimestampFile: Invalid fdHash param');
+    }
     return new DetachedTimestampFile(fileHashOp, new Timestamp(fdHash));
   }
 
@@ -124,8 +151,19 @@ class DetachedTimestampFile {
     json.timestamp = this.timestamp.toJson();
   }
 
+  equals(another) {
+    if (!(another instanceof DetachedTimestampFile)) {
+      return false;
+    }
+    if (!(another.fileHashOp.equals(this.fileHashOp))) {
+      return false;
+    }
+    if (!(another.timestamp.equals(this.timestamp))) {
+      return false;
+    }
+    return true;
+  }
+
 }
 
-module.exports = {
-  DetachedTimestampFile
-};
+module.exports = DetachedTimestampFile;
