@@ -49,7 +49,7 @@ browserify test.js -o test.bundle.js
 
 #### Node version
 
-> This library is tested on CI against version 6.0 and 6.1
+> This library is tested on CI against version 6.0, 6.1 and 7. See [__Travis build__](https://travis-ci.org/opentimestamps/javascript-opentimestamps.svg?branch=master) 
 
 Download: [__NodeJS__](https://nodejs.org/en/download/)
 
