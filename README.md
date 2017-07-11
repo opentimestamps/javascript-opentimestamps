@@ -9,14 +9,15 @@
 
 [![Build Status](https://travis-ci.org/opentimestamps/javascript-opentimestamps.svg?branch=master)](https://travis-ci.org/opentimestamps/javascript-opentimestamps)
 
-This repo host the javascript implementation of OpenTimestamps.
+This repository hosts the javascript implementation of OpenTimestamps.
 
 It is a based on the python implementation at https://github.com/opentimestamps/python-opentimestamps and https://github.com/opentimestamps/opentimestamps-client
 
-It is developed as node modules, you can use it in the browser with tools such as browserify.
+It has been developed as node modules for being used within Node environments along with Node Package Manager.
+> You can also use it in the browser with tools such as browserify.
 Have a look at the /examples folder for a demo of this.
 
-Documentation available at https://eternitywall.com/docs/javascript-opentimestamps/
+Documentation available at **[Eternity Wall](https://eternitywall.com/docs/javascript-opentimestamps/)** and **[NPM](https://www.npmjs.com/package/javascript-opentimestamps)**
 
 ## Installation
 
@@ -42,11 +43,11 @@ browserify test.js -o test.bundle.js
 
 #### Browser
 
-ECMAScript 6 browser compatibility required.
+> ECMAScript 6 browser compatibility required.
 
 #### Node version
 
-This library is tested on CI against version 6.0 and 6.1
+> This library is tested on CI against version 6.0 and 6.1
 
 
 ## Command Line
@@ -168,4 +169,13 @@ upgradePromise.then(timestampBytes => {
 
 ## License
 
-LGPL3
+[__LGPL3__](https://github.com/prahaladbelavadi/javascript-opentimestamps/blob/master/LICENSE)
+
+The OpenTimestamps Client is free software: you can redistribute it and/or
+modify it under the terms of the GNU Lesser General Public License as published
+by the Free Software Foundation, either version 3 of the License, or (at your
+option) any later version.
+
+The OpenTimestamps Client is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+or FITNESS FOR A PARTICULAR PURPOSE. 
