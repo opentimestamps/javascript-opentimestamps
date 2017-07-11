@@ -11,7 +11,7 @@
 
 This repository hosts the javascript implementation of OpenTimestamps.
 
-It is a based on the python implementation at https://github.com/opentimestamps/python-opentimestamps and https://github.com/opentimestamps/opentimestamps-client
+It is a based on the python implementation at [Opentimestamps-Python](https://github.com/opentimestamps/python-opentimestamps) and [Opentimestamps-Client](https://github.com/opentimestamps/opentimestamps-client)
 
 It has been developed as node modules for being used within Node environments along with Node Package Manager.
 > You can also use it in the browser with tools such as browserify.
