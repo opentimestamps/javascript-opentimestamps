@@ -42,6 +42,12 @@ Choose one option from the following:
 
 ## Compatibility
 
+#### Node
+
+> This library is tested on CI against version 6.0, 6.1 and 7. See [__Travis build__](https://travis-ci.org/opentimestamps/javascript-opentimestamps.svg?branch=master) 
+
+Download: [__NodeJS__](https://nodejs.org/en/download/)
+
 #### Browser
 
 > The lib is compatible with ECMAScript6(ES6) and ECMAScript5(ES5).
@@ -54,11 +60,7 @@ Browser compatibility:
 * [__Internet Explorer__](https://www.microsoft.com/en-us/download/internet-explorer.aspx) version >= 9
 * [__Safari__](https://support.apple.com/downloads/safari) version >= 8
 
-#### Node version
 
-> This library is tested on CI against version 6.0, 6.1 and 7. See [__Travis build__](https://travis-ci.org/opentimestamps/javascript-opentimestamps.svg?branch=master) 
-
-Download: [__NodeJS__](https://nodejs.org/en/download/)
 
 ## Command Line
 
