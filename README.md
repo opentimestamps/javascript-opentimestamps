@@ -14,28 +14,29 @@ This repository hosts the javascript implementation of OpenTimestamps.
 It is a based on the python implementation at [Opentimestamps-Python](https://github.com/opentimestamps/python-opentimestamps) and [Opentimestamps-Client](https://github.com/opentimestamps/opentimestamps-client)
 
 It has been developed as node modules for being used within Node environments along with Node Package Manager.
-> You can also use it in the browser with tools such as browserify.
-Have a look at the /examples folder for a demo of this.
+> You can also use it in the browser, see the **Installation** section.
 
 Documentation available at **[Eternity Wall](https://eternitywall.com/docs/javascript-opentimestamps/)** and **[NPM](https://www.npmjs.com/package/javascript-opentimestamps)**
 
 ## Installation
 
-Using npm:
+#### Node
 
 ```shell
 $ npm install -g javascript-opentimestamps
 ```
 
-Using Browserify:
+#### Browser
 
-```shell
-npm install -g browserify
-browserify test.js -o test.bundle.js
-```
+Choose one option from the following:
+ 
+ * Take the [js](https://opentimestamps.org/bower_components/bower-opentimestamps/bower-opentimestamps.js) used by opentimestamps.org
+ * Install the lib from bower `bower install bower-opentimestamps`
+ * If the bower version is not up to date, you can follow instructions in this [repository](https://github.com/lvaccaro/bower-opentimestamps) to build the most updated code.   
+
 
 ```html
-<script src="test.bundle.js"></script>
+<script src="bower-opentimestamps.js"></script>
 ```
 
 
@@ -43,9 +44,15 @@ browserify test.js -o test.bundle.js
 
 #### Browser
 
-> ECMAScript6(ES6) browser compatibility required.
+> The lib is compatible with ECMAScript6(ES6) and ECMAScript5(ES5).
 
-[__Chrome__](https://www.google.com/chrome/browser/desktop/index.html) and [__Firefox__](https://www.mozilla.org/en-US/firefox/new/) are both ES6 Compatible browsers.
+Browser compatibility:
+
+* [__Chrome__](https://www.google.com/chrome/browser/desktop/index.html) version >= 40
+* [__Chromium__](https://www.chromium.org/getting-involved/download-chromium) version >= 40
+* [__Firefox__](https://www.mozilla.org/en-US/firefox/new/) version >= 40
+* [__Internet Explorer__](https://www.microsoft.com/en-us/download/internet-explorer.aspx) version >= 9
+* [__Safari__](https://support.apple.com/downloads/safari) version >= 8
 
 #### Node version
 
