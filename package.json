@@ -30,7 +30,7 @@
   },
   "scripts": {
     "test": "tap test/*.js && xo --ignore ./out/* && browserify test/*.js | tape-run",
-    "jsdoc": "jsdoc -c conf.json src/"
+    "jsdoc": "jsdoc -c conf.json -R README.md src/"
   },
   "xo": {
     "esnext": true,
