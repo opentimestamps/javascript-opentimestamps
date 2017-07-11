@@ -29,7 +29,8 @@
     "faucet": "0.0.1"
   },
   "scripts": {
-    "test": "tap test/*.js && xo --ignore ./out/* && browserify test/*.js | tape-run"
+    "test": "tap test/*.js && xo --ignore ./out/* && browserify test/*.js | tape-run",
+    "jsdoc": "jsdoc -c conf.json src/"
   },
   "xo": {
     "esnext": true,
