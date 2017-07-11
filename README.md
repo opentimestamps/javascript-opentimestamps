@@ -16,7 +16,7 @@ It is a based on the python implementation at [Opentimestamps-Python](https://gi
 It has been developed as node modules for being used within Node environments along with Node Package Manager.
 > You can also use it in the browser, see the **Installation** section.
 
-Documentation available at **[Eternity Wall](https://eternitywall.com/docs/javascript-opentimestamps/)** and **[NPM](https://www.npmjs.com/package/javascript-opentimestamps)**
+[Jsdoc](https://opentimestamps.org/docs/javascript-opentimestamps/) available
 
 ## Installation
 
@@ -33,7 +33,6 @@ Choose one option from the following:
  * Take the [js](https://opentimestamps.org/bower_components/bower-opentimestamps/bower-opentimestamps.js) used by opentimestamps.org
  * Install the lib from bower `bower install bower-opentimestamps`
  * If the bower version is not up to date, you can follow instructions in this [repository](https://github.com/lvaccaro/bower-opentimestamps) to build the most updated code.   
-
 
 ```html
 <script src="bower-opentimestamps.js"></script>
@@ -59,8 +58,6 @@ Browser compatibility:
 * [__Firefox__](https://www.mozilla.org/en-US/firefox/new/) version >= 40
 * [__Internet Explorer__](https://www.microsoft.com/en-us/download/internet-explorer.aspx) version >= 9
 * [__Safari__](https://support.apple.com/downloads/safari) version >= 8
-
-
 
 ## Command Line
 
