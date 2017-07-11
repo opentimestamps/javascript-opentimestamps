@@ -43,12 +43,15 @@ browserify test.js -o test.bundle.js
 
 #### Browser
 
-> ECMAScript 6 browser compatibility required.
+> ECMAScript6(ES6) browser compatibility required.
+
+[__Chrome__](https://www.google.com/chrome/browser/desktop/index.html) and [__Firefox__](https://www.mozilla.org/en-US/firefox/new/) are both ES6 Compatible browsers.
 
 #### Node version
 
 > This library is tested on CI against version 6.0 and 6.1
 
+Download: [__NodeJS__](https://nodejs.org/en/download/)
 
 ## Command Line
 
