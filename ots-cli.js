@@ -12,7 +12,7 @@ const Ops = require('./src/ops.js');
 // Constants
 const path = process.argv[1].split('/');
 const title = path[path.length - 1];
-var isExecuted = false;
+let isExecuted = false;
 
 // Parse parameters
 

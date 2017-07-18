@@ -290,9 +290,7 @@ class Timestamp {
    * @return {string} The output string.
    */
   strTree(indent, verbosity) {
-
-
-    let bcolors = {};
+    const bcolors = {};
     bcolors.HEADER = '\x1b[95m';
     bcolors.OKBLUE = '\x1b[94m';
     bcolors.OKGREEN = '\x1b[92m';
@@ -302,32 +300,32 @@ class Timestamp {
     bcolors.BOLD = '\x1b[1m';
     bcolors.UNDERLINE = '\x1b[4m';
 
-    function strResult(verb, parameter, result){
-      var rr = '';
-      if(verb>0 && result !== undefined ){
-        rr +=" == ";
-        let resultHex = Utils.bytesToHex(result);
-        if(parameter !== undefined){
-          let parameterHex = Utils.bytesToHex(parameter);
-          try{
-            let index = resultHex.indexOf(parameterHex);
-            let parameterHexHighlight = bcolors.BOLD + parameterHex + bcolors.ENDC;
-            if (index == 0){
-              rr += parameterHexHighlight + resultHex[index+parameterHex.length];
+    function strResult(verb, parameter, result) {
+      let rr = '';
+      if (verb > 0 && result !== undefined) {
+        rr += ' == ';
+        const resultHex = Utils.bytesToHex(result);
+        if (parameter === undefined) {
+          rr += resultHex;
+        } else {
+          const parameterHex = Utils.bytesToHex(parameter);
+          try {
+            const index = resultHex.indexOf(parameterHex);
+            const parameterHexHighlight = bcolors.BOLD + parameterHex + bcolors.ENDC;
+            if (index === 0) {
+              rr += parameterHexHighlight + resultHex[index + parameterHex.length];
             } else {
-              rr += resultHex.substring(0,index) + parameterHexHighlight;
+              rr += resultHex.substring(0, index) + parameterHexHighlight;
             }
-          }catch(err){
+          } catch (err) {
             rr += resultHex;
           }
-        } else {
-          rr += resultHex;
         }
       }
       return rr;
     }
 
-    if (indent == undefined) {
+    if (indent === undefined) {
       indent = 0;
     }
     if (verbosity === undefined) {
@@ -338,7 +336,7 @@ class Timestamp {
       this.attestations.forEach(attestation => {
         r += Timestamp.indention(indent) + 'verify ' + attestation.toString() + strResult(verbosity, this.msg) + '\n';
         if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-          let tx = Utils.bytesToHex(new Ops.OpReverse().call(this.msg));
+          const tx = Utils.bytesToHex(new Ops.OpReverse().call(this.msg));
           r += Timestamp.indention(indent) + '# Bitcoin block merkle root ' + tx + '\n';
         }
       });

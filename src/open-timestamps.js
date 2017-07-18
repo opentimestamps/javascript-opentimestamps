@@ -40,9 +40,9 @@ module.exports = {
 
     try {
       if (options.verbose) {
-        return firstLine + 'Timestamp:\n' + timestamp.strTree(0,1);
+        return firstLine + 'Timestamp:\n' + timestamp.strTree(0, 1);
       }
-      return firstLine + 'Timestamp:\n' + timestamp.strTree(0,0);
+      return firstLine + 'Timestamp:\n' + timestamp.strTree(0, 0);
     } catch (err) {
       return 'Error parsing info ' + err;
     }
