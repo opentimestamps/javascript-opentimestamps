@@ -33,7 +33,7 @@ program
 
 program
     .command('stamp [files...]')
-    .alias('M')
+    .alias('s')
     .option('-c, --calendar <url>', 'Create timestamp with the aid of a remote calendar. May be specified multiple times.')
     .option('-m <int>', 'Commitments are sent to remote calendars in the event of timeout the timestamp is considered done if at least M calendars replied.')
     .option('-k, --key <file>', 'Signature key file of private remote calendars.')
@@ -55,7 +55,6 @@ program
       if (options.M) {
         parameters.m = options.M;
       }
-      console.log(options);
       stamp(files, parameters);
     });
 
