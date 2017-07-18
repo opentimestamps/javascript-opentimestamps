@@ -112,6 +112,8 @@ Timestamp has been successfully upgraded!
 
 ## From code
 
+> Note that from version 0.1.x to 0.2.x basic method interface changed, upgrade will require change in your code.
+
 #### Stamp and Info
 
 Create timestamp with the aid of a remote calendar.
