@@ -114,10 +114,9 @@ function stamp(argsFiles, options) {
   });
 
   Promise.all(filePromises).then(values => {
-
-    const detaches=[];
+    const detaches = [];
     values.forEach(value => {
-      detaches.push( DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), value) );
+      detaches.push(DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), value));
     });
 
     OpenTimestamps.stamp(detaches, options).then(() => {
@@ -201,9 +200,7 @@ function upgrade(argsFileOts) {
     const upgradePromise = OpenTimestamps.upgrade(detachedOts);
     upgradePromise.then(changed => {
       // check timestamp
-      if (!changed) {
-        console.log('Timestamp not changed');
-      } else {
+      if (changed) {
         console.log('Timestamp has been successfully upgraded!');
         fs.writeFile(argsFileOts + '.bak', new Buffer(ots), 'binary', err => {
           if (err) {
@@ -219,6 +216,8 @@ function upgrade(argsFileOts) {
           }
           console.log('The file .ots was upgraded!');
         });
+      } else {
+        console.log('Timestamp not changed');
       }
     }).catch(err => {
       console.log('Error: ' + err);
