@@ -12,6 +12,7 @@ const Ops = require('./src/ops.js');
 // Constants
 const path = process.argv[1].split('/');
 const title = path[path.length - 1];
+var isExecuted = false;
 
 // Parse parameters
 
@@ -21,14 +22,16 @@ program
 program
     .command('info [file_ots]')
     .alias('i')
+    .option('-v, --verbose', 'Be more verbose.')
     .description('Show information on a timestamp.')
-    .action(file => {
+    .action((file, options) => {
+      isExecuted = true;
       if (!file) {
         console.log('Show information on a timestamp given as argument.');
         console.log(title + ' info: bad options number ');
         return;
       }
-      info(file);
+      info(file, options);
     });
 
 program
@@ -39,6 +42,7 @@ program
     .option('-k, --key <file>', 'Signature key file of private remote calendars.')
     .description('Create timestamp with the aid of a remote calendar, the output receipt will be saved with .ots .')
     .action((files, options) => {
+      isExecuted = true;
       if (!files && files.size() < 1) {
         console.log('Create timestamp with the aid of a remote calendar.');
         console.log(title + ' stamp: bad options number ');
@@ -63,6 +67,7 @@ program
     .alias('v')
     .description('Verify the timestamp attestations, expect original file present in the same directory without .ots .')
     .action(file => {
+      isExecuted = true;
       if (!file) {
         console.log('Verify the timestamp attestations given as argument.');
         console.log(title + ' verify: bad options number ');
@@ -76,6 +81,7 @@ program
     .alias('u')
     .description('Upgrade remote calendar timestamps to be locally verifiable.')
     .action(file => {
+      isExecuted = true;
       if (!file) {
         console.log('Upgrade the timestamp attestations given as argument.');
         console.log(title + ' upgrade: bad options number ');
@@ -86,19 +92,19 @@ program
 
 program.parse(process.argv);
 
-if (program.args.length === 0) {
+if (!isExecuted) {
   console.log(program.helpInformation());
 }
 
 // FUNCTIONS
-function info(argsFileOts) {
+function info(argsFileOts, options) {
   const otsPromise = Utils.readFilePromise(argsFileOts, null);
 
   Promise.all([otsPromise]).then(values => {
     const ots = values[0];
 
     const detachedOts = DetachedTimestampFile.deserialize(ots);
-    const infoResult = OpenTimestamps.info(detachedOts);
+    const infoResult = OpenTimestamps.info(detachedOts, options);
     console.log(infoResult);
   }).catch(err => {
     console.log('Error: ' + err);

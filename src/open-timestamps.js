@@ -27,7 +27,7 @@ module.exports = {
    * @param {DetachedTimestampFile} detached - The array of detached file to stamp.
    * @return {String} The message to print.
    */
-  info(detached) {
+  info(detached, options) {
     if ((detached === undefined) && !(detached instanceof DetachedTimestampFile)) {
       console.error('Invalid input');
       return 'Invalid input';
@@ -39,7 +39,10 @@ module.exports = {
     const firstLine = 'File ' + hashOp + ' hash: ' + fileHash + '\n';
 
     try {
-      return firstLine + 'Timestamp:\n' + timestamp.strTree();
+      if (options.verbose) {
+        return firstLine + 'Timestamp:\n' + timestamp.strTree(0,1);
+      }
+      return firstLine + 'Timestamp:\n' + timestamp.strTree(0,0);
     } catch (err) {
       return 'Error parsing info ' + err;
     }
@@ -225,7 +228,7 @@ module.exports = {
             timestamp.merge(resultTimestamp);
           }
         });
-        // console.log(Timestamp.strTreeExtended(timestamp));
+        // console.log(timestamp.strTree());
         return resolve(timestamp);
       }).catch(err => {
         reject(err);
@@ -423,7 +426,7 @@ module.exports = {
           }
         });
         // console.log('Timestamp merged');
-        // console.log(Timestamp.strTreeExtended(timestamp));
+        // console.log(timestamp.strTree());
         if (results.length === 0) {
           resolve(false);
         } else {

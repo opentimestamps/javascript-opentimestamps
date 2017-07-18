@@ -203,14 +203,7 @@ class OpPrepend extends OpBinary {
  * @extends Op
  */
 class OpUnary extends Op {
-  constructor(arg_) {
-    super();
-    if (arg_ === undefined) {
-      this.arg = [];
-    } else {
-      this.arg = arg_;
-    }
-  }
+
   static deserializeFromTag(ctx, tag) {
     if (_SUBCLS_BY_TAG.get(tag) !== undefined) {
       return new (_SUBCLS_BY_TAG.get(tag))();
@@ -227,14 +220,7 @@ class OpUnary extends Op {
  * @extends OpUnary
  */
 class OpReverse extends OpUnary {
-  constructor(arg_) {
-    super(arg_);
-    if (arg_ === undefined) {
-      this.arg = [];
-    } else {
-      this.arg = arg_;
-    }
-  }
+
   _TAG() {
     return 0xf2;
   }
@@ -245,7 +231,7 @@ class OpReverse extends OpUnary {
     if (msg.length === 0) {
       console.error('Can\'t reverse an empty message');
     }
-        // return msg;//[::-1];
+    return msg.reverse();
   }
   static deserializeFromTag(ctx, tag) {
     return super.deserializeFromTag(ctx, tag);
@@ -260,14 +246,7 @@ class OpReverse extends OpUnary {
  * @extends OpUnary
  */
 class OpHexlify extends OpUnary {
-  constructor(arg_) {
-    super(arg_);
-    if (arg_ === undefined) {
-      this.arg = [];
-    } else {
-      this.arg = arg_;
-    }
-  }
+
   _TAG() {
     return 0xf3;
   }

@@ -276,87 +276,103 @@ class Timestamp {
    * @return {string} The output space string.
    */
   static indention(pos) {
-    let output = '';
+    let r = '';
     for (let i = 0; i < pos; i++) {
-      output += '    ';
+      r += '    ';
     }
-    return output;
-  }
-
-  /**
-   * Print as tree hierarchical object.
-   * @param {int} indent - Initial hierarchical indention.
-   * @return {string} The output string.
-   */
-  strTree(indent = 0) {
-    let output = '';
-    if (this.attestations.length > 0) {
-      this.attestations.forEach(attestation => {
-        output += Timestamp.indention(indent);
-        output += 'verify ' + attestation.toString() + '\n';
-      });
-    }
-
-    if (this.ops.size > 1) {
-      this.ops.forEach((timestamp, op) => {
-        output += Timestamp.indention(indent);
-        output += ' -> ';
-        output += op.toString() + '\n';
-        output += timestamp.strTree(indent + 1);
-      });
-    } else if (this.ops.size > 0) {
-      // output += Timestamp.indention(indent);
-      this.ops.forEach((timestamp, op) => {
-        output += Timestamp.indention(indent);
-        output += op.toString() + '\n';
-
-        // output += ' ( ' + Utils.bytesToHex(this.msg) + ' ) ';
-        // output += '\n';
-        output += timestamp.strTree(indent);
-      });
-    }
-    return output;
+    return r;
   }
 
   /**
    * Print as tree extended hierarchical object.
    * @param {int} indent - Initial hierarchical indention.
+   * @param {int} verbosity - Verbose option.
    * @return {string} The output string.
    */
-  static strTreeExtended(timestamp, indent = 0) {
-    let output = '';
+  strTree(indent, verbosity) {
 
-    if (timestamp.attestations.length > 0) {
-      timestamp.attestations.forEach(attestation => {
-        output += Timestamp.indention(indent);
-        output += 'verify ' + attestation.toString();
-        output += ' (' + Utils.bytesToHex(timestamp.msg) + ') ';
-                // output += " ["+Utils.bytesToHex(timestamp.msg)+"] ";
-        output += '\n';
-      });
+
+    let bcolors = {};
+    bcolors.HEADER = '\x1b[95m';
+    bcolors.OKBLUE = '\x1b[94m';
+    bcolors.OKGREEN = '\x1b[92m';
+    bcolors.WARNING = '\x1b[93m';
+    bcolors.FAIL = '\x1b[91m';
+    bcolors.ENDC = '\x1b[0m';
+    bcolors.BOLD = '\x1b[1m';
+    bcolors.UNDERLINE = '\x1b[4m';
+
+    function strResult(verb, parameter, result){
+      var rr = '';
+      if(verb>0 && result !== undefined ){
+        rr +=" == ";
+        let resultHex = Utils.bytesToHex(result);
+        if(parameter !== undefined){
+          let parameterHex = Utils.bytesToHex(parameter);
+          try{
+            let index = resultHex.indexOf(parameterHex);
+            let parameterHexHighlight = bcolors.BOLD + parameterHex + bcolors.ENDC;
+            if (index == 0){
+              rr += parameterHexHighlight + resultHex[index+parameterHex.length];
+            } else {
+              rr += resultHex.substring(0,index) + parameterHexHighlight;
+            }
+          }catch(err){
+            rr += resultHex;
+          }
+        } else {
+          rr += resultHex;
+        }
+      }
+      return rr;
     }
 
-    if (timestamp.ops.size > 1) {
-      timestamp.ops.forEach((ts, op) => {
-        output += Timestamp.indention(indent);
-        output += ' -> ';
-        output += op.toString();
-        output += ' (' + Utils.bytesToHex(timestamp.msg) + ') ';
-        output += '\n';
-        output += Timestamp.strTreeExtended(ts, indent + 1);
-      });
-    } else if (timestamp.ops.size > 0) {
-      output += Timestamp.indention(indent);
-      timestamp.ops.forEach((ts, op) => {
-        output += Timestamp.indention(indent);
-        output += op.toString();
-
-        output += ' ( ' + Utils.bytesToHex(timestamp.msg) + ' ) ';
-        output += '\n';
-        output += Timestamp.strTreeExtended(ts, indent);
+    if (indent == undefined) {
+      indent = 0;
+    }
+    if (verbosity === undefined) {
+      verbosity = 0;
+    }
+    let r = '';
+    if (this.attestations.length > 0) {
+      this.attestations.forEach(attestation => {
+        r += Timestamp.indention(indent) + 'verify ' + attestation.toString() + strResult(verbosity, this.msg) + '\n';
+        if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
+          let tx = Utils.bytesToHex(new Ops.OpReverse().call(this.msg));
+          r += Timestamp.indention(indent) + '# Bitcoin block merkle root ' + tx + '\n';
+        }
       });
     }
-    return output;
+    if (this.ops.size > 1) {
+      this.ops.forEach((timestamp, op) => {
+        try {
+          bitcore.Transaction(Utils.bytesToHex(this.msg));
+          let tx = new Ops.OpReverse().call(new Ops.OpSHA256().call(new Ops.OpSHA256().call(this.msg)));
+          tx = Utils.bytesToHex(tx);
+          r += Timestamp.indention(indent) + '* Bitcoin transaction id ' + tx + '\n';
+        } catch (err) {
+        }
+        const curRes = op.call(this.msg);
+        const curPar = op.arg;
+        r += Timestamp.indention(indent) + ' -> ' + op.toString() + strResult(verbosity, curPar, curRes) + '\n';
+        r += timestamp.strTree(indent + 1, verbosity);
+      });
+    } else if (this.ops.size > 0) {
+      try {
+        bitcore.Transaction(Utils.bytesToHex(this.msg));
+        let tx = new Ops.OpReverse().call(new Ops.OpSHA256().call(new Ops.OpSHA256().call(this.msg)));
+        tx = Utils.bytesToHex(tx);
+        r += Timestamp.indention(indent) + '* Bitcoin transaction id ' + tx + '\n';
+      } catch (err) {
+      }
+      const op = this.ops.keys().next().value;
+      const stamp = this.ops.values().next().value;
+      const curRes = op.call(this.msg);
+      const curPar = op.arg;
+      r += Timestamp.indention(indent) + op.toString() + strResult(verbosity, curPar, curRes) + '\n';
+      r += stamp.strTree(indent, verbosity);
+    }
+    return r;
   }
 
   /** Set of al Attestations.
