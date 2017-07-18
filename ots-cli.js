@@ -7,6 +7,7 @@ const OpenTimestamps = require('./src/open-timestamps.js');
 const Context = require('./src/context.js');
 const Utils = require('./src/utils.js');
 const DetachedTimestampFile = require('./src/detached-timestamp-file.js');
+const Ops = require('./src/ops.js');
 
 // Constants
 const path = process.argv[1].split('/');
@@ -31,20 +32,7 @@ program
     });
 
 program
-    .command('stamp [file]')
-    .alias('s')
-    .description('Create timestamp with the aid of a remote calendar, the output receipt will be saved with .ots .')
-    .action(file => {
-      if (!file) {
-        console.log('Create timestamp with the aid of a remote calendar.');
-        console.log(title + ' stamp: bad options number ');
-        return;
-      }
-      stamp(file);
-    });
-
-program
-    .command('multistamp [files...]')
+    .command('stamp [files...]')
     .alias('M')
     .option('-c, --calendar <url>', 'Create timestamp with the aid of a remote calendar. May be specified multiple times.')
     .option('-m <int>', 'Commitments are sent to remote calendars in the event of timeout the timestamp is considered done if at least M calendars replied.')
@@ -68,7 +56,7 @@ program
         parameters.m = options.M;
       }
       console.log(options);
-      multistamp(files, parameters);
+      stamp(files, parameters);
     });
 
 program
@@ -106,88 +94,58 @@ if (program.args.length === 0) {
 // FUNCTIONS
 function info(argsFileOts) {
   const otsPromise = Utils.readFilePromise(argsFileOts, null);
+
   Promise.all([otsPromise]).then(values => {
     const ots = values[0];
 
-    const infoResult = OpenTimestamps.info(ots);
+    const detachedOts = DetachedTimestampFile.deserialize(ots);
+    const infoResult = OpenTimestamps.info(detachedOts);
     console.log(infoResult);
   }).catch(err => {
     console.log('Error: ' + err);
+    process.exit(1);
   });
 }
 
-function stamp(argsFile) {
-  const filePromise = Utils.readFilePromise(argsFile, null);
-  Promise.all([filePromise]).then(values => {
-    const file = values[0];
-
-    const timestampBytesPromise = OpenTimestamps.stamp(file);
-    timestampBytesPromise.then(timestampBytes => {
-      const ctx = new Context.StreamDeserialization(timestampBytes);
-      const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-      if (detachedTimestampFile === undefined) {
-        console.error('Invalid timestamp');
-        return;
-      }
-      // console.log('STAMP result : ');
-      // console.log(Utils.bytesToHex(detachedTimestampFile.timestamp.msg));
-
-      const buffer = new Buffer(timestampBytes);
-      const otsFilename = argsFile + '.ots';
-      fs.exists(otsFilename, fileExist => {
-        if (fileExist) {
-          console.log('The timestamp proof \'' + otsFilename + '\' already exists');
-        } else {
-          fs.writeFile(otsFilename, buffer, 'binary', err => {
-            if (err) {
-              return console.log(err);
-            }
-            console.log('The timestamp proof \'' + otsFilename + '\' has been created!');
-          });
-        }
-      });
-    }).catch(err => {
-      console.log('Error: ' + err);
-    });
-  }).catch(err => {
-    console.log('Error: ' + err);
-  });
-}
-
-function multistamp(argsFiles, options) {
+function stamp(argsFiles, options) {
   const filePromises = [];
   argsFiles.forEach(argsFile => {
     filePromises.push(Utils.readFilePromise(argsFile, null));
   });
 
   Promise.all(filePromises).then(values => {
-    const timestampBytesPromise = OpenTimestamps.multistamp(values, options);
-    timestampBytesPromise.then(timestams => {
-      if (timestams === undefined) {
+    const detaches = [];
+    values.forEach(value => {
+      detaches.push(DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), value));
+    });
+
+    OpenTimestamps.stamp(detaches, options).then(() => {
+      if (detaches === undefined) {
         console.error('Invalid timestamp');
         return;
       }
 
-      timestams.forEach((timestamp, i) => {
-        const ctx = new Context.StreamDeserialization(timestamp);
-        const detachedTimestampFile = DetachedTimestampFile.DetachedTimestampFile.deserialize(ctx);
-        if (detachedTimestampFile === undefined) {
+      detaches.forEach((ots, i) => {
+        if (ots === undefined) {
           console.error('Invalid timestamp');
           return;
         }
-
         // console.log('STAMP result : ');
-        // console.log(Utils.bytesToHex(detachedTimestampFile.timestamp.msg));
+        // console.log(Utils.bytesToHex(ots.timestamp.msg));
 
-        const buffer = new Buffer(timestamp);
+        const ctx = new Context.StreamSerialization();
+        ots.serialize(ctx);
+        const buffer = new Buffer(ctx.getOutput());
         const otsFilename = argsFiles[i] + '.ots';
         saveOts(otsFilename, buffer);
       });
     }).catch(err => {
       console.log('Error: ' + err);
+      process.exit(1);
     });
   }).catch(err => {
     console.log('Error: ' + err);
+    process.exit(1);
   });
 }
 
@@ -215,7 +173,10 @@ function verify(argsFileOts) {
     const fileOts = values[1];
 
     console.log('Assuming target filename is \'' + argsFile + '\'');
-    const verifyPromise = OpenTimestamps.verify(fileOts, file, false);
+
+    const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), file);
+    const detachedOts = DetachedTimestampFile.deserialize(fileOts);
+    const verifyPromise = OpenTimestamps.verify(detachedOts, detached);
     verifyPromise.then(result => {
       if (result === undefined) {
         console.log('Pending or Bad attestation');
@@ -224,40 +185,46 @@ function verify(argsFileOts) {
       }
     }).catch(err => {
       console.log(err);
+      process.exit(1);
     });
   }).catch(err => {
     console.log('Error: ' + err);
+    process.exit(1);
   });
 }
 
 function upgrade(argsFileOts) {
   const otsPromise = Utils.readFilePromise(argsFileOts, null);
   otsPromise.then(ots => {
-    const upgradePromise = OpenTimestamps.upgrade(ots);
-    upgradePromise.then(timestampBytes => {
+    const detachedOts = DetachedTimestampFile.deserialize(ots);
+    const upgradePromise = OpenTimestamps.upgrade(detachedOts);
+    upgradePromise.then(changed => {
       // check timestamp
-      if (Utils.arrEq(Utils.arrayToBytes(ots), Utils.arrayToBytes(timestampBytes))) {
-        console.log('Timestamp not changed');
-      } else {
+      if (changed) {
         console.log('Timestamp has been successfully upgraded!');
         fs.writeFile(argsFileOts + '.bak', new Buffer(ots), 'binary', err => {
           if (err) {
             return console.log(err);
           }
-          // console.log('The file .bak was saved!');
+          console.log('The file .bak was saved!');
         });
-
-        fs.writeFile(argsFileOts, new Buffer(timestampBytes), 'binary', err => {
+        const ctx = new Context.StreamSerialization();
+        detachedOts.serialize(ctx);
+        fs.writeFile(argsFileOts, new Buffer(ctx.getOutput()), 'binary', err => {
           if (err) {
             return console.log(err);
           }
-          // console.log('The file .ots was upgraded!');
+          console.log('The file .ots was upgraded!');
         });
+      } else {
+        console.log('Timestamp not changed');
       }
     }).catch(err => {
       console.log('Error: ' + err);
+      process.exit(1);
     });
   }).catch(err => {
     console.log('Error: ' + err);
+    process.exit(1);
   });
 }
