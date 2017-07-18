@@ -29,7 +29,7 @@
     "faucet": "0.0.1"
   },
   "scripts": {
-    "test": "tap test/*.js && xo --ignore ./out/* && browserify test/*.js | tape-run",
+    "test": "./test/ots-cli.sh && tap test/*.js && xo --ignore ./out/* && browserify test/*.js | tape-run",
     "jsdoc": "jsdoc -c conf.json -R README.md src/"
   },
   "xo": {
