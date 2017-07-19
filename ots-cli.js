@@ -40,6 +40,8 @@ program
     .option('-c, --calendar <url>', 'Create timestamp with the aid of a remote calendar. May be specified multiple times.')
     .option('-m <int>', 'Commitments are sent to remote calendars in the event of timeout the timestamp is considered done if at least M calendars replied.')
     .option('-k, --key <file>', 'Signature key file of private remote calendars.')
+    .option('-H, --hash', 'Timestamp hashes instead of files.')
+    .option('-a, --algorithm <type>', 'Hash algorithm: SHA1, SHA256 (default), RIPEMD160')
     .description('Create timestamp with the aid of a remote calendar, the output receipt will be saved with .ots .')
     .action((files, options) => {
       isExecuted = true;
@@ -56,9 +58,25 @@ program
       if (options.key) {
         parameters.privateCalendars = Utils.readSignatureFile(options.key);
       }
-      if (options.M) {
-        parameters.m = options.M;
+      if (options.m) {
+        parameters.m = options.m;
       }
+      if (options.hash) {
+        parameters.hash = true;
+      } else {
+        parameters.hash = false;
+      }
+
+      if (options.algorithm === undefined) {
+        parameters.algorithm = 'SHA256';
+      } else if (['SHA1', 'SHA256', 'RIPEMD160'].indexOf(options.algorithm) > -1) {
+        parameters.algorithm = options.algorithm;
+      } else {
+        console.log('Create timestamp with the aid of a remote calendar.');
+        console.log(title + ' stamp: ' + options.algorithm + ' unsupported ');
+        return;
+      }
+
       stamp(files, parameters);
     });
 
@@ -113,15 +131,40 @@ function info(argsFileOts, options) {
 }
 
 function stamp(argsFiles, options) {
+  // check input params : file/hash
+  const isHash = options.hash;
   const filePromises = [];
-  argsFiles.forEach(argsFile => {
-    filePromises.push(Utils.readFilePromise(argsFile, null));
-  });
+  if (isHash) {
+    // hash: convert to bytes
+    argsFiles.forEach(argsFile => {
+      filePromises.push(Utils.hexToBytes(argsFile));
+    });
+  } else {
+    // file: read file in bytes format
+    argsFiles.forEach(argsFile => {
+      filePromises.push(Utils.readFilePromise(argsFile, null));
+    });
+  }
 
+  // check input params : algorithm
+  let op = new Ops.OpSHA256();
+  if (options.algorithm === 'SHA1') {
+    op = new Ops.OpSHA1();
+  } else if (options.algorithm === 'SHA256') {
+    op = new Ops.OpSHA256();
+  } else if (options.algorithm === 'RIPEMD160') {
+    op = new Ops.OpRIPEMD160();
+  }
+
+  // main promise
   Promise.all(filePromises).then(values => {
     const detaches = [];
     values.forEach(value => {
-      detaches.push(DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), value));
+      if (isHash) {
+        detaches.push(DetachedTimestampFile.fromHash(op, value));
+      } else {
+        detaches.push(DetachedTimestampFile.fromBytes(op, value));
+      }
     });
 
     OpenTimestamps.stamp(detaches, options).then(() => {
