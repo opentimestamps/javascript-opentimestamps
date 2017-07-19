@@ -40,7 +40,7 @@ const stampCommand = program
     .option('-m <int>', 'Commitments are sent to remote calendars in the event of timeout the timestamp is considered done if at least M calendars replied.')
     .option('-k, --key <file>', 'Signature key file of private remote calendars.')
     .option('-H, --hash', 'Timestamp hashes instead of files.')
-    .option('-a, --algorithm <type>', 'Hash algorithm: SHA1, SHA256 (default), RIPEMD160')
+    .option('-a, --algorithm <type>', 'Hash algorithm: sha1, sha256 (default), ripemd160')
     .description('Create timestamp with the aid of a remote calendar, the output receipt will be saved with .ots .')
     .action((files, options) => {
       isExecuted = true;
@@ -66,8 +66,8 @@ const stampCommand = program
       }
 
       if (options.algorithm === undefined) {
-        parameters.algorithm = 'SHA256';
-      } else if (['SHA1', 'SHA256', 'RIPEMD160'].indexOf(options.algorithm) > -1) {
+        parameters.algorithm = 'sha256';
+      } else if (['sha1', 'sha256', 'ripemd160'].indexOf(options.algorithm) > -1) {
         parameters.algorithm = options.algorithm;
       } else {
         console.log('Create timestamp with the aid of a remote calendar.');
@@ -144,11 +144,11 @@ function stamp(argsFiles, options) {
 
   // check input params : algorithm
   let op = new Ops.OpSHA256();
-  if (options.algorithm === 'SHA1') {
+  if (options.algorithm === 'sha1') {
     op = new Ops.OpSHA1();
-  } else if (options.algorithm === 'SHA256') {
+  } else if (options.algorithm === 'sha256') {
     op = new Ops.OpSHA256();
-  } else if (options.algorithm === 'RIPEMD160') {
+  } else if (options.algorithm === 'ripemd160') {
     op = new Ops.OpRIPEMD160();
   }
 

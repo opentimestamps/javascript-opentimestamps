@@ -6,9 +6,9 @@ echo ">> node ots-cli.js verify examples/empty.ots" && node ots-cli.js verify ex
 
 # Test: stamp input file
 echo ">> node ots-cli.js stamp README.md" && node ots-cli.js stamp README.md && (node ots-cli.js info README.md.ots | grep "File sha256 hash") && rm -rf README.md.ots && \
-echo ">> node ots-cli.js stamp -a SHA1 README.md" && node ots-cli.js stamp -a SHA1 README.md && (node ots-cli.js info README.md.ots | grep "File sha1 hash") && rm -rf README.md.ots && \
-echo ">> node ots-cli.js stamp -a SHA256  README.md" && node ots-cli.js stamp -a SHA256 README.md && (node ots-cli.js info README.md.ots | grep "File sha256 hash") && rm -rf README.md.ots && \
-echo ">> node ots-cli.js stamp -a RIPEMD160 README.md" && node ots-cli.js stamp -a RIPEMD160 README.md && (node ots-cli.js info README.md.ots | grep "File ripemd160 hash") && rm -rf README.md.ots && \
+echo ">> node ots-cli.js stamp -a sha1 README.md" && node ots-cli.js stamp -a sha1 README.md && (node ots-cli.js info README.md.ots | grep "File sha1 hash") && rm -rf README.md.ots && \
+echo ">> node ots-cli.js stamp -a sha256  README.md" && node ots-cli.js stamp -a sha256 README.md && (node ots-cli.js info README.md.ots | grep "File sha256 hash") && rm -rf README.md.ots && \
+echo ">> node ots-cli.js stamp -a ripemd160 README.md" && node ots-cli.js stamp -a ripemd160 README.md && (node ots-cli.js info README.md.ots | grep "File ripemd160 hash") && rm -rf README.md.ots && \
 
 # Test: stamp input files
 echo ">> node ots-cli.js stamp README.md LICENSE" && \
@@ -21,8 +21,8 @@ rm -rf README.md.ots LICENSE.ots && \
 sha1=$(shasum -a 1 README.md | awk '{print $1;}')
 sha256=$(shasum -a 256 README.md | awk '{print $1;}')
 echo ">> node ots-cli.js stamp -H $sha256" && node ots-cli.js stamp -H $sha256 && (node ots-cli.js info $sha256.ots | grep "File sha256 hash") && rm -rf $sha256.ots && \
-echo ">> node ots-cli.js stamp -a SHA1 -H $sha1" && node ots-cli.js stamp -a SHA1 -H $sha1 && (node ots-cli.js info $sha1.ots | grep "File sha1 hash") && rm -rf $sha1.ots && \
-echo ">> node ots-cli.js stamp -a SHA256 -H $sha256" && node ots-cli.js stamp -a SHA256 -H $sha256 && (node ots-cli.js info $sha256.ots | grep "File sha256 hash") && rm -rf $sha256.ots && \
+echo ">> node ots-cli.js stamp -a sha1 -H $sha1" && node ots-cli.js stamp -a sha1 -H $sha1 && (node ots-cli.js info $sha1.ots | grep "File sha1 hash") && rm -rf $sha1.ots && \
+echo ">> node ots-cli.js stamp -a sha256 -H $sha256" && node ots-cli.js stamp -a sha256 -H $sha256 && (node ots-cli.js info $sha256.ots | grep "File sha256 hash") && rm -rf $sha256.ots && \
 
 # Test: info attestations
 echo ">> node ots-cli.js info examples/incomplete.txt.ots" && (node ots-cli.js info examples/incomplete.txt.ots | grep "PendingAttestation") && \
