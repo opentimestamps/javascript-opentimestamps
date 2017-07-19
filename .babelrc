@@ -1,0 +1,18 @@
+// with options
+{
+  "presets": [
+    [ "env", {
+      "browsers": [
+        "last 2 versions",
+        "ie >= 9",
+        "safari >= 8",
+        "firefox >= 40",
+        "chrome >= 40",
+        "chromium >= 40"
+        ],
+      "modules": false,
+      "debug": true,
+      "useBuiltIns": true
+    }]
+  ]
+}
