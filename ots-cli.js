@@ -19,7 +19,7 @@ let isExecuted = false;
 program
     .version(require('./package.json').version);
 
-program
+const infoCommand = program
     .command('info [file_ots]')
     .alias('i')
     .option('-v, --verbose', 'Be more verbose.')
@@ -27,14 +27,13 @@ program
     .action((file, options) => {
       isExecuted = true;
       if (!file) {
-        console.log('Show information on a timestamp given as argument.');
-        console.log(title + ' info: bad options number ');
+        console.log(infoCommand.helpInformation());
         return;
       }
       info(file, options);
     });
 
-program
+const stampCommand = program
     .command('stamp [files...]')
     .alias('s')
     .option('-c, --calendar <url>', 'Create timestamp with the aid of a remote calendar. May be specified multiple times.')
@@ -45,9 +44,8 @@ program
     .description('Create timestamp with the aid of a remote calendar, the output receipt will be saved with .ots .')
     .action((files, options) => {
       isExecuted = true;
-      if (!files && files.size() < 1) {
-        console.log('Create timestamp with the aid of a remote calendar.');
-        console.log(title + ' stamp: bad options number ');
+      if (files === undefined || files.length < 1) {
+        console.log(stampCommand.helpInformation());
         return;
       }
 
@@ -80,29 +78,27 @@ program
       stamp(files, parameters);
     });
 
-program
+const verifyCommand = program
     .command('verify [file_ots]')
     .alias('v')
     .description('Verify the timestamp attestations, expect original file present in the same directory without .ots .')
     .action(file => {
       isExecuted = true;
       if (!file) {
-        console.log('Verify the timestamp attestations given as argument.');
-        console.log(title + ' verify: bad options number ');
+        console.log(verifyCommand.helpInformation());
         return;
       }
       verify(file);
     });
 
-program
+const upgradeCommand = program
     .command('upgrade [file_ots]')
     .alias('u')
     .description('Upgrade remote calendar timestamps to be locally verifiable.')
     .action(file => {
       isExecuted = true;
       if (!file) {
-        console.log('Upgrade the timestamp attestations given as argument.');
-        console.log(title + ' upgrade: bad options number ');
+        console.log(upgradeCommand.helpInformation());
         return;
       }
       upgrade(file);
