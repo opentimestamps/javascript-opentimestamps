@@ -347,7 +347,7 @@ class Timestamp {
           bitcore.Transaction(Utils.bytesToHex(this.msg));
           let tx = new Ops.OpReverse().call(new Ops.OpSHA256().call(new Ops.OpSHA256().call(this.msg)));
           tx = Utils.bytesToHex(tx);
-          r += Timestamp.indention(indent) + '* Bitcoin transaction id ' + tx + '\n';
+          r += Timestamp.indention(indent) + '# Bitcoin transaction id ' + tx + '\n';
         } catch (err) {
         }
         const curRes = op.call(this.msg);
@@ -360,7 +360,7 @@ class Timestamp {
         bitcore.Transaction(Utils.bytesToHex(this.msg));
         let tx = new Ops.OpReverse().call(new Ops.OpSHA256().call(new Ops.OpSHA256().call(this.msg)));
         tx = Utils.bytesToHex(tx);
-        r += Timestamp.indention(indent) + '* Bitcoin transaction id ' + tx + '\n';
+        r += Timestamp.indention(indent) + '# Bitcoin transaction id ' + tx + '\n';
       } catch (err) {
       }
       const op = this.ops.keys().next().value;
