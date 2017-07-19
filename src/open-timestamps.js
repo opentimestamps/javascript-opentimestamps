@@ -39,7 +39,7 @@ module.exports = {
     const firstLine = 'File ' + hashOp + ' hash: ' + fileHash + '\n';
 
     try {
-      if (options.verbose) {
+      if (options !== undefined && options.verbose) {
         return firstLine + 'Timestamp:\n' + timestamp.strTree(0, 1);
       }
       return firstLine + 'Timestamp:\n' + timestamp.strTree(0, 0);
