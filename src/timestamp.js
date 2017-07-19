@@ -313,7 +313,7 @@ class Timestamp {
             const index = resultHex.indexOf(parameterHex);
             const parameterHexHighlight = bcolors.BOLD + parameterHex + bcolors.ENDC;
             if (index === 0) {
-              rr += parameterHexHighlight + resultHex[index + parameterHex.length];
+              rr += parameterHexHighlight + resultHex.substring(index + parameterHex.length, resultHex.length);
             } else {
               rr += resultHex.substring(0, index) + parameterHexHighlight;
             }
