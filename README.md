@@ -61,12 +61,30 @@ Browser compatibility:
 
 ## Command Line
 
+The following example requires you installed globally the javascript-opentimestamps library, if you want to test locally just prepend `node` to the command, like `node ots-cli.js --help`
+
 #### Stamp
 
 Create timestamp `README.md.ots` from this `README.md` with the aid of a remote calendar.
 
 ```shell
 $ ots-cli.js stamp README.md
+The timestamp proof 'README.md.ots' has been created!
+```
+
+If you already have the hash of some file, you don't need to rehash it:
+
+```shell
+$ ots-cli.js stamp -H 05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9
+The timestamp proof '05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9.ots' has been created!
+```
+Note that verify implicity requires the file must be called like the .ots receipt but without the ots, if you timestamp hashes and want to verify you need to rename files accordingly.
+
+The stamp command support multiple files or hashes as argument.
+
+```shell
+$ ots-cli.js stamp README.md ots-cli.js
+The timestamp proof 'ots-cli.js.ots' has been created!
 The timestamp proof 'README.md.ots' has been created!
 ```
 
@@ -85,6 +103,27 @@ sha256
 prepend 57cfa5c4
 append 6fb1ac8d4e4eb0e7
 verify PendingAttestation('https://alice.btc.calendar.opentimestamps.org')
+```
+
+You can have verbose output wich clarifies operations, arguments, results and contains also comments showing transaction id involved and calculated merkle tree root.
+
+```shell
+$ node ots-cli.js info -v examples/hello-world.txt.ots 
+File sha256 hash: 03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340
+Timestamp:
+ripemd160 == 1df8859e60bc679503d16dcb870e6ce91a57e9df
+prepend 0100000001e482f9d32ecc3ba657b69d898010857b54457a90497982ff56f97c4ec58e6f98010000006b483045022100b253add1d1cf90844338a475a04ff13fc9e7bd242b07762dea07f5608b2de367022000b268ca9c3342b3769cdd062891317cdcef87aac310b6855e9d93898ebbe8ec0121020d8e4d107d2b339b0050efdd4b4a09245aa056048f125396374ea6a2ab0709c6ffffffff026533e605000000001976a9140bf057d40fbba6744862515f5b55a2310de5772f88aca0860100000000001976a914 == 0100000001e482f9d32ecc3ba657b69d898010857b54457a90497982ff56f97c4ec58e6f98010000006b483045022100b253add1d1cf90844338a475a04ff13fc9e7bd242b07762dea07f5608b2de367022000b268ca9c3342b3769cdd062891317cdcef87aac310b6855e9d93898ebbe8ec0121020d8e4d107d2b339b0050efdd4b4a09245aa056048f125396374ea6a2ab0709c6ffffffff026533e605000000001976a9140bf057d40fbba6744862515f5b55a2310de5772f88aca0860100000000001976a9141df8859e60bc679503d16dcb870e6ce91a57e9df
+append 88ac00000000 == 0100000001e482f9d32ecc3ba657b69d898010857b54457a90497982ff56f97c4ec58e6f98010000006b483045022100b253add1d1cf90844338a475a04ff13fc9e7bd242b07762dea07f5608b2de367022000b268ca9c3342b3769cdd062891317cdcef87aac310b6855e9d93898ebbe8ec0121020d8e4d107d2b339b0050efdd4b4a09245aa056048f125396374ea6a2ab0709c6ffffffff026533e605000000001976a9140bf057d40fbba6744862515f5b55a2310de5772f88aca0860100000000001976a9141df8859e60bc679503d16dcb870e6ce91a57e9df88ac00000000
+# Bitcoin transaction id 7e9f0f7d9daa2d9e51b2e22f4abe814c3f90539afa778a9bef88dc64627cb2ec
+sha256 == 9c6aa9591003377455b6f27fc71b5acfa5fbb2fa49362fa87a25ef0d799dd462
+&
+...content omitted...
+&
+prepend 0be23709859913babd4460bbddf8ed213e7c8773a4b1face30f8acfdf093b705 == 0be23709859913babd4460bbddf8ed213e7c8773a4b1face30f8acfdf093b7053f10376d0aebb4647ff550b60d69ba5ad6b6809d51af6a6476e0312a9433a3bf
+sha256 == faa6e88835c144ad73f48992bc05e691a52a9199df02450194f3a03b530dc2d7
+sha256 == 007ee445d23ad061af4a36b809501fab1ac4f2d7e7a739817dd0cbb7ec661b8a
+verify BitcoinBlockHeaderAttestation(358391)
+# Bitcoin block merkle root 8a1b66ecb7cbd07d8139a7e7d7f2c41aab1f5009b8364aaf61d03ad245e47e00
 
 ```
 
