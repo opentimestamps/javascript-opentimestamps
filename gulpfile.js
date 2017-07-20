@@ -14,8 +14,12 @@ const runSequence = require('run-sequence');
 const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
 const pump = require('pump');
+const fs = require('fs');
 
 gulp.task('clean', function () {
+    if (!fs.existsSync('./dist')){
+        fs.mkdirSync('./dist');
+    }
     return gulp.src('./dist/*', {read: false})
         .pipe(clean({force: true}))
 });
