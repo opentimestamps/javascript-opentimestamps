@@ -5,3 +5,4 @@ sync.sh
 signature.key
 signature.wif
 deploy.sh
+dist/
