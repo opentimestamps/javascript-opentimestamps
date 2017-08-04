@@ -289,6 +289,32 @@ module.exports = {
       let found = false;
 
       timestamp.allAttestations().forEach((attestation, msg) => {
+        function liteVerify() {
+          // There is no local node available or is turned of
+          // Request to insight
+          const insight = new Insight.MultiInsight();
+          insight.blockhash(attestation.height).then(blockHash => {
+            console.log('Lite-client verification, assuming block ' + blockHash + ' is valid');
+            insight.block(blockHash).then(blockInfo => {
+              const merkle = Utils.hexToBytes(blockInfo.merkleroot);
+              const message = msg.reverse();
+
+              // One Bitcoin attestation is enough
+              if (Utils.arrEq(merkle, message)) {
+                resolve(blockInfo.time);
+              } else {
+                resolve();
+              }
+            }).catch(err => {
+              console.error('Error: ' + err);
+              reject(err);
+            });
+          }).catch(err => {
+            console.error('Error: ' + err);
+            reject(err);
+          });
+        }
+
         if (!found) { // Verify only the first BitcoinBlockHeaderAttestation
           if (attestation instanceof Notary.PendingAttestation) {
             // console.log('PendingAttestation: pass ');
@@ -313,37 +339,17 @@ module.exports = {
               bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
                 const merkle = Utils.hexToBytes(blockHeader.getMerkleroot());
                 const message = msg.reverse();
-                // One Bitcoin attestation is enought
+                  // One Bitcoin attestation is enought
                 if (Utils.arrEq(merkle, message)) {
                   resolve(blockHeader.time);
                 } else {
                   resolve();
                 }
+              }).catch(() => {
+                liteVerify();
               });
             }).catch(() => {
-              // There is no local node available
-              // Request to insight
-              const insight = new Insight.MultiInsight();
-              insight.blockhash(attestation.height).then(blockHash => {
-                console.log('Lite-client verification, assuming block ' + blockHash + ' is valid');
-                insight.block(blockHash).then(blockInfo => {
-                  const merkle = Utils.hexToBytes(blockInfo.merkleroot);
-                  const message = msg.reverse();
-
-                  // One Bitcoin attestation is enought
-                  if (Utils.arrEq(merkle, message)) {
-                    resolve(blockInfo.time);
-                  } else {
-                    resolve();
-                  }
-                }).catch(err => {
-                  console.error('Error: ' + err);
-                  reject(err);
-                });
-              }).catch(err => {
-                console.error('Error: ' + err);
-                reject(err);
-              });
+              liteVerify();
             });
           }
         }
