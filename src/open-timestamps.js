@@ -403,6 +403,11 @@ module.exports = {
     const promises = [];
     const self = this;
 
+    if (timestamp.isTimestampComplete()) {
+      return new Promise(resolve => {
+        resolve(false);
+      });
+    }
     // console.log(timestamp.directlyVerified().length);
     timestamp.directlyVerified().forEach(subStamp => {
       subStamp.attestations.forEach(attestation => {
