@@ -30,11 +30,14 @@ echo ">> node ots-cli.js info examples/hello-world.txt.ots" && (node ots-cli.js 
 echo ">> node ots-cli.js info examples/hello-world.txt.eth.ots" && (node ots-cli.js info examples/hello-world.txt.eth.ots | grep "EthereumBlockHeaderAttestation") && \
 echo ">> node ots-cli.js info examples/unknown-notary.txt.ots" && (node ots-cli.js info examples/unknown-notary.txt.ots | grep "UnknownAttestation") && \
 
-# Test: upgrade examples/incomplete.txt
+# Test: upgrade examples/incomplete.txt and check double upgrade
 echo ">> node ots-cli.js upgrade examples/incomplete.txt.ots" && \
 cp examples/incomplete.txt.ots examples/incomplete.txt.ots.old && \
 node ots-cli.js upgrade examples/incomplete.txt.ots && \
 (node ots-cli.js info examples/incomplete.txt.ots | grep "BitcoinBlockHeaderAttestation") && \
-cp examples/incomplete.txt.ots.old examples/incomplete.txt.ots && rm examples/incomplete.txt.ots.bak examples/incomplete.txt.ots.old && \
+cp examples/incomplete.txt.ots examples/incomplete.txt.ots.upgraded && \
+node ots-cli.js upgrade examples/incomplete.txt.ots && \
+diff examples/incomplete.txt.ots examples/incomplete.txt.ots.upgraded && \
+cp examples/incomplete.txt.ots.old examples/incomplete.txt.ots && rm examples/incomplete.txt.ots.bak examples/incomplete.txt.ots.old examples/incomplete.txt.ots.upgraded && \
 
  echo --- END TESTING ots-cli.js
