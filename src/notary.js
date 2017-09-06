@@ -16,27 +16,28 @@ class TimeAttestation {
   _TAG_SIZE() {
     return 8;
   }
+
   _MAX_PAYLOAD_SIZE() {
     return 8192;
   }
 
-  /**
-   * Deserialize a general Time Attestation to the specific subclass Attestation.
-   * @param {StreamDeserializationContext} ctx - The stream deserialization context.
-   * @return {Attestation} The specific subclass Attestation.
-   */
+    /**
+     * Deserialize a general Time Attestation to the specific subclass Attestation.
+     * @param {StreamDeserializationContext} ctx - The stream deserialization context.
+     * @return {Attestation} The specific subclass Attestation.
+     */
   static deserialize(ctx) {
-    // console.log('attestation deserialize');
+        // console.log('attestation deserialize');
 
     const tag = ctx.readBytes(new TimeAttestation()._TAG_SIZE());
-    // console.log('tag: ', Utils.bytesToHex(tag));
+        // console.log('tag: ', Utils.bytesToHex(tag));
 
     const serializedAttestation = ctx.readVarbytes(new TimeAttestation()._MAX_PAYLOAD_SIZE());
-    // console.log('serializedAttestation: ', Utils.bytesToHex(serializedAttestation));
+        // console.log('serializedAttestation: ', Utils.bytesToHex(serializedAttestation));
 
     const ctxPayload = new Context.StreamDeserialization(serializedAttestation);
 
-    /* eslint no-use-before-define: ["error", { "classes": false }] */
+        /* eslint no-use-before-define: ["error", { "classes": false }] */
     if (Utils.arrEq(tag, new PendingAttestation()._TAG()) === true) {
       return PendingAttestation.deserialize(ctxPayload);
     } else if (Utils.arrEq(tag, new BitcoinBlockHeaderAttestation()._TAG()) === true) {
@@ -47,15 +48,23 @@ class TimeAttestation {
     return UnknownAttestation.deserialize(ctxPayload, tag);
   }
 
-  /**
-   * Serialize a a general Time Attestation to the specific subclass Attestation.
-   * @param {StreamSerializationContext} ctx - The output stream serialization context.
-   */
+    /**
+     * Serialize a a general Time Attestation to the specific subclass Attestation.
+     * @param {StreamSerializationContext} ctx - The output stream serialization context.
+     */
   serialize(ctx) {
     ctx.writeBytes(this._TAG());
     const ctxPayload = new Context.StreamSerialization();
     this.serializePayload(ctxPayload);
     ctx.writeVarbytes(ctxPayload.getOutput());
+  }
+
+  compareTo(other) {
+    const deltaTag = Utils.arrCompare(this._TAG(), other._TAG());
+    if (deltaTag === 0) {
+      return Utils.arrCompare(this.uri, other.uri);
+    }
+    return deltaTag;
   }
 }
 
@@ -87,10 +96,18 @@ class UnknownAttestation extends TimeAttestation {
   toString() {
     return 'UnknownAttestation ' + Utils.bytesToHex(this._TAG()) + ' ' + Utils.bytesToHex(this.payload);
   }
+
   equals(another) {
     return (another instanceof UnknownAttestation) &&
-        (Utils.arrEq(this._TAG(), another._TAG())) &&
-        (Utils.arrEq(this.payload, another.payload));
+            (Utils.arrEq(this._TAG(), another._TAG())) &&
+            (Utils.arrEq(this.payload, another.payload));
+  }
+
+  compareTo(other) {
+    if (other instanceof UnknownAttestation) {
+      return Utils.arrCompare(this.payload, other.payload);
+    }
+    return super.compareTo(other);
   }
 }
 
@@ -117,9 +134,11 @@ class PendingAttestation extends TimeAttestation {
   _TAG() {
     return [0x83, 0xdf, 0xe3, 0x0d, 0x2e, 0xf9, 0x0c, 0x8e];
   }
+
   _MAX_URI_LENGTH() {
     return 1000;
   }
+
   _ALLOWED_URI_CHARS() {
     return 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._/:';
   }
@@ -157,13 +176,22 @@ class PendingAttestation extends TimeAttestation {
   serializePayload(ctx) {
     ctx.writeVarbytes(Utils.charsToBytes(this.uri));
   }
+
   toString() {
     return 'PendingAttestation(\'' + this.uri + '\')';
   }
+
   equals(another) {
     return (another instanceof PendingAttestation) &&
-        (Utils.arrEq(this._TAG(), another._TAG())) &&
-        (this.uri === another.uri);
+            (Utils.arrEq(this._TAG(), another._TAG())) &&
+            (this.uri === another.uri);
+  }
+
+  compareTo(other) {
+    if (other instanceof PendingAttestation) {
+      return Utils.arrCompare(Utils.charsToBytes(this.uri), Utils.charsToBytes(other.uri));
+    }
+    return super.compareTo(other);
   }
 }
 
@@ -210,13 +238,22 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
   serializePayload(ctx) {
     ctx.writeVaruint(this.height);
   }
+
   toString() {
     return 'BitcoinBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')';
   }
+
   equals(another) {
     return (another instanceof BitcoinBlockHeaderAttestation) &&
-        (Utils.arrEq(this._TAG(), another._TAG())) &&
-        (this.height === another.height);
+            (Utils.arrEq(this._TAG(), another._TAG())) &&
+            (this.height === another.height);
+  }
+
+  compareTo(other) {
+    if (other instanceof BitcoinBlockHeaderAttestation) {
+      return this.height - other.height;
+    }
+    return super.compareTo(other);
   }
 }
 
@@ -244,10 +281,10 @@ class EthereumBlockHeaderAttestation extends TimeAttestation {
     return 'EthereumBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')';
   }
 
-  /*
-   Verify attestation against a block header
-   Returns the block time on success; raises VerificationError on failure.
-   */
+    /*
+     Verify attestation against a block header
+     Returns the block time on success; raises VerificationError on failure.
+     */
   verifyAgainstBlockheader(digest, block) {
     if (digest.length !== 32) {
       console.error('Expected digest with length 32 bytes; got ' + digest.length + ' bytes');
@@ -259,8 +296,15 @@ class EthereumBlockHeaderAttestation extends TimeAttestation {
 
   equals(another) {
     return (another instanceof EthereumBlockHeaderAttestation) &&
-        (Utils.arrEq(this._TAG(), another._TAG())) &&
-        (this.height === another.height);
+            (Utils.arrEq(this._TAG(), another._TAG())) &&
+            (this.height === another.height);
+  }
+
+  compareTo(other) {
+    if (other instanceof BitcoinBlockHeaderAttestation) {
+      return this.height - other.height;
+    }
+    return super.compareTo(other);
   }
 
 }

@@ -87,14 +87,19 @@ class Timestamp {
     // console.log('SERIALIZE');
     // console.log(ctx.toString());
 
-    // sort
+      // sort
     const sortedAttestations = this.attestations;
+    sortedAttestations.sort((a, b) => {
+      return a.compareTo(b);
+    });
+
     if (sortedAttestations.length > 1) {
-      for (let i = 0; i < sortedAttestations.length; i++) {
+      for (let i = 0; i < sortedAttestations.length - 1; i++) {
         ctx.writeBytes([0xff, 0x00]);
         sortedAttestations[i].serialize(ctx);
       }
     }
+
     if (this.ops.size === 0) {
       ctx.writeByte(0x00);
       if (sortedAttestations.length > 0) {
