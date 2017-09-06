@@ -458,6 +458,24 @@ class Timestamp {
 
     return true;
   }
+
+    /**
+     * Add Op to current timestamp and return the sub stamp
+     * @param op - The operation to insert
+     * @return Returns the sub timestamp
+     */
+    add(op) {
+        // nonce_appended_stamp = timestamp.ops.add(com.eternitywall.ots.op.OpAppend(os.urandom(16)))
+        // Op opAppend = new OpAppend(bytes);
+
+        if (this.ops.has(op)) {
+            return this.ops.get(op);
+        }
+
+        const stamp = new Timestamp(op.call(this.msg));
+        this.ops.set(op, stamp);
+        return stamp;
+    }
 }
 
 module.exports = Timestamp;
