@@ -76,12 +76,20 @@ exports.charsToBytes = function (chars) {
   return bytes;
 };
 
-exports.bytesToCharts = function (buffer) {
+exports.bytesToChars = function (buffer) {
   let charts = '';
   for (let b = 0; b < buffer.length; b++) {
     charts += String.fromCharCode(b)[0];
   }
   return charts;
+};
+
+exports.toBytes = function (str) {
+  const arr = [];
+  for (let i = 0; i < str.length; i++) {
+    arr.push(str.charCodeAt(i));
+  }
+  return arr;
 };
 
 exports.arrayToBytes = function (buffer) {
@@ -90,6 +98,17 @@ exports.arrayToBytes = function (buffer) {
     bytes.push(parseInt(buffer[c], 10));
   }
   return bytes;
+};
+
+exports.arrCompare = function (left, right) {
+  for (let i = 0, j = 0; i < left.length && j < right.length; i++, j++) {
+    const a = (left[i] & 0xff);
+    const b = (right[j] & 0xff);
+    if (a !== b) {
+      return a - b;
+    }
+  }
+  return left.length - right.length;
 };
 
 exports.arrEq = function (arr1, arr2) {
