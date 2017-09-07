@@ -490,6 +490,24 @@ class Timestamp {
     this.ops.set(op, stamp);
     return stamp;
   }
+
+    /**
+     * Iterate over all tips recursively
+     * @return Returns iterable of (msg, attestation)
+     */
+  allTips() {
+    const set = new Set();
+    if (this.ops.size === 0) {
+      set.add(this.msg);
+    }
+    this.ops.forEach(stamp => {
+      const subSet = stamp.allTips();
+      subSet.forEach(msg => {
+        set.add(msg);
+      });
+    });
+    return set;
+  }
 }
 
 module.exports = Timestamp;
