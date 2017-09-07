@@ -101,9 +101,6 @@ module.exports = {
    */
   stamp(detaches, options) {
     return new Promise((resolve, reject) => {
-      const fileTimestamps = [];
-      const merkleRoots = [];
-
       // Parse input detaches
       let detachedList;
       if (detaches instanceof DetachedTimestampFile) {
@@ -114,6 +111,12 @@ module.exports = {
         return reject('Invalid input');
       }
 
+        // Build markle tree
+      const merkleTip = this.makeMerkleTree(detachedList);
+      if (merkleTip === undefined) {
+        return reject('Invalid input');
+      }
+      /*
       // Fill merkle tree leaf
       detachedList.forEach(fileTimestamp => {
         if (!(fileTimestamp instanceof DetachedTimestampFile)) {
@@ -121,11 +124,6 @@ module.exports = {
           return reject('Invalid input');
         }
 
-        /* Add nonce:
-         * Remember that the files - and their timestamps - might get separated
-         * later, so if we didn't use a nonce for every file, the timestamp
-         * would leak information on the digests of adjacent files.
-         * */
         let merkleRoot;
         try {
           const bytesRandom16 = Utils.randBytes(16);
@@ -141,10 +139,7 @@ module.exports = {
 
         fileTimestamps.push(fileTimestamp);
         merkleRoots.push(merkleRoot);
-      });
-
-      // Build merkle tree
-      const merkleTip = Merkle.makeMerkleTree(merkleRoots);
+      }); */
 
       // Parse options
       if (!options) {
@@ -224,6 +219,39 @@ module.exports = {
         reject(err);
       });
     });
+  },
+
+    /**
+     * Make Merkle Tree.
+     * @param fileTimestamps The list of DetachedTimestampFile.
+     * @return merkle tip timestamp.
+     */
+  makeMerkleTree(fileTimestamps) {
+        /* Add nonce:
+         * Remember that the files - and their timestamps - might get separated
+         * later, so if we didn't use a nonce for every file, the timestamp
+         * would leak information on the digests of adjacent files.
+         * */
+    const merkleRoots = [];
+    fileTimestamps.forEach(fileTimestamp => {
+      if (!(fileTimestamp instanceof DetachedTimestampFile)) {
+        console.error('Invalid input');
+        return undefined;
+      }
+      try {
+        const bytesRandom16 = Utils.randBytes(16);
+                // nonce_appended_stamp = file_timestamp.timestamp.ops.add(OpAppend(os.urandom(16)))
+        const nonceAppendedStamp = fileTimestamp.timestamp.add(new Ops.OpAppend(Utils.arrayToBytes(bytesRandom16)));
+                // merkle_root = nonce_appended_stamp.ops.add(OpSHA256())
+        const merkleRoot = nonceAppendedStamp.add(new Ops.OpSHA256());
+        merkleRoots.push(merkleRoot);
+      } catch (err) {
+        return undefined;
+      }
+    });
+
+    const merkleTip = Merkle.makeMerkleTree(merkleRoots);
+    return merkleTip;
   },
 
   /**
