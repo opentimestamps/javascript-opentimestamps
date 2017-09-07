@@ -131,20 +131,10 @@ module.exports = {
           const bytesRandom16 = Utils.randBytes(16);
 
           // nonce_appended_stamp = file_timestamp.timestamp.ops.add(OpAppend(os.urandom(16)))
-          const opAppend = new Ops.OpAppend(Utils.arrayToBytes(bytesRandom16));
-          let nonceAppendedStamp = fileTimestamp.timestamp.ops.get(opAppend);
-          if (nonceAppendedStamp === undefined) {
-            nonceAppendedStamp = new Timestamp(opAppend.call(fileTimestamp.timestamp.msg));
-            fileTimestamp.timestamp.ops.set(opAppend, nonceAppendedStamp);
-          }
+          const nonceAppendedStamp = fileTimestamp.timestamp.add(new Ops.OpAppend(Utils.arrayToBytes(bytesRandom16)));
 
           // merkle_root = nonce_appended_stamp.ops.add(OpSHA256())
-          const opSHA256 = new Ops.OpSHA256();
-          merkleRoot = nonceAppendedStamp.ops.get(opSHA256);
-          if (merkleRoot === undefined) {
-            merkleRoot = new Timestamp(opSHA256.call(nonceAppendedStamp.msg));
-            nonceAppendedStamp.ops.set(opSHA256, merkleRoot);
-          }
+          merkleRoot = nonceAppendedStamp.add(new Ops.OpSHA256());
         } catch (err) {
           return reject(err);
         }
