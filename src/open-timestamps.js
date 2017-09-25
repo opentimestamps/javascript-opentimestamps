@@ -116,30 +116,6 @@ module.exports = {
       if (merkleTip === undefined) {
         return reject('Invalid input');
       }
-      /*
-      // Fill merkle tree leaf
-      detachedList.forEach(fileTimestamp => {
-        if (!(fileTimestamp instanceof DetachedTimestampFile)) {
-          console.error('Invalid input');
-          return reject('Invalid input');
-        }
-
-        let merkleRoot;
-        try {
-          const bytesRandom16 = Utils.randBytes(16);
-
-          // nonce_appended_stamp = file_timestamp.timestamp.ops.add(OpAppend(os.urandom(16)))
-          const nonceAppendedStamp = fileTimestamp.timestamp.add(new Ops.OpAppend(Utils.arrayToBytes(bytesRandom16)));
-
-          // merkle_root = nonce_appended_stamp.ops.add(OpSHA256())
-          merkleRoot = nonceAppendedStamp.add(new Ops.OpSHA256());
-        } catch (err) {
-          return reject(err);
-        }
-
-        fileTimestamps.push(fileTimestamp);
-        merkleRoots.push(merkleRoot);
-      }); */
 
       // Parse options
       if (!options) {
