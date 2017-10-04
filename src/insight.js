@@ -118,7 +118,6 @@ const urls = [
   'https://www.localbitcoinschain.com/api',
   'https://search.bitaccess.co/insight-api',
   'https://insight.bitpay.com/api',
-  'https://ots.eternitywall.it/insight-api',
   'https://btc-bitcore1.trezor.io/api',
   'https://btc-bitcore4.trezor.io/api',
   'https://blockexplorer.com/api'
