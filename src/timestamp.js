@@ -101,8 +101,8 @@ class Timestamp {
     }
 
     if (this.ops.size === 0) {
-      ctx.writeByte(0x00);
       if (sortedAttestations.length > 0) {
+        ctx.writeByte(0x00);
         sortedAttestations[sortedAttestations.length - 1].serialize(ctx);
       }
     } else if (this.ops.size > 0) {

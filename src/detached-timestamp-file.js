@@ -58,7 +58,6 @@ class DetachedTimestampFile {
   /**
    * Serialize a Timestamp File.
    * @param {StreamSerializationContext} ctx - The stream serialization context.
-   * @return {byte[]} The serialized DetachedTimestampFile object.
    */
   serialize(ctx) {
     ctx.writeBytes(HEADER_MAGIC);
@@ -66,6 +65,16 @@ class DetachedTimestampFile {
     this.fileHashOp.serialize(ctx);
     ctx.writeBytes(this.timestamp.msg);
     this.timestamp.serialize(ctx);
+  }
+
+  /**
+   * Serialize a Timestamp File into a byte array.
+   * @return {byte[]} The serialized DetachedTimestampFile object.
+   */
+  serializeToBytes() {
+    const ctx = new Context.StreamSerialization();
+    this.serialize(ctx);
+    return ctx.getOutput();
   }
 
   /**

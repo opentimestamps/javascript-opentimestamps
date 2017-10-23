@@ -368,3 +368,63 @@ test('OpenTimestamps.upgrade()', assert => {
   });
 });
 
+test('OpenTimestamps.emptyTimestamp()', assert => {
+  const info = 'File sha256 hash: 05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9\nTimestamp:\n';
+  const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), incomplete);
+  const detachedInfo = OpenTimestamps.info(detached);
+  assert.equal(detachedInfo, info);
+  console.log(Utils.bytesToHex(detached.serializeToBytes()));
+
+  // serialize & deserialize
+  const ctx = new Context.StreamSerialization();
+  detached.serialize(ctx);
+  const buffer = new Buffer(ctx.getOutput());
+  console.log(Utils.bytesToHex(buffer));
+
+  // error to deserialize an ots with empty timestamp
+  try {
+    DetachedTimestampFile.deserialize(new Context.StreamDeserialization(buffer));
+    assert.true(false);
+  } catch (err) {
+    assert.true(true);
+  }
+  assert.end();
+});
+
+test('OpenTimestamps.serialize()', assert => {
+  // from bytes: serialize to buffer
+  let detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), helloworld);
+  const ots = detached.serializeToBytes();
+
+  // from bytes: serialize with context
+  let ctx = new Context.StreamSerialization();
+  detached.serialize(ctx);
+  assert.true(Utils.arrEq(ots, ctx.getOutput()));
+
+  // from hash: serialize to buffer
+  let hash = (new Ops.OpSHA256()).call(helloworld);
+  detached = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), hash);
+  let bytes = Utils.arrayToBytes(detached.serializeToBytes());
+  assert.true(Utils.arrEq(ots, bytes));
+
+  // from hash: serialize with context
+  hash = (new Ops.OpSHA256()).call(helloworld);
+  detached = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), hash);
+  ctx = new Context.StreamSerialization();
+  detached.serialize(ctx);
+  assert.true(Utils.arrEq(ots, ctx.getOutput()));
+
+  // from ots: serialize to buffer
+  detached = DetachedTimestampFile.deserialize(helloworldOts);
+  bytes = Utils.arrayToBytes(detached.serializeToBytes());
+  assert.true(Utils.arrEq(helloworldOts, bytes));
+
+  // from ots: serialize with context
+  detached = DetachedTimestampFile.deserialize(helloworldOts);
+  ctx = new Context.StreamSerialization();
+  detached.serialize(ctx);
+  assert.true(Utils.arrEq(helloworldOts, ctx.getOutput()));
+
+  assert.end();
+});
+
