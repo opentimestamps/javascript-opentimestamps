@@ -421,22 +421,15 @@ module.exports = {
     });
 
     return new Promise((resolve, reject) => {
-      Promise.all(promises).then(results => {
-        // console.log('Timestamp before merged');
-        // console.log(Timestamp.strTreeExtended(timestamp));
-
+      Promise.all(promises.map(Utils.softFail)).then(results => {
+        let changed = false;
         results.forEach(result => {
           if (result !== undefined) {
+            changed = true;
             result.subStamp.merge(result.upgradedStamp);
           }
         });
-        // console.log('Timestamp merged');
-        // console.log(timestamp.strTree());
-        if (results.length === 0) {
-          resolve(false);
-        } else {
-          resolve(true);
-        }
+        resolve(changed);
       }).catch(err => {
         console.error('Error upgradeTimestamp: ' + err);
         reject(err);
@@ -445,7 +438,7 @@ module.exports = {
   },
 
   upgradeStamp(subStamp, calendar, commitment, existingAttestations) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       calendar.getTimestamp(commitment).then(upgradedStamp => {
         // console.log(Timestamp.strTreeExtended(upgradedStamp, 0));
 
@@ -472,11 +465,7 @@ module.exports = {
           resolve();
         }
       }).catch(err => {
-        if (err === undefined) {
-          resolve();
-        } else {
-          resolve();
-        }
+        reject(err);
       });
     });
   }
