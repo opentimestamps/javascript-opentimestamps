@@ -121,7 +121,7 @@ module.exports = {
       if (!options) {
         options = {};
       }
-      if (options.privateCalendars) {
+      if (options.privateCalendars && options.privateCalendars.length > 0) {
         options.publicCalendars = [];
         if (!options.m || options.m === 0) {
           options.m = options.privateCalendars.length;
