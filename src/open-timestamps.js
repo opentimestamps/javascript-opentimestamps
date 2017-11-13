@@ -121,11 +121,11 @@ module.exports = {
       if (!options) {
         options = {};
       }
-      if (options.privateCalendars) {
+      if (options.privateCalendars && options.privateCalendars.length > 0) {
         options.publicCalendars = [];
         if (!options.m || options.m === 0) {
-          options.m = options.privateCalendars.size();
-        } else if (options.m < 0 || options.m > options.publicCalendars.size()) {
+          options.m = options.privateCalendars.length;
+        } else if (options.m < 0 || options.m > options.publicCalendars.length) {
           console.log('m cannot be greater than available calendar neither less or equal 0');
           return reject('m cannot be greater than available calendar neither less or equal 0');
         }
@@ -143,7 +143,7 @@ module.exports = {
           if (options.publicCalendars.length >= 2) {
             options.m = 2;
           }
-        } else if (options.m < 0 || options.m > options.publicCalendars.size()) {
+        } else if (options.m < 0 || options.m > options.publicCalendars.length) {
           console.log('m cannot be greater than available calendar neither less or equal 0');
           return reject('m cannot be greater than available calendar neither less or equal 0');
         }
