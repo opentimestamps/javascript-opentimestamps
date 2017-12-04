@@ -46,6 +46,7 @@ HELLOWORLD_HASH="03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab34
 echo ">> node ots-cli.js verify examples/hello-world.txt.ots" && node ots-cli.js verify examples/hello-world.txt.ots | grep "${HELLOWORLD}" && \
 echo ">> node ots-cli.js verify -f examples/hello-world.txt examples/hello-world.txt.ots" && node ots-cli.js verify -f examples/hello-world.txt examples/hello-world.txt.ots | grep "${HELLOWORLD}" && \
 echo ">> node ots-cli.js verify -d ${HELLOWORLD_HASH} examples/hello-world.txt.ots" && node ots-cli.js verify -d ${HELLOWORLD_HASH} examples/hello-world.txt.ots | grep "${HELLOWORLD}" && \
+echo ">> node ots-cli.js verify -d ${HELLOWORLD_HASH} -a sha256 examples/hello-world.txt.ots" && node ots-cli.js verify -d ${HELLOWORLD_HASH} -a sha256 examples/hello-world.txt.ots | grep "${HELLOWORLD}" && \
 
 # Test: upgrade pending attestation with different calendar url
 echo ">> node ots-cli.js upgrade -c https://finney.calendar.eternitywall.com examples/incomplete.txt.ots" && \

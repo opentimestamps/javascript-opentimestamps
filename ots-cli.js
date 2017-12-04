@@ -40,12 +40,12 @@ const infoCommand = program
 const stampCommand = program
     .command('stamp [FILE...]')
     .alias('s')
-    .option('-c, --calendar [url]', 'Create timestamp with the aid of a remote calendar. May be specified multiple times.', collect, [])
-    .option('-m <int>', 'Commitments are sent to remote calendars in the event of timeout the timestamp is considered done if at least M calendars replied.')
-    .option('-k, --key <file>', 'Signature key file of private remote calendars.')
-    .option('-d, --digest <digest>', 'Verify a (hex-encoded) digest rather than a file.')
+    .option('-c, --calendar [url]', 'Create timestamp with the aid of a remote calendar. May be specified multiple times', collect, [])
+    .option('-m <int>', 'Commitments are sent to remote calendars in the event of timeout the timestamp is considered done if at least M calendars replied')
+    .option('-k, --key <file>', 'Signature key file of private remote calendars')
+    .option('-d, --digest <digest>', 'Verify a (hex-encoded) digest rather than a file')
     .option('-a, --algorithm <type>', 'Hash algorithm: sha1, sha256 (default), ripemd160')
-    .description('Create timestamp with the aid of a remote calendar, the output receipt will be saved with .ots .')
+    .description('Create timestamp with the aid of a remote calendar, the output receipt will be saved with .ots')
     .action((files, options) => {
       isExecuted = true;
       if ((files === undefined || files.length < 1) && !options.digest) {
@@ -69,8 +69,8 @@ const stampCommand = program
 
       if (options.algorithm === undefined) {
         parameters.algorithm = 'sha256';
-      } else if (['sha1', 'sha256', 'ripemd160'].indexOf(options.algorithm) > -1) {
-        parameters.algorithm = options.algorithm;
+      } else if (['sha1', 'sha256', 'ripemd160'].indexOf(options.algorithm.toLowerCase()) > -1) {
+        parameters.algorithm = options.algorithm.toLowerCase();
       } else {
         console.log('Create timestamp with the aid of a remote calendar.');
         console.log(title + ' stamp: ' + options.algorithm + ' unsupported ');
@@ -83,8 +83,9 @@ const stampCommand = program
 const verifyCommand = program
     .command('verify [FILE_OTS]')
     .alias('v')
-    .option('-f, --file <file>', 'Specify target file explicitly (default: original file present in the same directory without .ots).')
-    .option('-d, --digest <digest>', 'Verify a (hex-encoded) digest rather than a file.')
+    .option('-f, --file <file>', 'Specify target file explicitly (default: original file present in the same directory without .ots)')
+    .option('-d, --digest <digest>', 'Verify a (hex-encoded) digest rather than a file')
+    .option('-a, --algorithm <type>', 'Hash algorithm: sha1, sha256 (default), ripemd160')
     .description('Verify a timestamp')
     .action((file, options) => {
       isExecuted = true;
@@ -92,14 +93,24 @@ const verifyCommand = program
         console.log(verifyCommand.helpInformation());
         return;
       }
+      if (options.algorithm === undefined) {
+        options.algorithm = 'sha256';
+      } else if (['sha1', 'sha256', 'ripemd160'].indexOf(options.algorithm.toLowerCase()) > -1) {
+        options.algorithm = options.algorithm.toLowerCase();
+      } else {
+        console.log('Create timestamp with the aid of a remote calendar.');
+        console.log(title + ' stamp: ' + options.algorithm + ' unsupported ');
+        return;
+      }
+
       verify(file, options);
     });
 
 const upgradeCommand = program
     .command('upgrade [FILE_OTS]')
     .alias('u')
-    .option('-c, --calendar [url]', 'Override calendars in timestamp.', collect, [])
-    .description('Upgrade remote calendar timestamps to be locally verifiable.')
+    .option('-c, --calendar [url]', 'Override calendars in timestamp', collect, [])
+    .description('Upgrade remote calendar timestamps to be locally verifiable')
     .action((file, options) => {
       isExecuted = true;
       if (!file) {
@@ -241,7 +252,16 @@ function verify(argsFileOts, options) {
     let detached;
 
     if (options.digest) {
-      detached = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), Utils.hexToBytes(options.digest));
+        // check input params : algorithm
+      let op = new Ops.OpSHA256();
+      if (options.algorithm === 'sha1') {
+        op = new Ops.OpSHA1();
+      } else if (options.algorithm === 'sha256') {
+        op = new Ops.OpSHA256();
+      } else if (options.algorithm === 'ripemd160') {
+        op = new Ops.OpRIPEMD160();
+      }
+      detached = DetachedTimestampFile.fromHash(op, Utils.hexToBytes(options.digest));
     } else {
       const file = values[1];
       detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), file);
