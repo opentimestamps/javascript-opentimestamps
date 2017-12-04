@@ -16,6 +16,11 @@ let isExecuted = false;
 
 // Parse parameters
 
+function collect(val, memo) {
+  memo.push(val);
+  return memo;
+}
+
 program
     .version(require('./package.json').version);
 
@@ -36,7 +41,7 @@ const infoCommand = program
 const stampCommand = program
     .command('stamp [files...]')
     .alias('s')
-    .option('-c, --calendar <url>', 'Create timestamp with the aid of a remote calendar. May be specified multiple times.')
+    .option('-c, --calendar [url]', 'Create timestamp with the aid of a remote calendar. May be specified multiple times.', collect, [])
     .option('-m <int>', 'Commitments are sent to remote calendars in the event of timeout the timestamp is considered done if at least M calendars replied.')
     .option('-k, --key <file>', 'Signature key file of private remote calendars.')
     .option('-H, --hash', 'Timestamp hashes instead of files.')
