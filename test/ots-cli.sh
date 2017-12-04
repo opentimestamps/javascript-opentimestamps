@@ -41,14 +41,17 @@ diff examples/incomplete.txt.ots examples/incomplete.txt.ots.upgraded && \
 cp examples/incomplete.txt.ots.old examples/incomplete.txt.ots && rm examples/incomplete.txt.ots.bak examples/incomplete.txt.ots.old examples/incomplete.txt.ots.upgraded && \
 
 # Test: verify ots
-
 HELLOWORLD="Success! Bitcoin attests data existed as of" && \
 HELLOWORLD_HASH="03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340" && \
 echo ">> node ots-cli.js verify examples/hello-world.txt.ots" && node ots-cli.js verify examples/hello-world.txt.ots | grep "${HELLOWORLD}" && \
 echo ">> node ots-cli.js verify -f examples/hello-world.txt examples/hello-world.txt.ots" && node ots-cli.js verify -f examples/hello-world.txt examples/hello-world.txt.ots | grep "${HELLOWORLD}" && \
 echo ">> node ots-cli.js verify -d ${HELLOWORLD_HASH} examples/hello-world.txt.ots" && node ots-cli.js verify -d ${HELLOWORLD_HASH} examples/hello-world.txt.ots | grep "${HELLOWORLD}" && \
 
-
-
+# Test: upgrade pending attestation with different calendar url
+echo ">> node ots-cli.js upgrade -c https://finney.calendar.eternitywall.com examples/incomplete.txt.ots" && \
+cp examples/incomplete.txt.ots examples/incomplete.txt.ots.old && \
+node ots-cli.js upgrade -c https://finney.calendar.eternitywall.com examples/incomplete.txt.ots && \
+diff examples/incomplete.txt.ots examples/incomplete.txt.ots.old && \
+cp examples/incomplete.txt.ots.old examples/incomplete.txt.ots && \
 
  echo --- END TESTING ots-cli.js

@@ -98,7 +98,7 @@ const verifyCommand = program
 const upgradeCommand = program
     .command('upgrade [FILE_OTS]')
     .alias('u')
-    .option('-c, --calendar <url>', 'Override calendars in timestamp.')
+    .option('-c, --calendar [url]', 'Override calendars in timestamp.', collect, [])
     .description('Upgrade remote calendar timestamps to be locally verifiable.')
     .action((file, options) => {
       isExecuted = true;
@@ -265,11 +265,11 @@ function verify(argsFileOts, options) {
   });
 }
 
-function upgrade(argsFileOts) {
+function upgrade(argsFileOts, options) {
   const otsPromise = Utils.readFilePromise(argsFileOts, null);
   otsPromise.then(ots => {
     const detachedOts = DetachedTimestampFile.deserialize(ots);
-    const upgradePromise = OpenTimestamps.upgrade(detachedOts);
+    const upgradePromise = OpenTimestamps.upgrade(detachedOts, options.calendar);
     upgradePromise.then(changed => {
       // check timestamp
       if (changed) {
