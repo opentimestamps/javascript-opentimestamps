@@ -4,7 +4,6 @@
 const fs = require('fs');
 const program = require('commander');
 const OpenTimestamps = require('./src/open-timestamps.js');
-const Context = require('./src/context.js');
 const Utils = require('./src/utils.js');
 const DetachedTimestampFile = require('./src/detached-timestamp-file.js');
 const Ops = require('./src/ops.js');
@@ -25,7 +24,7 @@ program
     .version(require('./package.json').version);
 
 const infoCommand = program
-    .command('info [file_ots]')
+    .command('info [FILE_OTS]')
     .alias('i')
     .option('-v, --verbose', 'Be more verbose.')
     .description('Show information on a timestamp.')
@@ -39,17 +38,17 @@ const infoCommand = program
     });
 
 const stampCommand = program
-    .command('stamp [files...]')
+    .command('stamp [FILE...]')
     .alias('s')
     .option('-c, --calendar [url]', 'Create timestamp with the aid of a remote calendar. May be specified multiple times.', collect, [])
     .option('-m <int>', 'Commitments are sent to remote calendars in the event of timeout the timestamp is considered done if at least M calendars replied.')
     .option('-k, --key <file>', 'Signature key file of private remote calendars.')
-    .option('-H, --hash', 'Timestamp hashes instead of files.')
+    .option('-d, --digest <digest>', 'Verify a (hex-encoded) digest rather than a file.')
     .option('-a, --algorithm <type>', 'Hash algorithm: sha1, sha256 (default), ripemd160')
     .description('Create timestamp with the aid of a remote calendar, the output receipt will be saved with .ots .')
     .action((files, options) => {
       isExecuted = true;
-      if (files === undefined || files.length < 1) {
+      if ((files === undefined || files.length < 1) && !options.digest) {
         console.log(stampCommand.helpInformation());
         return;
       }
@@ -64,10 +63,8 @@ const stampCommand = program
       if (options.m) {
         parameters.m = options.m;
       }
-      if (options.hash) {
-        parameters.hash = true;
-      } else {
-        parameters.hash = false;
+      if (options.digest) {
+        parameters.digest = options.digest;
       }
 
       if (options.algorithm === undefined) {
@@ -84,29 +81,32 @@ const stampCommand = program
     });
 
 const verifyCommand = program
-    .command('verify [file_ots]')
+    .command('verify [FILE_OTS]')
     .alias('v')
-    .description('Verify the timestamp attestations, expect original file present in the same directory without .ots .')
-    .action(file => {
+    .option('-f, --file <file>', 'Specify target file explicitly (default: original file present in the same directory without .ots).')
+    .option('-d, --digest <digest>', 'Verify a (hex-encoded) digest rather than a file.')
+    .description('Verify a timestamp')
+    .action((file, options) => {
       isExecuted = true;
       if (!file) {
         console.log(verifyCommand.helpInformation());
         return;
       }
-      verify(file);
+      verify(file, options);
     });
 
 const upgradeCommand = program
-    .command('upgrade [file_ots]')
+    .command('upgrade [FILE_OTS]')
     .alias('u')
+    .option('-c, --calendar <url>', 'Override calendars in timestamp.')
     .description('Upgrade remote calendar timestamps to be locally verifiable.')
-    .action(file => {
+    .action((file, options) => {
       isExecuted = true;
       if (!file) {
         console.log(upgradeCommand.helpInformation());
         return;
       }
-      upgrade(file);
+      upgrade(file, options);
     });
 
 program.parse(process.argv);
@@ -133,13 +133,10 @@ function info(argsFileOts, options) {
 
 function stamp(argsFiles, options) {
   // check input params : file/hash
-  const isHash = options.hash;
   const filePromises = [];
-  if (isHash) {
-    // hash: convert to bytes
-    argsFiles.forEach(argsFile => {
-      filePromises.push(Utils.hexToBytes(argsFile));
-    });
+  if (options.digest) {
+    // digest: convert to bytes
+    filePromises.push(Utils.hexToBytes(options.digest));
   } else {
     // file: read file in bytes format
     argsFiles.forEach(argsFile => {
@@ -161,7 +158,7 @@ function stamp(argsFiles, options) {
   Promise.all(filePromises).then(values => {
     const detaches = [];
     values.forEach(value => {
-      if (isHash) {
+      if (options.digest) {
         detaches.push(DetachedTimestampFile.fromHash(op, value));
       } else {
         detaches.push(DetachedTimestampFile.fromBytes(op, value));
@@ -179,13 +176,14 @@ function stamp(argsFiles, options) {
           console.error('Invalid timestamp');
           return;
         }
-        // console.log('STAMP result : ');
-        // console.log(Utils.bytesToHex(ots.timestamp.msg));
 
-        const ctx = new Context.StreamSerialization();
-        ots.serialize(ctx);
-        const buffer = new Buffer(ctx.getOutput());
-        const otsFilename = argsFiles[i] + '.ots';
+        let otsFilename;
+        if (options.digest) {
+          otsFilename = options.digest + '.ots';
+        } else {
+          otsFilename = argsFiles[i] + '.ots';
+        }
+        const buffer = new Buffer(ots.serializeToBytes());
         saveOts(otsFilename, buffer);
       });
     }).catch(err => {
@@ -213,17 +211,42 @@ function saveOts(otsFilename, buffer) {
   });
 }
 
-function verify(argsFileOts) {
-  const argsFile = argsFileOts.replace('.ots', '');
-  const filePromise = Utils.readFilePromise(argsFile, null);
-  const filePromiseOts = Utils.readFilePromise(argsFileOts, null);
-  Promise.all([filePromise, filePromiseOts]).then(values => {
-    const file = values[0];
-    const fileOts = values[1];
+function verify(argsFileOts, options) {
+  const files = [];
+  files.push(Utils.readFilePromise(argsFileOts, null));
+  if (options.digest) {
+      // input is a digest
+    console.log('Assuming target hash is \'' + options.digest + '\'');
+  } else if (options.file) {
+      // defined input file
+    console.log('Assuming target filename is \'' + options.file + '\'');
+    try {
+      files.push(Utils.readFilePromise(options.file, null));
+    } catch (err) {
+      console.log('File not found \'' + options.file + '\'');
+    }
+  } else {
+      // default input file
+    const argsFile = argsFileOts.replace('.ots', '');
+    try {
+      console.log('Assuming target filename is \'' + argsFile + '\'');
+      files.push(Utils.readFilePromise(argsFile, null));
+    } catch (err) {
+      console.log('File not found \'' + argsFile + '\'');
+    }
+  }
 
-    console.log('Assuming target filename is \'' + argsFile + '\'');
+  Promise.all(files).then(values => {
+    const fileOts = values[0];
+    let detached;
 
-    const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), file);
+    if (options.digest) {
+      detached = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), Utils.hexToBytes(options.digest));
+    } else {
+      const file = values[1];
+      detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), file);
+    }
+
     const detachedOts = DetachedTimestampFile.deserialize(fileOts);
     const verifyPromise = OpenTimestamps.verify(detachedOts, detached);
     verifyPromise.then(result => {
@@ -257,9 +280,7 @@ function upgrade(argsFileOts) {
           }
           console.log('The file .bak was saved!');
         });
-        const ctx = new Context.StreamSerialization();
-        detachedOts.serialize(ctx);
-        fs.writeFile(argsFileOts, new Buffer(ctx.getOutput()), 'binary', err => {
+        fs.writeFile(argsFileOts, new Buffer(detachedOts.serializeToBytes()), 'binary', err => {
           if (err) {
             return console.log(err);
           }
