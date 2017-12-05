@@ -356,12 +356,13 @@ module.exports = {
 
   /** Upgrade a timestamp.
    * @param {DetachedTimestampFile} detached - The DetachedTimestampFile object.
+   * @param {string[]} calendarUrls - Override calendars in timestamp.
    * @return {Promise} resolve(changed) : changed = True if the timestamp has changed, False otherwise.
    */
-  upgrade(detached) {
+  upgrade(detached, calendarUrls) {
     return new Promise((resolve, reject) => {
       // Upgrade timestamp
-      this.upgradeTimestamp(detached.timestamp).then(changed => {
+      this.upgradeTimestamp(detached.timestamp, calendarUrls).then(changed => {
         if (changed) {
           // console.log('Timestamp upgraded');
         }
@@ -382,17 +383,10 @@ module.exports = {
   /** Attempt to upgrade an incomplete timestamp to make it verifiable.
    * Note that this means if the timestamp that is already complete, False will be returned as nothing has changed.
    * @param {Timestamp} timestamp - The timestamp.
+   * @param {string[]} calendarUrls - Override calendars in timestamp.
    * @return {Promise} True if the timestamp has changed, False otherwise.
    */
-  upgradeTimestamp(timestamp) {
-    // Check remote calendars for upgrades.
-    // This time we only check PendingAttestations - we can't be as agressive.
-
-    const calendarUrls = [];
-    // calendarUrls.push('https://alice.btc.calendar.opentimestamps.org');
-    // calendarUrls.append('https://b.pool.opentimestamps.org');
-    calendarUrls.push('https://finney.calendar.eternitywall.com');
-
+  upgradeTimestamp(timestamp, calendarUrls) {
     const existingAttestations = timestamp.getAttestations();
     const promises = [];
     const self = this;
@@ -406,16 +400,21 @@ module.exports = {
     timestamp.directlyVerified().forEach(subStamp => {
       subStamp.attestations.forEach(attestation => {
         if (attestation instanceof Notary.PendingAttestation) {
-          const calendarUrl = attestation.uri;
-          // var calendarUrl = calendarUrls[0];
           const commitment = subStamp.msg;
 
-          // console.log('attestation url: ', calendarUrl);
-          // console.log('commitment: ', Utils.bytesToHex(commitment));
+          // check to force override calendars
+          const calendars = [];
+          if (calendarUrls && calendarUrls.length > 0) {
+            calendarUrls.forEach(calendar => {
+              calendars.push(new Calendar.RemoteCalendar(calendar));
+            });
+          } else {
+            calendars.push(new Calendar.RemoteCalendar(attestation.uri));
+          }
 
-          const calendar = new Calendar.RemoteCalendar(calendarUrl);
-          // promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations));
-          promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations));
+          calendars.forEach(calendar => {
+            promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations));
+          });
         }
       });
     });
