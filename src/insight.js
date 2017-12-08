@@ -16,10 +16,12 @@ class Insight {
 
   /**
    * Create a RemoteCalendar.
+   * @param {int} timeout - timeout (in seconds) used for calls to insight servers
    */
-  constructor(url) {
+  constructor(url, timeout) {
     this.urlBlockindex = url + '/block-index';
     this.urlBlock = url + '/block';
+    this.timeout = timeout * 1000;
 
     // this.urlBlockindex = 'https://search.bitaccess.co/insight-api/block-index';
     // this.urlBlock = 'https://search.bitaccess.co/insight-api/block';
@@ -55,7 +57,8 @@ class Insight {
         'User-Agent': 'javascript-opentimestamps',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      json: true
+      json: true,
+      timeout: this.timeout
     };
 
     return new Promise((resolve, reject) => {
@@ -92,7 +95,8 @@ class Insight {
         'User-Agent': 'javascript-opentimestamps',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      json: true
+      json: true,
+      timeout: this.timeout
     };
 
     return new Promise((resolve, reject) => {
@@ -125,10 +129,23 @@ const publicInsightUrls = [
 
 class MultiInsight {
 
-  constructor() {
+  /** Constructor
+   * @param {object} options - Options
+   *    urls: array of insight server urls
+   *    timeout: timeout(in seconds) used for calls to insight servers
+   */
+  constructor(options) {
     this.insights = [];
-    publicInsightUrls.forEach(url => {
-      this.insights.push(new Insight(url));
+
+    // Sets requests timeout (default = 10s)
+    let timeout = (options && options.hasOwnProperty('timeout')) ? options.timeout : 10;
+
+    // We need at least 2 insight servers (for confirmation)
+    let urlsOptionSet = (options && options.hasOwnProperty('urls') && options.urls.length > 1);
+    let urls = urlsOptionSet ? options.urls : publicInsightUrls;
+
+    urls.forEach(url => {
+      this.insights.push(new Insight(url, timeout));
     });
   }
 

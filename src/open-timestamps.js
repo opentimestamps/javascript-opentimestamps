@@ -235,8 +235,11 @@ module.exports = {
    * @exports OpenTimestamps/verify
    * @param {DetachedTimestampFile} detachedStamped - The detached of stamped file.
    * @param {DetachedTimestampFile} detachedOriginal - The detached of original file.
+   * @param {Object} options - 
+   *    insight.urls: array of insight server urls
+   *    insight.timeout: timeout (in seconds) used for calls to insight servers
    */
-  verify(detachedStamped, detachedOriginal) {
+  verify(detachedStamped, detachedOriginal, options) {
     // Compare stamped vs original detached file
     if (!Utils.arrEq(detachedStamped.fileDigest(), detachedOriginal.fileDigest())) {
       console.error('Expected digest ' + Utils.bytesToHex(detachedStamped.fileDigest()));
@@ -250,7 +253,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       if (detachedStamped.timestamp.isTimestampComplete()) {
         // Timestamp completed
-        self.verifyTimestamp(detachedStamped.timestamp).then(attestedTime => {
+        self.verifyTimestamp(detachedStamped.timestamp, options).then(attestedTime => {
           return resolve(attestedTime);
         }).catch(err => {
           return reject(err);
@@ -275,9 +278,12 @@ module.exports = {
 
   /** Verify a timestamp.
    * @param {Timestamp} timestamp - The timestamp.
+   * @param {Object} options - 
+   *    insight.urls: array of insight server urls
+   *    insight.timeout: timeout (in seconds) used for calls to insight servers
    * @return {int} unix timestamp if verified, undefined otherwise.
    */
-  verifyTimestamp(timestamp) {
+  verifyTimestamp(timestamp, options) {
     return new Promise((resolve, reject) => {
       // upgradeTimestamp(timestamp, args);
       let found = false;
@@ -286,7 +292,8 @@ module.exports = {
         function liteVerify() {
           // There is no local node available or is turned of
           // Request to insight
-          const insight = new Insight.MultiInsight();
+          const insightOptions = (options && options.hasOwnProperty('insight')) ? options.insight : null;
+          const insight = new Insight.MultiInsight(insightOptions);
           insight.blockhash(attestation.height).then(blockHash => {
             console.log('Lite-client verification, assuming block ' + blockHash + ' is valid');
             insight.block(blockHash).then(blockInfo => {
