@@ -114,7 +114,7 @@ class Insight {
   }
 }
 
-const urls = [
+const publicInsightUrls = [
   'https://www.localbitcoinschain.com/api',
   'https://search.bitaccess.co/insight-api',
   'https://insight.bitpay.com/api',
@@ -127,7 +127,7 @@ class MultiInsight {
 
   constructor() {
     this.insights = [];
-    urls.forEach(url => {
+    publicInsightUrls.forEach(url => {
       this.insights.push(new Insight(url));
     });
   }
