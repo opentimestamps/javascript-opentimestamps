@@ -54,6 +54,6 @@ cp examples/incomplete.txt.ots examples/incomplete.txt.ots.old && \
 node ots-cli.js upgrade -c https://finney.calendar.eternitywall.com examples/incomplete.txt.ots && \
 diff examples/incomplete.txt.ots examples/incomplete.txt.ots.old && \
 cp examples/incomplete.txt.ots.old examples/incomplete.txt.ots && \
-rm examples/incomplete.txt.ots.old && rm examples/incomplete.txt.ots.bak && \
+rm examples/incomplete.txt.ots.old && \
 
  echo --- END TESTING ots-cli.js

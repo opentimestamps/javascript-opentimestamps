@@ -17,8 +17,6 @@ test('addOp', assert => {
   t.add(opAppend);
   const tComplete = new Timestamp(Utils.toBytes('abcdefgh', 'UTF-8'));
 
-  console.log(t.ops.get(opAppend));
-  console.log(tComplete);
   assert.true(t.ops.get(opAppend).equals(tComplete));
 
   assert.end();
@@ -125,25 +123,25 @@ test('merge', assert => {
 
   const stampA = new Timestamp(Utils.toBytes('a', 'UTF-8'));
   const stampB = new Timestamp(Utils.toBytes('b', 'UTF-8'));
-  let error = null;
+  let error;
   try {
     stampA.merge(stampB);
   } catch (err) {
     error = err;
   }
-  assert.false(error);
+  assert.false(error === undefined);
 
   const stamp1 = new Timestamp(Utils.toBytes('a', 'UTF-8'));
   const stamp2 = new Timestamp(Utils.toBytes('a', 'UTF-8'));
   stamp2.attestations.push(new Notary.PendingAttestation('foobar'));
-  error = null;
+  error = undefined;
   try {
     stamp1.merge(stamp2);
     assert.true(stamp1.equals(stamp2));
   } catch (err) {
     error = err;
   }
-  assert.false(error);
+  assert.true(error === undefined);
   assert.end();
 });
 

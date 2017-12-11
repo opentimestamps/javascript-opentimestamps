@@ -140,12 +140,10 @@ class Timestamp {
    */
   merge(other) {
     if (!(other instanceof Timestamp)) {
-      console.error('Can only merge Timestamps together');
-      return;
+      throw Object('Can only merge Timestamps together');
     }
     if (!Utils.arrEq(this.msg, other.msg)) {
-      console.error('Can\'t merge timestamps for different messages together');
-      return;
+      throw Object('Can\'t merge timestamps for different messages together');
     }
 
     other.attestations.forEach(attestation => {
