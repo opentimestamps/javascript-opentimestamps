@@ -235,7 +235,7 @@ module.exports = {
    * @exports OpenTimestamps/verify
    * @param {DetachedTimestampFile} detachedStamped - The detached of stamped file.
    * @param {DetachedTimestampFile} detachedOriginal - The detached of original file.
-   * @param {Object} options - 
+   * @param {Object} options -
    *    insight.urls: array of insight server urls
    *    insight.timeout: timeout (in seconds) used for calls to insight servers
    */
@@ -278,7 +278,7 @@ module.exports = {
 
   /** Verify a timestamp.
    * @param {Timestamp} timestamp - The timestamp.
-   * @param {Object} options - 
+   * @param {Object} options -
    *    insight.urls: array of insight server urls
    *    insight.timeout: timeout (in seconds) used for calls to insight servers
    * @return {int} unix timestamp if verified, undefined otherwise.
@@ -292,7 +292,8 @@ module.exports = {
         function liteVerify() {
           // There is no local node available or is turned of
           // Request to insight
-          const insightOptions = (options && options.hasOwnProperty('insight')) ? options.insight : null;
+          const insightOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'insight');
+          const insightOptions = insightOptionSet ? options.insight : null;
           const insight = new Insight.MultiInsight(insightOptions);
           insight.blockhash(attestation.height).then(blockHash => {
             console.log('Lite-client verification, assuming block ' + blockHash + ' is valid');

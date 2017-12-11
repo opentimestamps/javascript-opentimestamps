@@ -138,11 +138,12 @@ class MultiInsight {
     this.insights = [];
 
     // Sets requests timeout (default = 10s)
-    let timeout = (options && options.hasOwnProperty('timeout')) ? options.timeout : 10;
+    const timeoutOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'timeout');
+    const timeout = timeoutOptionSet ? options.timeout : 10;
 
     // We need at least 2 insight servers (for confirmation)
-    let urlsOptionSet = (options && options.hasOwnProperty('urls') && options.urls.length > 1);
-    let urls = urlsOptionSet ? options.urls : publicInsightUrls;
+    const urlsOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'urls') && options.urls.length > 1;
+    const urls = urlsOptionSet ? options.urls : publicInsightUrls;
 
     urls.forEach(url => {
       this.insights.push(new Insight(url, timeout));

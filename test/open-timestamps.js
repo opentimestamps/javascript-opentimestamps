@@ -315,9 +315,9 @@ test('OpenTimestamps.verify()', assert => {
       ]
     }
   };
-  OpenTimestamps.verify(detachedOts, detached, options).then(result => {
-    assert.fail();
-  }).catch(err => {
+  OpenTimestamps.verify(detachedOts, detached, options).then(() => {
+    assert.fail('Unable to reach the server (bad insight url)');
+  }).catch(() => {
     assert.true(true);
     assert.end();
   });
@@ -344,11 +344,11 @@ test('OpenTimestamps.verify()', assert => {
 });
 
 test('OpenTimestamps.verify()', assert => {
-  // Test options with timeout of 5s
+  // Test options with timeout of 20s
   const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(helloworld));
   const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts));
   const options = {
-    insight: {timeout: 5}
+    insight: {timeout: 20}
   };
   OpenTimestamps.verify(detachedOts, detached, options).then(result => {
     assert.true(result !== undefined);
