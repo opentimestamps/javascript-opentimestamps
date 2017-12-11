@@ -368,6 +368,22 @@ test('OpenTimestamps.upgrade()', assert => {
   });
 });
 
+test('OpenTimestamps.stamp&upgrade()', assert => {
+  const sha256 = Utils.hexToBytes('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9');
+  const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), incomplete);
+  OpenTimestamps.stamp(detached).then(() => {
+    assert.false(detached === undefined);
+    assert.true(Utils.arrEq(sha256, detached.fileDigest()));
+    return OpenTimestamps.upgrade(detached);
+  }).then(changed => {
+    assert.true(detached !== null);
+    assert.false(changed);
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
 test('OpenTimestamps.emptyTimestamp()', assert => {
   const info = 'File sha256 hash: 05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9\nTimestamp:\n';
   const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), incomplete);
