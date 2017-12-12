@@ -16,10 +16,12 @@ class Insight {
 
   /**
    * Create a RemoteCalendar.
+   * @param {int} timeout - timeout (in seconds) used for calls to insight servers
    */
-  constructor(url) {
+  constructor(url, timeout) {
     this.urlBlockindex = url + '/block-index';
     this.urlBlock = url + '/block';
+    this.timeout = timeout * 1000;
 
     // this.urlBlockindex = 'https://search.bitaccess.co/insight-api/block-index';
     // this.urlBlock = 'https://search.bitaccess.co/insight-api/block';
@@ -55,7 +57,8 @@ class Insight {
         'User-Agent': 'javascript-opentimestamps',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      json: true
+      json: true,
+      timeout: this.timeout
     };
 
     return new Promise((resolve, reject) => {
@@ -92,7 +95,8 @@ class Insight {
         'User-Agent': 'javascript-opentimestamps',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
-      json: true
+      json: true,
+      timeout: this.timeout
     };
 
     return new Promise((resolve, reject) => {
@@ -114,7 +118,7 @@ class Insight {
   }
 }
 
-const urls = [
+const publicInsightUrls = [
   'https://www.localbitcoinschain.com/api',
   'https://search.bitaccess.co/insight-api',
   'https://insight.bitpay.com/api',
@@ -125,10 +129,24 @@ const urls = [
 
 class MultiInsight {
 
-  constructor() {
+  /** Constructor
+   * @param {object} options - Options
+   *    urls: array of insight server urls
+   *    timeout: timeout(in seconds) used for calls to insight servers
+   */
+  constructor(options) {
     this.insights = [];
+
+    // Sets requests timeout (default = 10s)
+    const timeoutOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'timeout');
+    const timeout = timeoutOptionSet ? options.timeout : 10;
+
+    // We need at least 2 insight servers (for confirmation)
+    const urlsOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'urls') && options.urls.length > 1;
+    const urls = urlsOptionSet ? options.urls : publicInsightUrls;
+
     urls.forEach(url => {
-      this.insights.push(new Insight(url));
+      this.insights.push(new Insight(url, timeout));
     });
   }
 

@@ -282,6 +282,83 @@ test('OpenTimestamps.verify()', assert => {
   });
 });
 
+test('OpenTimestamps.verify()', assert => {
+  // Test options with 2 insight urls
+  const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(helloworld));
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts));
+  const options = {
+    insight: {
+      urls: [
+        'https://insight.bitpay.com/api',
+        'https://btc-bitcore1.trezor.io/api'
+      ]
+    }
+  };
+  OpenTimestamps.verify(detachedOts, detached, options).then(result => {
+    assert.true(result !== undefined);
+    assert.equal(result, 1432827678);
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
+test('OpenTimestamps.verify()', assert => {
+  // Test options with 2 bad insight urls (it should fail)
+  const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(helloworld));
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts));
+  const options = {
+    insight: {
+      urls: [
+        'https://badinsight1.bitpay.com/api',
+        'https://badinsight2.bitpay.com/api'
+      ]
+    }
+  };
+  OpenTimestamps.verify(detachedOts, detached, options).then(() => {
+    assert.fail('Unable to reach the server (bad insight url)');
+  }).catch(() => {
+    assert.true(true);
+    assert.end();
+  });
+});
+
+test('OpenTimestamps.verify()', assert => {
+  // Test options with 1 insight url (it should fallback to default list)
+  const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(helloworld));
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts));
+  const options = {
+    insight: {
+      urls: [
+        'https://insight.bitpay.com/api'
+      ]
+    }
+  };
+  OpenTimestamps.verify(detachedOts, detached, options).then(result => {
+    assert.true(result !== undefined);
+    assert.equal(result, 1432827678);
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
+test('OpenTimestamps.verify()', assert => {
+  // Test options with timeout of 20s
+  const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(helloworld));
+  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts));
+  const options = {
+    insight: {timeout: 20}
+  };
+  OpenTimestamps.verify(detachedOts, detached, options).then(result => {
+    assert.true(result !== undefined);
+    assert.equal(result, 1432827678);
+    assert.end();
+  }).catch(err => {
+    assert.fail('err=' + err);
+  });
+});
+
 // UPGRADE TESTS
 
 test('OpenTimestamps.upgrade()', assert => {
