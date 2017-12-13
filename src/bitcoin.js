@@ -65,7 +65,11 @@ class BitcoinNode {
               obj.rpcconnect = '127.0.0.1';
             }
             if (obj.rpcport === undefined) {
-              obj.rpcport = '8332';
+              if (obj.testnet) {
+                  obj.rpcport = '18332';
+              } else {
+                  obj.rpcport = '8332';
+              }
             }
           }
           return resolve(obj);
