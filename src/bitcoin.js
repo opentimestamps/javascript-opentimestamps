@@ -66,9 +66,9 @@ class BitcoinNode {
             }
             if (obj.rpcport === undefined) {
               if (obj.testnet) {
-                  obj.rpcport = '18332';
+                obj.rpcport = '18332';
               } else {
-                  obj.rpcport = '8332';
+                obj.rpcport = '8332';
               }
             }
           }
