@@ -28,14 +28,31 @@ $ npm install -g javascript-opentimestamps
 
 #### Browser
 
-Choose one option from the following:
+##### Get the "binaries"
+
+Choose one of the following options:
  
  * Take the [js](https://opentimestamps.org/bower_components/bower-opentimestamps/bower-opentimestamps.js) used by opentimestamps.org
  * Install the lib from bower `bower install bower-opentimestamps`
- * If the bower version is not up to date, you can follow instructions in this [repository](https://github.com/lvaccaro/bower-opentimestamps) to build the most updated code.   
+
+##### Build from source
+
+From this repo, install the dev library
+
+```
+npm install --dev
+```
+
+then run the gulp process
+
+```
+gulp
+```
+
+include the result `/dist/opentimestamps.min.js` in your page
 
 ```html
-<script src="bower-opentimestamps.js"></script>
+<script src="opentimestamps.min.js"></script>
 ```
 
 

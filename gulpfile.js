@@ -19,9 +19,9 @@ gulp.task('clean', () => {
 
 gulp.task('compress', cb => {
   pump([
-    gulp.src('./dist/bower-opentimestamps.js'),
+    gulp.src('./dist/opentimestamps.js'),
     uglify(),
-    rename('bower-opentimestamps.min.js'),
+    rename('opentimestamps.min.js'),
     gulp.dest('./dist/')
   ],
         cb
@@ -40,16 +40,16 @@ gulp.task('index', () => {
     stdout: true // default = true, false means don't write stdout
   };
   return gulp.src('./')
-        .pipe(exec('./node_modules/browserify/bin/cmd.js -r ./src/open-timestamps.js index.js -o ./dist/bower-opentimestamps.es6.js', options))
-        .pipe(exec('./node_modules/babel-cli/bin/babel.js ./dist/bower-opentimestamps.es6.js -o ./dist/bower-opentimestamps.js', options))
+        .pipe(exec('./node_modules/browserify/bin/cmd.js -r ./src/open-timestamps.js index.js -o ./dist/opentimestamps.es6.js', options))
+        .pipe(exec('./node_modules/babel-cli/bin/babel.js ./dist/opentimestamps.es6.js -o ./dist/opentimestamps.js', options))
         .pipe(exec.reporter(reportOptions));
 
     /* NOTE: babelify run babel with .babelrc file, but doesn't convert the code
     gulp.task('index', function() {
-        return browserify({ debug: true, entries: [" bower-opentimestamps.es6.js"] })
+        return browserify({ debug: true, entries: [" opentimestamps.es6.js"] })
             .transform(babelify)
             .bundle()
-            .pipe(source(' bower-opentimestamps.js'))
+            .pipe(source(' opentimestamps.js'))
             .pipe(gulp.dest('./'));
     }); */
 });
