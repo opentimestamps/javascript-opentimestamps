@@ -257,7 +257,7 @@ class Timestamp {
         const item = {};
         item.fork = fork + count;
         item.op = op._TAG_NAME();
-        item.arg = Utils.bytesToHex(op.arg);
+        item.arg = (op.arg === undefined) ? '' : Utils.bytesToHex(op.arg);
         item.result = Utils.bytesToHex(timestamp.msg);
         item.timestamp = timestamp.toJson(fork + count);
         try {
