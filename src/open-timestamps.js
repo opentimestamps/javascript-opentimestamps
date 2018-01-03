@@ -335,25 +335,31 @@ module.exports = {
           } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
             found = true;
 
-            // Check for local bitcoin configuration
-            Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
-              const bitcoin = new Bitcoin.BitcoinNode(properties);
-              bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
-                const merkle = Utils.hexToBytes(blockHeader.getMerkleroot());
-                const message = msg.reverse();
+            // if insight url are specified through options, use lite verification
+            if (options && options.insight && options.insight.urls) {
+              liteVerify()
+            } else {
+              // Check for local bitcoin configuration
+              Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
+                const bitcoin = new Bitcoin.BitcoinNode(properties);
+                bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
+                  const merkle = Utils.hexToBytes(blockHeader.getMerkleroot());
+                  const message = msg.reverse();
                   // One Bitcoin attestation is enought
-                if (Utils.arrEq(merkle, message)) {
-                  resolve(blockHeader.time);
-                } else {
-                  resolve();
-                }
+                  if (Utils.arrEq(merkle, message)) {
+                    resolve(blockHeader.time);
+                  } else {
+                    resolve();
+                  }
+                }).catch(() => {
+                  liteVerify();
+                });
               }).catch(() => {
                 liteVerify();
               });
-            }).catch(() => {
-              liteVerify();
-            });
+            }
           }
+
         }
       });
       if (!found) {
