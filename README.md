@@ -173,9 +173,9 @@ Timestamp has been successfully upgraded!
 
 > Note that from version 0.1.x to 0.2.x basic method interface changed, upgrade will require change in your code.
 
-#### Stamp and Info
+#### Stamp
 
-Create timestamp with the aid of a remote calendar.
+Create timestamp of a file with the aid of a remote calendar.
 
 ```js
 const OpenTimestamps = require('javascript-opentimestamps');
@@ -184,11 +184,62 @@ const file = Buffer.from('5468652074696d657374616d70206f6e20746869732066696c6520
 const detached = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), file);
 OpenTimestamps.stamp(detached).then( ()=>{
   const fileOts = detached.serializeToBytes();
-  const infoResult = OpenTimestamps.info(detached);
-  console.log(infoResult);
 });
 ```
 Const `file` created from the hex representation of the file `examples/incomplete.txt`
+
+###### Stamp hash
+
+Sometimes you don't want to timestamp a file or you already have the sha256 hash of what you want to timestamp. For example, if you want to timestamp the file `examples/incomplete.txt` and you already have its hash you can do this:
+
+```js
+const hash = Buffer.from('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9');
+detached = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), hash);
+```
+
+###### Stamp multiple data at once
+
+If you have a lot of files to timestamp it is unconvenient to make a calendar request for every file. In this cases you can build a [merkle tree](https://github.com/opentimestamps/javascript-opentimestamps/blob/7429d35011350f4df29c53b45b76b87adff62ee8/src/open-timestamps.js#L205) by your own or call the stamp function with an array for request, behind the curtain the function will make a merkle tree and perform just one call to the calendars.
+
+```js
+  const files = []; /* init this array with the binary contents of the files you want to timestamp */
+  const detaches = [];
+  files.forEach(file => {
+    const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), file);
+    detaches.push(detached);
+  });
+  OpenTimestamps.stamp(detaches).then(() => {
+    ots = [];
+    detaches.forEach((timestamp, i) => {
+      ots.push( timestamp.serializeToBytes() );
+    });
+  }).catch(err => {
+    console.error(err);
+  });
+```
+
+The `ots` array will contain multiple proofs, one for each input.
+
+###### Async Await
+
+If you prefer the async/await (require Node 7.6+) syntax the promise based API of the library works out of the box:
+
+```js
+go_async();
+
+async function go_async() {
+    const hash = Buffer.from('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9','hex');
+    const detached = OpenTimestamps.DetachedTimestampFile.fromHash(new OpenTimestamps.Ops.OpSHA256(), hash);
+
+    try {
+        await OpenTimestamps.stamp(detached);
+        const fileOts = detached.serializeToBytes();
+    } catch(err) {
+        console.log(err);
+    }
+
+}
+```
 
 #### Info
 
