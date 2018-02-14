@@ -42,6 +42,8 @@ class TimeAttestation {
       return PendingAttestation.deserialize(ctxPayload);
     } else if (Utils.arrEq(tag, new BitcoinBlockHeaderAttestation()._TAG()) === true) {
       return BitcoinBlockHeaderAttestation.deserialize(ctxPayload);
+    } else if (Utils.arrEq(tag, new LitecoinBlockHeaderAttestation()._TAG()) === true) {
+      return LitecoinBlockHeaderAttestation.deserialize(ctxPayload);
     } else if (Utils.arrEq(tag, new EthereumBlockHeaderAttestation()._TAG()) === true) {
       return EthereumBlockHeaderAttestation.deserialize(ctxPayload);
     }
@@ -256,6 +258,43 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
     return super.compareTo(other);
   }
 }
+class LitecoinBlockHeaderAttestation extends TimeAttestation {
+
+  _TAG() {
+    return [0x06, 0x86, 0x9a, 0x0d, 0x73, 0xd7, 0x1b, 0x45];
+  }
+
+  constructor(height_) {
+    super();
+    this.height = height_;
+  }
+
+  static deserialize(ctxPayload) {
+    const height = ctxPayload.readVaruint();
+    return new LitecoinBlockHeaderAttestation(height);
+  }
+
+  serializePayload(ctx) {
+    ctx.writeVaruint(this.height);
+  }
+
+  toString() {
+    return 'LitecoinBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')';
+  }
+
+  equals(another) {
+    return (another instanceof LitecoinBlockHeaderAttestation) &&
+            (Utils.arrEq(this._TAG(), another._TAG())) &&
+            (this.height === another.height);
+  }
+
+  compareTo(other) {
+    if (other instanceof LitecoinBlockHeaderAttestation) {
+      return this.height - other.height;
+    }
+    return super.compareTo(other);
+  }
+}
 
 class EthereumBlockHeaderAttestation extends TimeAttestation {
 
@@ -314,5 +353,6 @@ module.exports = {
   UnknownAttestation,
   PendingAttestation,
   BitcoinBlockHeaderAttestation,
+  LitecoinBlockHeaderAttestation,
   EthereumBlockHeaderAttestation
 };

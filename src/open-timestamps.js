@@ -295,6 +295,7 @@ module.exports = {
           const insightOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'insight');
           const insightOptions = insightOptionSet ? options.insight : null;
           const insight = new Insight.MultiInsight(insightOptions);
+console.log(insight);
           insight.blockhash(attestation.height).then(blockHash => {
             console.log('Lite-client verification, assuming block ' + blockHash + ' is valid');
             insight.block(blockHash).then(blockInfo => {
@@ -358,6 +359,15 @@ module.exports = {
                 liteVerify();
               });
             }
+          } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
+            found = true;
+            console.log("Checking LitecoinBlockHeaderAttestation");
+
+            options = {};
+            options.insight = {};
+            options.insight.urls = ["https://insight.litecore.io/"];
+            // this is still failing
+            liteVerify();
           }
         }
       });
