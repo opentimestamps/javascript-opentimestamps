@@ -289,13 +289,12 @@ module.exports = {
       let found = false;
 
       timestamp.allAttestations().forEach((attestation, msg) => {
-        function liteVerify() {
+        function liteVerify(options) {
           // There is no local node available or is turned of
           // Request to insight
           const insightOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'insight');
           const insightOptions = insightOptionSet ? options.insight : null;
           const insight = new Insight.MultiInsight(insightOptions);
-console.log(insight);
           insight.blockhash(attestation.height).then(blockHash => {
             console.log('Lite-client verification, assuming block ' + blockHash + ' is valid');
             insight.block(blockHash).then(blockInfo => {
@@ -365,9 +364,8 @@ console.log(insight);
 
             options = {};
             options.insight = {};
-            options.insight.urls = ["https://insight.litecore.io/"];
-            // this is still failing
-            liteVerify();
+            options.insight.urls = ["https://insight.litecore.io/api", "https://ltc-bitcore1.trezor.io/api"];
+            liteVerify(options);
           }
         }
       });
