@@ -269,11 +269,11 @@ function verify(argsFileOts, options) {
 
     const detachedOts = DetachedTimestampFile.deserialize(fileOts);
     const verifyPromise = OpenTimestamps.verify(detachedOts, detached);
-    verifyPromise.then(result => {
-      if (result === undefined) {
+    verifyPromise.then(results => {
+      if (results === undefined) {
         console.log('Pending or Bad attestation');
       } else {
-        console.log('Success! Bitcoin attests data existed as of ' + (new Date(result * 1000)));
+        console.log('Success! ' + results.chain + ' attests data existed as of ' + (new Date(results.attestedTime * 1000)));
       }
     }).catch(err => {
       console.log(err);

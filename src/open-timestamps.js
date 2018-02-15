@@ -264,8 +264,8 @@ module.exports = {
           if (changed) {
             console.log('Timestamp upgraded');
           }
-          self.verifyTimestamp(detachedStamped.timestamp).then(attestedTime => {
-            return resolve(attestedTime);
+          self.verifyTimestamp(detachedStamped.timestamp).then(results => {
+            return resolve({"attestedTime": results.attestedTime, "chain": results.chain});
           }).catch(err => {
             return reject(err);
           });
@@ -294,6 +294,7 @@ module.exports = {
           // Request to insight
           const insightOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'insight');
           const insightOptions = insightOptionSet ? options.insight : null;
+          const chain = insightOptionSet && options.insight.chain ? options.insight.chain : "bitcoin";
           const insight = new Insight.MultiInsight(insightOptions);
           insight.blockhash(attestation.height).then(blockHash => {
             console.log('Lite-client verification, assuming block ' + blockHash + ' is valid');
@@ -303,7 +304,7 @@ module.exports = {
 
               // One Bitcoin attestation is enough
               if (Utils.arrEq(merkle, message)) {
-                resolve(blockInfo.time);
+                resolve({"attestedTime": blockInfo.time, "chain": chain});
               } else {
                 resolve();
               }
@@ -364,7 +365,7 @@ module.exports = {
 
             options = {};
             options.insight = {};
-            options.insight.urls = ["https://insight.litecore.io/api", "https://ltc-bitcore1.trezor.io/api"];
+            options.insight.chain = "litecoin";
             liteVerify(options);
           }
         }
