@@ -273,7 +273,7 @@ function verify(argsFileOts, options) {
       if (results === undefined) {
         console.log('Pending or Bad attestation');
       } else {
-        console.log('Success! ' + results.chain + ' attests data existed as of ' + (new Date(results.attestedTime * 1000)));
+        console.log('Success! ' + results.chain[0].toUpperCase() + results.chain.slice(1) + ' attests data existed as of ' + (new Date(results.attestedTime * 1000)));
       }
     }).catch(err => {
       console.log(err);
