@@ -270,7 +270,7 @@ function verify(argsFileOts, options) {
     const detachedOts = DetachedTimestampFile.deserialize(fileOts);
     const verifyPromise = OpenTimestamps.verify(detachedOts, detached);
     verifyPromise.then(results => {
-      if (results === undefined) {
+      if (results.attestedTime === undefined) {
         console.log('Pending or Bad attestation');
       } else {
         console.log('Success! ' + results.chain[0].toUpperCase() + results.chain.slice(1) + ' attests data existed as of ' + (new Date(results.attestedTime * 1000)));

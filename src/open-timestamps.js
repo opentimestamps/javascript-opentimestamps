@@ -265,6 +265,7 @@ module.exports = {
             console.log('Timestamp upgraded');
           }
           self.verifyTimestamp(detachedStamped.timestamp).then(results => {
+	    results = results || { attestedTime: undefined, chain: undefined };
             return resolve({"attestedTime": results.attestedTime, "chain": results.chain});
           }).catch(err => {
             return reject(err);
