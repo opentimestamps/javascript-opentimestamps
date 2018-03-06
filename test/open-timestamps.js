@@ -213,7 +213,7 @@ test('OpenTimestamps.verify()', assert => {
   const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(incomplete));
   const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(incompleteOts));
   OpenTimestamps.verify(detachedOts, detached).then(result => {
-    assert.equal(result, 1473227803); // verify on python call upgrade, in this case result should be 1473227803
+    assert.deepEqual(result, { attestedTime: 1473227803, chain: 'bitcoin' }); // verify on python call upgrade, in this case result should be 1473227803
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -225,7 +225,7 @@ test('OpenTimestamps.verify()', assert => {
   const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts));
   OpenTimestamps.verify(detachedOts, detached).then(result => {
     assert.true(result !== undefined);
-    assert.equal(result, 1432827678);
+    assert.deepEqual(result, { attestedTime: 1432827678, chain: 'bitcoin' });
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
