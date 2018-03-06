@@ -339,7 +339,7 @@ module.exports = {
 
             // if insight url are specified through options, use lite verification
             if (options && options.insight && options.insight.urls) {
-              liteVerify();
+              liteVerify(options);
             } else {
               // Check for local bitcoin configuration
               Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {

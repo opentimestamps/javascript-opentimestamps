@@ -336,7 +336,7 @@ test('OpenTimestamps.verify()', assert => {
   };
   OpenTimestamps.verify(detachedOts, detached, options).then(result => {
     assert.true(result !== undefined);
-    assert.equal(result, 1432827678);
+    assert.deepEqual(result, { attestedTime: 1432827678, chain: 'bitcoin' });
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
@@ -352,7 +352,7 @@ test('OpenTimestamps.verify()', assert => {
   };
   OpenTimestamps.verify(detachedOts, detached, options).then(result => {
     assert.true(result !== undefined);
-    assert.equal(result, 1432827678);
+    assert.deepEqual(result, { attestedTime: 1432827678, chain: 'bitcoin' });
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
