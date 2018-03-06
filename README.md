@@ -271,7 +271,7 @@ OpenTimestamps.verify(detachedOts,detached).then(verifyResult => {
 });
 ```
 
-Const `file` created from the hex representation of the file `examples/hello-world.txt.ots` while `fileOts` contains `test/hello-world.txt` 
+Const `file` created from the hex representation of the file `examples/hello-world.txt` while `fileOts` contains `examples/hello-world.txt.ots`. 
 
 #### Upgrade
 
