@@ -275,7 +275,7 @@ Const `file` created from the hex representation of the file `examples/hello-wor
 
 #### Upgrade
 
-Upgrade incomplete remote calendar timestamps to be indipendently verifiable.
+Upgrade incomplete remote calendar timestamps to be independently verifiable.
 
 ```js
 const OpenTimestamps = require('javascript-opentimestamps');
