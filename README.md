@@ -293,6 +293,14 @@ OpenTimestamps.upgrade(detached).then((changed) => {
 });
 ```
 
+## Pull Requests
+
+PRs are welcome, before reviewing them we wait the travis build concludes successfully, so please check:
+
+*  All tests must pass. (Rarely test fails for networking issue, if you think it's your case ask the maintainers in the comments to relaunch the travis build)
+*  [xo linter](https://github.com/xojs/xo) is launched in the build process, any warning found by the linker break the build, so be sure to check warnings by launching `xo` before the commit, most simple errors could be automatically fixed with `xo --fix`
+
+
 ## License
 
 [__LGPL3__](https://github.com/prahaladbelavadi/javascript-opentimestamps/blob/master/LICENSE)
