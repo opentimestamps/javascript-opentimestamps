@@ -265,8 +265,8 @@ module.exports = {
             console.log('Timestamp upgraded');
           }
           self.verifyTimestamp(detachedStamped.timestamp).then(results => {
-	    results = results || { attestedTime: undefined, chain: undefined };
-            return resolve({"attestedTime": results.attestedTime, "chain": results.chain});
+            results = results || {attestedTime: undefined, chain: undefined};
+            return resolve({attestedTime: results.attestedTime, chain: results.chain});
           }).catch(err => {
             return reject(err);
           });
@@ -295,7 +295,7 @@ module.exports = {
           // Request to insight
           const insightOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'insight');
           const insightOptions = insightOptionSet ? options.insight : null;
-          const chain = insightOptionSet && options.insight.chain ? options.insight.chain : "bitcoin";
+          const chain = insightOptionSet && options.insight.chain ? options.insight.chain : 'bitcoin';
           const insight = new Insight.MultiInsight(insightOptions);
           insight.blockhash(attestation.height).then(blockHash => {
             console.log('Lite-client verification, assuming block ' + blockHash + ' is valid');
@@ -305,7 +305,7 @@ module.exports = {
 
               // One Bitcoin attestation is enough
               if (Utils.arrEq(merkle, message)) {
-                resolve({"attestedTime": blockInfo.time, "chain": chain});
+                resolve({attestedTime: blockInfo.time, chain});
               } else {
                 resolve();
               }
@@ -362,11 +362,11 @@ module.exports = {
             }
           } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
             found = true;
-            console.log("Checking LitecoinBlockHeaderAttestation");
+            console.log('Checking LitecoinBlockHeaderAttestation');
 
             options = {};
             options.insight = {};
-            options.insight.chain = "litecoin";
+            options.insight.chain = 'litecoin';
             liteVerify(options);
           }
         }

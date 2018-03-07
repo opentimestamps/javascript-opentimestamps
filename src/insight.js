@@ -118,7 +118,7 @@ class Insight {
   }
 }
 
-var publicInsightUrls = {};
+const publicInsightUrls = {};
 publicInsightUrls.bitcoin = [
   'https://www.localbitcoinschain.com/api',
   'https://search.bitaccess.co/insight-api',
@@ -146,7 +146,7 @@ class MultiInsight {
     const timeoutOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'timeout');
     const timeout = timeoutOptionSet ? options.timeout : 10;
     const chainOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'chain');
-    const chain = chainOptionSet ? options.chain : "bitcoin";
+    const chain = chainOptionSet ? options.chain : 'bitcoin';
 
     // We need at least 2 insight servers (for confirmation)
     const urlsOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'urls') && options.urls.length > 1;
