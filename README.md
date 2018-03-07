@@ -11,7 +11,7 @@
 
 This repository hosts the javascript implementation of OpenTimestamps.
 
-It is a based on the python implementation at [Opentimestamps-Python](https://github.com/opentimestamps/python-opentimestamps) and [Opentimestamps-Client](https://github.com/opentimestamps/opentimestamps-client)
+It is based on the python implementation at [Opentimestamps-Python](https://github.com/opentimestamps/python-opentimestamps) and [Opentimestamps-Client](https://github.com/opentimestamps/opentimestamps-client)
 
 It has been developed as node modules for being used within Node environments along with Node Package Manager.
 > You can also use it in the browser, see the **Installation** section.
@@ -97,10 +97,10 @@ The timestamp proof '05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b0
 ```
 Note that verify implicity requires the file must be called like the .ots receipt but without the ots, if you timestamp hashes and want to verify you need to rename files accordingly.
 
-The default hash used i `sha256` but you can also specify other hashes like `md5`, `sha1` or `ripemd` (eg `ots-cli.js stamp -H 4f8d8389200583977943be86f0f74a964a670405 -a sha1`). Note that partially broken hash function like `md5` or `sha1` are ok for timestamping purpose because their are still resistant to preimage attack (their use is discouraged anyway).
+The default hash used `sha256` but you can also specify other hashes like `md5`, `sha1` or `ripemd` (eg `ots-cli.js stamp -H 4f8d8389200583977943be86f0f74a964a670405 -a sha1`). Note that partially broken hash function like `md5` or `sha1` are ok for timestamping purpose because they are still resistant to preimage attacks (their use is discouraged anyway).
 
 
-The stamp command support multiple files or hashes as argument.
+The stamp command supports multiple files or hashes as arguments.
 
 ```shell
 $ ots-cli.js stamp README.md ots-cli.js
@@ -125,7 +125,7 @@ append 6fb1ac8d4e4eb0e7
 verify PendingAttestation('https://alice.btc.calendar.opentimestamps.org')
 ```
 
-You can have verbose output wich clarifies operations, arguments, results and contains also comments showing transaction id involved and calculated merkle tree root.
+You can have verbose output which clarifies operations, arguments, results and also contains comments showing the involved transaction id and calculated merkle tree root.
 
 ```shell
 $ node ots-cli.js info -v examples/hello-world.txt.ots 
@@ -157,12 +157,12 @@ Assuming target filename is 'examples/hello-world.txt'
 Success! Bitcoin attests data existed as of Thu May 28 2015 17:41:18 GMT+0200 (CEST)
 ```
 
-Note: This verification using block explorers is convenient but not as secure as asking to a local node.
-To mitigate the risks, answer from block explorer is considered only if two different endpoint return the same result. Even by doing so this is not as secure as asking a local node.   
+Note: This verification using block explorers is convenient but not as secure as asking a local node.
+To mitigate the risks, an answer from block explorers is considered only if two different endpoint return the same result. Even by doing so this is not as secure as asking a local node.   
 
 #### Upgrade
 
-Upgrade incomplete remote calendar timestamps to be independently verifiable. This command overwrite the file `examples/incomplete.txt.ots` if needed and make a backup of the old content at `examples/incomplete.txt.ots`. 
+Upgrade incomplete remote calendar timestamps to be independently verifiable. This command overwrites the file `examples/incomplete.txt.ots` if needed and makes a backup of the old content at `examples/incomplete.txt.ots`. 
 
 ```shell
 $ ots-cli.js upgrade examples/incomplete.txt.ots
@@ -171,7 +171,7 @@ Timestamp has been successfully upgraded!
 
 ## From code
 
-> Note that from version 0.1.x to 0.2.x basic method interface changed, upgrade will require change in your code.
+> Note that from version 0.1.x to 0.2.x basic method interface changed, an upgrade will require change in your code.
 
 #### Stamp
 
