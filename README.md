@@ -97,7 +97,7 @@ The timestamp proof '05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b0
 ```
 Note that verify implicity requires the file must be called like the .ots receipt but without the ots, if you timestamp hashes and want to verify you need to rename files accordingly.
 
-The default hash used `sha256` but you can also specify other hashes like `md5`, `sha1` or `ripemd` (eg `ots-cli.js stamp -d 4f8d8389200583977943be86f0f74a964a670405 -a sha1`). Note that partially broken hash function like `md5` or `sha1` are ok for timestamping purpose because they are still resistant to preimage attacks (their use is discouraged anyway).
+The default hash used `sha256` but you can also specify other hashes like `sha1` or `ripemd` (eg `ots-cli.js stamp -d 4f8d8389200583977943be86f0f74a964a670405 -a sha1`). Note that partially broken hash function like `sha1` is ok for timestamping purpose because they are [still resistant](https://petertodd.org/2017/sha1-and-opentimestamps-proofs) to preimage attacks (their use is discouraged anyway).
 
 
 The stamp command supports multiple files or hashes as arguments.
