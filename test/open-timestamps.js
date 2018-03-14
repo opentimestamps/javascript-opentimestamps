@@ -325,6 +325,7 @@ test('OpenTimestamps.verify()', assert => {
   } catch (err) {
     assert.fail(err);
     assert.end();
+    return;
   }
   const options = {
     insight: {
@@ -360,6 +361,7 @@ test('OpenTimestamps.verify()', assert => {
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 
@@ -376,6 +378,7 @@ test('OpenTimestamps.verify()', assert => {
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 
@@ -392,6 +395,7 @@ test('OpenTimestamps.upgrade()', assert => {
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 
@@ -406,6 +410,7 @@ test('OpenTimestamps.upgrade()', assert => {
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 
@@ -420,6 +425,7 @@ test('OpenTimestamps.upgrade()', assert => {
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 
@@ -434,6 +440,7 @@ test('OpenTimestamps.upgrade()', assert => {
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 
@@ -448,6 +455,7 @@ test('OpenTimestamps.upgrade()', assert => {
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 
@@ -462,6 +470,7 @@ test('OpenTimestamps.upgrade()', assert => {
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 
@@ -478,6 +487,7 @@ test('OpenTimestamps.stamp&upgrade()', assert => {
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 

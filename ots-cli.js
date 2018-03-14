@@ -133,12 +133,19 @@ function info(argsFileOts, options) {
 
   Promise.all([otsPromise]).then(values => {
     const ots = values[0];
+
     try {
       const detachedOts = DetachedTimestampFile.deserialize(ots);
       const infoResult = OpenTimestamps.info(detachedOts, options);
       console.log(infoResult);
     } catch (err) {
-      console.log('Error! ' + argsFileOts + ' is not a timestamp file.');
+      if (err instanceof Context.BadMagicError) {
+        throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.');
+      } else if (err instanceof Context.DeserializationError) {
+        throw new Error('Invalid timestamp file' + argsFileOts);
+      } else {
+        throw err;
+      }
     }
   }).catch(() => {
     console.log('Could not read: ' + argsFileOts);
@@ -278,7 +285,7 @@ function verify(argsFileOts, options) {
       if (err instanceof Context.BadMagicError) {
         throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.');
       } else if (err instanceof Context.DeserializationError) {
-        throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.');
+        throw new Error('Invalid timestamp file' + argsFileOts);
       } else {
         throw err;
       }
@@ -304,11 +311,19 @@ function upgrade(argsFileOts, options) {
   const otsPromise = Utils.readFilePromise(argsFileOts, null);
   otsPromise.then(ots => {
     let detachedOts;
+
     try {
       detachedOts = DetachedTimestampFile.deserialize(ots);
     } catch (err) {
-      throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.');
+      if (err instanceof Context.BadMagicError) {
+        throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.');
+      } else if (err instanceof Context.DeserializationError) {
+        throw new Error('Invalid timestamp file' + argsFileOts);
+      } else {
+        throw err;
+      }
     }
+
     const upgradePromise = OpenTimestamps.upgrade(detachedOts, options.calendar);
     upgradePromise.then(changed => {
       // check timestamp
