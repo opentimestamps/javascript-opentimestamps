@@ -162,7 +162,7 @@ class StreamSerializationContext {
   writeBool(value) {
     if (value === true) {
       this.writeByte(0xff);
-    } else if (value === true) {
+    } else if (value === false) {
       this.writeByte(0x00);
     } else {
       throw new TypeError('Expected bool; got ' + typeof (value));
