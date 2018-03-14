@@ -255,6 +255,20 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
     }
     return super.compareTo(other);
   }
+
+  /*
+   Verify attestation against a block header
+   Returns the block time on success; raises VerificationError on failure.
+   */
+  verifyAgainstBlockheader(digest, block) {
+    if (digest.length !== 32) {
+      throw new Context.ValueError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes');
+    } else if (!Utils.arrEq(digest, Utils.hexToBytes(block.merkleroot))) {
+      throw new Context.ValueError('Digest does not match merkleroot');
+    }
+    return block.time;
+  }
+
 }
 
 class EthereumBlockHeaderAttestation extends TimeAttestation {
@@ -281,15 +295,15 @@ class EthereumBlockHeaderAttestation extends TimeAttestation {
     return 'EthereumBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')';
   }
 
-    /*
-     Verify attestation against a block header
-     Returns the block time on success; raises VerificationError on failure.
-     */
+  /*
+    Verify attestation against a block header
+    Returns the block time on success; raises VerificationError on failure.
+    */
   verifyAgainstBlockheader(digest, block) {
     if (digest.length !== 32) {
-      console.error('Expected digest with length 32 bytes; got ' + digest.length + ' bytes');
+      throw new Context.ValueError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes');
     } else if (digest !== Utils.hexToBytes(block.transactionsRoot)) {
-      console.error('Digest does not match merkleroot');
+      throw new Context.ValueError('Digest does not match merkleroot');
     }
     return block.timestamp;
   }

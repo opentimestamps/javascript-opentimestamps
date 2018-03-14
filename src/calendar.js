@@ -20,6 +20,14 @@ const Utils = require('./utils.js');
 const Context = require('./context.js');
 const Timestamp = require('./timestamp.js');
 
+/* Exceptions */
+class CommitmentNotFoundError extends Error {
+}
+class URLError extends Error {
+}
+class ExceededSizeError extends Error {
+}
+
 /** Class representing Remote Calendar server interface */
 class RemoteCalendar {
 
@@ -99,8 +107,7 @@ class RemoteCalendar {
               .then(body => {
                 // console.log('body ', body);
                 if (body.size > 10000) {
-                  console.error('Calendar response exceeded size limit');
-                  return;
+                  return reject(new ExceededSizeError('Calendar response exceeded size limit'));
                 }
 
                 const ctx = new Context.StreamDeserialization(body);
@@ -108,8 +115,7 @@ class RemoteCalendar {
                 resolve(timestamp);
               })
               .catch(err => {
-                console.error('Calendar response error: ' + err);
-                reject();
+                return reject(new URLError(err.error.toString()));
               });
     });
   }
@@ -139,8 +145,7 @@ class RemoteCalendar {
           .then(body => {
             // /console.log('body ', body);
             if (body.size > 10000) {
-              console.error('Calendar response exceeded size limit');
-              return reject();
+              return reject(new ExceededSizeError('Calendar response exceeded size limit'));
             }
             const ctx = new Context.StreamDeserialization(body);
 
@@ -149,16 +154,17 @@ class RemoteCalendar {
           })
           .catch(err => {
             if (err.statusCode === 404) {
-              // console.error(err.response.body);
-            } else {
-              console.error('Calendar response error: ' + err);
+              return reject(new CommitmentNotFoundError(err.error.toString()));
             }
-            return reject();
+            return reject(new URLError(err.error.toString()));
           });
     });
   }
 }
 
 module.exports = {
-  RemoteCalendar
+  RemoteCalendar,
+  CommitmentNotFoundError,
+  URLError,
+  ExceededSizeError
 };

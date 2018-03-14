@@ -41,8 +41,12 @@ class DetachedTimestampFile {
 
   constructor(fileHashOp, timestamp) {
     if (!(fileHashOp instanceof Ops.Op) || !(timestamp instanceof Timestamp)) {
-      throw new Error('DetachedTimestampFile: Invalid params');
+      throw new Context.ValueError('Invalid Timestamp or fileHashOp');
     }
+    if (timestamp.msg.length !== fileHashOp._DIGEST_LENGTH()) {
+      throw new Context.ValueError('Timestamp message length and fileHashOp digest length differ');
+    }
+
     this.fileHashOp = fileHashOp;
     this.timestamp = timestamp;
   }
@@ -98,7 +102,10 @@ class DetachedTimestampFile {
     }
 
     ctx.assertMagic(HEADER_MAGIC);
-    ctx.readVaruint();
+    const major = ctx.readVaruint();
+    if (major !== MAJOR_VERSION) {
+      throw new Context.UnsupportedMajorVersion('Version ' + major + ' detached timestamp files are not supported');
+    }
 
     const fileHashOp = Ops.CryptOp.deserialize(ctx);
     const fileHash = ctx.readBytes(fileHashOp._DIGEST_LENGTH());

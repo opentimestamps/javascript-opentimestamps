@@ -210,13 +210,22 @@ test('OpenTimestamps.stamp()', assert => {
 // VERIFY TESTS
 
 test('OpenTimestamps.verify()', assert => {
-  const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(incomplete));
-  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(incompleteOts));
+  let detached;
+  let detachedOts;
+  try {
+    detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(incomplete));
+    detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(incompleteOts));
+  } catch (err) {
+    assert.fail('err=' + err);
+    assert.end();
+    return;
+  }
   OpenTimestamps.verify(detachedOts, detached).then(result => {
     assert.equal(result, 1473227803); // verify on python call upgrade, in this case result should be 1473227803
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 
@@ -229,6 +238,7 @@ test('OpenTimestamps.verify()', assert => {
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 
@@ -240,6 +250,7 @@ test('OpenTimestamps.verify()', assert => {
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 
@@ -253,6 +264,7 @@ test('OpenTimestamps.verify()', assert => {
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 
@@ -260,12 +272,11 @@ test('OpenTimestamps.verify()', assert => {
   const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(badStamp));
   const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(badStampOts));
   OpenTimestamps.verify(detachedOts, detached).then(result => {
-    assert.true(result === undefined);
-    assert.true(detached !== undefined);
-    assert.true(detachedOts !== undefined);
+    assert.fail('Invalid timestamp', result);
     assert.end();
   }).catch(err => {
-    assert.fail('err=' + err);
+    assert.true(err !== undefined);
+    assert.end();
   });
 });
 
@@ -279,6 +290,7 @@ test('OpenTimestamps.verify()', assert => {
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 
@@ -300,13 +312,20 @@ test('OpenTimestamps.verify()', assert => {
     assert.end();
   }).catch(err => {
     assert.fail('err=' + err);
+    assert.end();
   });
 });
 
 test('OpenTimestamps.verify()', assert => {
   // Test options with 2 bad insight urls (it should fail)
   const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(helloworld));
-  const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts));
+  let detachedOts;
+  try {
+    detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts));
+  } catch (err) {
+    assert.fail(err);
+    assert.end();
+  }
   const options = {
     insight: {
       urls: [
@@ -317,6 +336,7 @@ test('OpenTimestamps.verify()', assert => {
   };
   OpenTimestamps.verify(detachedOts, detached, options).then(() => {
     assert.fail('Unable to reach the server (bad insight url)');
+    assert.end();
   }).catch(() => {
     assert.true(true);
     assert.end();
@@ -466,13 +486,11 @@ test('OpenTimestamps.emptyTimestamp()', assert => {
   const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), incomplete);
   const detachedInfo = OpenTimestamps.info(detached);
   assert.equal(detachedInfo, info);
-  console.log(Utils.bytesToHex(detached.serializeToBytes()));
 
   // serialize & deserialize
   const ctx = new Context.StreamSerialization();
   detached.serialize(ctx);
   const buffer = new Buffer(ctx.getOutput());
-  console.log(Utils.bytesToHex(buffer));
 
   // error to deserialize an ots with empty timestamp
   try {
@@ -486,38 +504,58 @@ test('OpenTimestamps.emptyTimestamp()', assert => {
 
 test('OpenTimestamps.serialize()', assert => {
   // from bytes: serialize to buffer
-  let detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), helloworld);
-  const ots = detached.serializeToBytes();
+  const det = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), helloworld);
+  const ots = det.serializeToBytes();
 
   // from bytes: serialize with context
-  let ctx = new Context.StreamSerialization();
-  detached.serialize(ctx);
-  assert.true(Utils.arrEq(ots, ctx.getOutput()));
+  try {
+    const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), helloworld);
+    const ctx = new Context.StreamSerialization();
+    detached.serialize(ctx);
+    assert.true(Utils.arrEq(ots, ctx.getOutput()));
+  } catch (err) {
+    assert.fail(err);
+  }
 
   // from hash: serialize to buffer
-  let hash = (new Ops.OpSHA256()).call(helloworld);
-  detached = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), hash);
-  let bytes = Utils.arrayToBytes(detached.serializeToBytes());
-  assert.true(Utils.arrEq(ots, bytes));
+  try {
+    const hash = (new Ops.OpSHA256()).call(helloworld);
+    const detached = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), hash);
+    const bytes = Utils.arrayToBytes(detached.serializeToBytes());
+    assert.true(Utils.arrEq(ots, bytes));
+  } catch (err) {
+    assert.fail(err);
+  }
 
   // from hash: serialize with context
-  hash = (new Ops.OpSHA256()).call(helloworld);
-  detached = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), hash);
-  ctx = new Context.StreamSerialization();
-  detached.serialize(ctx);
-  assert.true(Utils.arrEq(ots, ctx.getOutput()));
+  try {
+    const hash = (new Ops.OpSHA256()).call(helloworld);
+    const detached = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), hash);
+    const ctx = new Context.StreamSerialization();
+    detached.serialize(ctx);
+    assert.true(Utils.arrEq(ots, ctx.getOutput()));
+  } catch (err) {
+    assert.fail(err);
+  }
 
   // from ots: serialize to buffer
-  detached = DetachedTimestampFile.deserialize(helloworldOts);
-  bytes = Utils.arrayToBytes(detached.serializeToBytes());
-  assert.true(Utils.arrEq(helloworldOts, bytes));
+  try {
+    const detached = DetachedTimestampFile.deserialize(helloworldOts);
+    const bytes = Utils.arrayToBytes(detached.serializeToBytes());
+    assert.true(Utils.arrEq(helloworldOts, bytes));
+  } catch (err) {
+    assert.fail(err);
+  }
 
   // from ots: serialize with context
-  detached = DetachedTimestampFile.deserialize(helloworldOts);
-  ctx = new Context.StreamSerialization();
-  detached.serialize(ctx);
-  assert.true(Utils.arrEq(helloworldOts, ctx.getOutput()));
+  try {
+    const detached = DetachedTimestampFile.deserialize(helloworldOts);
+    const ctx = new Context.StreamSerialization();
+    detached.serialize(ctx);
+    assert.true(Utils.arrEq(helloworldOts, ctx.getOutput()));
+  } catch (err) {
+    assert.fail();
+  }
 
   assert.end();
 });
-

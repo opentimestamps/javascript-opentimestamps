@@ -108,13 +108,13 @@ module.exports = {
       } else if (detaches instanceof Array) {
         detachedList = detaches;
       } else {
-        return reject('Invalid input');
+        return reject(new Error('Invalid input'));
       }
 
         // Build markle tree
       const merkleTip = this.makeMerkleTree(detachedList);
       if (merkleTip === undefined) {
-        return reject('Invalid input');
+        return reject(new Error('Invalid input'));
       }
 
       // Parse options
@@ -127,7 +127,7 @@ module.exports = {
           options.m = options.privateCalendars.length;
         } else if (options.m < 0 || options.m > options.publicCalendars.length) {
           console.log('m cannot be greater than available calendar neither less or equal 0');
-          return reject('m cannot be greater than available calendar neither less or equal 0');
+          return reject(new Error('m cannot be greater than available calendar neither less or equal 0'));
         }
       } else {
         // Parse options : public calendars
@@ -145,14 +145,14 @@ module.exports = {
           }
         } else if (options.m < 0 || options.m > options.publicCalendars.length) {
           console.log('m cannot be greater than available calendar neither less or equal 0');
-          return reject('m cannot be greater than available calendar neither less or equal 0');
+          return reject(new Error('m cannot be greater than available calendar neither less or equal 0'));
         }
       }
 
       // Build timestamp from the merkle root
       this.createTimestamp(merkleTip, options.publicCalendars, options.m, options.privateCalendars).then(timestamp => {
         if (timestamp === undefined) {
-          return reject();
+          return reject(new Error('Error on timestamp creation'));
         }
         resolve();
       }).catch(err => {
@@ -172,12 +172,14 @@ module.exports = {
       publicCalendars.forEach(calendar => {
         const remote = new Calendar.RemoteCalendar(calendar);
         res.push(remote.submit(timestamp.msg));
+        console.log('Submitting to remote calendar ' + calendar);
       });
     }
     if (privateCalendars) {
       privateCalendars.forEach(calendar => {
         const remote = new Calendar.RemoteCalendar(calendar);
         res.push(remote.submit(timestamp.msg));
+        console.log('Submitting to remote calendar ' + calendar);
       });
     }
 
@@ -245,7 +247,7 @@ module.exports = {
       console.error('Expected digest ' + Utils.bytesToHex(detachedStamped.fileDigest()));
       console.error('File does not match original!');
       return new Promise((resolve, reject) => {
-        reject('File does not match original!');
+        reject(new Error('File does not match original!'));
       });
     }
 
@@ -260,10 +262,7 @@ module.exports = {
         });
       } else {
         // Timestamp not completed
-        self.upgradeTimestamp(detachedStamped.timestamp).then(changed => {
-          if (changed) {
-            console.log('Timestamp upgraded');
-          }
+        self.upgradeTimestamp(detachedStamped.timestamp).then(() => {
           self.verifyTimestamp(detachedStamped.timestamp).then(attestedTime => {
             return resolve(attestedTime);
           }).catch(err => {
@@ -297,23 +296,14 @@ module.exports = {
           const insight = new Insight.MultiInsight(insightOptions);
           insight.blockhash(attestation.height).then(blockHash => {
             console.log('Lite-client verification, assuming block ' + blockHash + ' is valid');
-            insight.block(blockHash).then(blockInfo => {
-              const merkle = Utils.hexToBytes(blockInfo.merkleroot);
-              const message = msg.reverse();
-
+            insight.block(blockHash).then(blockHeader => {
               // One Bitcoin attestation is enough
-              if (Utils.arrEq(merkle, message)) {
-                resolve(blockInfo.time);
-              } else {
-                resolve();
-              }
+              resolve(attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader));
             }).catch(err => {
-              console.error('Error: ' + err);
-              reject(err);
+              reject(new Error('Bitcoin verification failed: ' + err.message));
             });
-          }).catch(err => {
-            console.error('Error: ' + err);
-            reject(err);
+          }).catch(() => {
+            reject(new Error('Bitcoin block height ' + attestation.height + ' not found'));
           });
         }
 
@@ -343,18 +333,14 @@ module.exports = {
               Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
                 const bitcoin = new Bitcoin.BitcoinNode(properties);
                 bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
-                  const merkle = Utils.hexToBytes(blockHeader.getMerkleroot());
-                  const message = msg.reverse();
                   // One Bitcoin attestation is enought
-                  if (Utils.arrEq(merkle, message)) {
-                    resolve(blockHeader.time);
-                  } else {
-                    resolve();
-                  }
+                  resolve(attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader));
                 }).catch(() => {
+                  console.error('Bitcoin block height ' + attestation.height + ' not found');
                   liteVerify();
                 });
               }).catch(() => {
+                console.error('Could not connect to local Bitcoin node');
                 liteVerify();
               });
             }
@@ -426,6 +412,7 @@ module.exports = {
           }
 
           calendars.forEach(calendar => {
+            console.log('Checking calendar ' + attestation.uri + ' for ' + Utils.bytesToHex(subStamp.msg));
             promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations));
           });
         }
@@ -436,14 +423,14 @@ module.exports = {
       Promise.all(promises.map(Utils.softFail)).then(results => {
         let changed = false;
         results.forEach(result => {
-          if (result !== undefined) {
+          if (result !== undefined && !(result instanceof Error)) {
             changed = true;
             result.subStamp.merge(result.upgradedStamp);
           }
         });
         resolve(changed);
       }).catch(err => {
-        console.error('Error upgradeTimestamp: ' + err);
+        console.error(err);
         reject(err);
       });
     });
@@ -458,6 +445,7 @@ module.exports = {
         const attsFromRemote = upgradedStamp.getAttestations();
         if (attsFromRemote.size > 0) {
           // console.log(attsFromRemote.size + ' attestation(s) from ' + calendar.url);
+          console.log('Got 1 attestation(s) from ' + calendar.url);
         }
 
         // Set difference from remote attestations & existing attestations
@@ -477,6 +465,7 @@ module.exports = {
           resolve();
         }
       }).catch(err => {
+        console.log('Calendar ' + calendar.url + ': ' + err.message);
         reject(err);
       });
     });

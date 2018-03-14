@@ -7,6 +7,7 @@ const OpenTimestamps = require('./src/open-timestamps.js');
 const Utils = require('./src/utils.js');
 const DetachedTimestampFile = require('./src/detached-timestamp-file.js');
 const Ops = require('./src/ops.js');
+const Context = require('./src/context.js');
 
 // Constants
 const path = process.argv[1].split('/');
@@ -132,12 +133,15 @@ function info(argsFileOts, options) {
 
   Promise.all([otsPromise]).then(values => {
     const ots = values[0];
-
-    const detachedOts = DetachedTimestampFile.deserialize(ots);
-    const infoResult = OpenTimestamps.info(detachedOts, options);
-    console.log(infoResult);
-  }).catch(err => {
-    console.log('Error: ' + err);
+    try {
+      const detachedOts = DetachedTimestampFile.deserialize(ots);
+      const infoResult = OpenTimestamps.info(detachedOts, options);
+      console.log(infoResult);
+    } catch (err) {
+      console.log('Error! ' + argsFileOts + ' is not a timestamp file.');
+    }
+  }).catch(() => {
+    console.log('Could not read: ' + argsFileOts);
     process.exit(1);
   });
 }
@@ -198,11 +202,11 @@ function stamp(argsFiles, options) {
         saveOts(otsFilename, buffer);
       });
     }).catch(err => {
-      console.log('Error: ' + err);
+      console.error(err.message);
       process.exit(1);
     });
-  }).catch(err => {
-    console.log('Error: ' + err);
+  }).catch(() => {
+    console.error('Could not read: ' + argsFiles);
     process.exit(1);
   });
 }
@@ -234,7 +238,7 @@ function verify(argsFileOts, options) {
     try {
       files.push(Utils.readFilePromise(options.file, null));
     } catch (err) {
-      console.log('File not found \'' + options.file + '\'');
+      throw new Error('File not found \'' + options.file + '\'');
     }
   } else {
       // default input file
@@ -243,7 +247,7 @@ function verify(argsFileOts, options) {
       console.log('Assuming target filename is \'' + argsFile + '\'');
       files.push(Utils.readFilePromise(argsFile, null));
     } catch (err) {
-      console.log('File not found \'' + argsFile + '\'');
+      throw new Error('File not found \'' + argsFile + '\'');
     }
   }
 
@@ -267,20 +271,31 @@ function verify(argsFileOts, options) {
       detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), file);
     }
 
-    const detachedOts = DetachedTimestampFile.deserialize(fileOts);
+    let detachedOts;
+    try {
+      detachedOts = DetachedTimestampFile.deserialize(fileOts);
+    } catch (err) {
+      if (err instanceof Context.BadMagicError) {
+        throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.');
+      } else if (err instanceof Context.DeserializationError) {
+        throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.');
+      } else {
+        throw err;
+      }
+    }
     const verifyPromise = OpenTimestamps.verify(detachedOts, detached);
     verifyPromise.then(result => {
       if (result === undefined) {
-        console.log('Pending or Bad attestation');
+        // console.log('Pending or Bad attestation');
       } else {
         console.log('Success! Bitcoin attests data existed as of ' + (new Date(result * 1000)));
       }
     }).catch(err => {
-      console.log(err);
+      console.log(err.message);
       process.exit(1);
     });
   }).catch(err => {
-    console.log('Error: ' + err);
+    console.log(err.message);
     process.exit(1);
   });
 }
@@ -288,7 +303,12 @@ function verify(argsFileOts, options) {
 function upgrade(argsFileOts, options) {
   const otsPromise = Utils.readFilePromise(argsFileOts, null);
   otsPromise.then(ots => {
-    const detachedOts = DetachedTimestampFile.deserialize(ots);
+    let detachedOts;
+    try {
+      detachedOts = DetachedTimestampFile.deserialize(ots);
+    } catch (err) {
+      throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.');
+    }
     const upgradePromise = OpenTimestamps.upgrade(detachedOts, options.calendar);
     upgradePromise.then(changed => {
       // check timestamp
@@ -306,15 +326,18 @@ function upgrade(argsFileOts, options) {
           }
           console.log('The file .ots was upgraded!');
         });
+      }
+      if (detachedOts.timestamp.isTimestampComplete()) {
+        console.log('Success! Timestamp complete');
       } else {
-        console.log('Timestamp not changed');
+        console.log('Failed! Timestamp not complete');
       }
     }).catch(err => {
-      console.log('Error: ' + err);
+      console.log(err.message);
       process.exit(1);
     });
   }).catch(err => {
-    console.log('Error: ' + err);
+    console.log(err.message);
     process.exit(1);
   });
 }
