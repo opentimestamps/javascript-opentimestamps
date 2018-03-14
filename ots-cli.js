@@ -142,7 +142,7 @@ function info(argsFileOts, options) {
       if (err instanceof Context.BadMagicError) {
         throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.');
       } else if (err instanceof Context.DeserializationError) {
-        throw new Error('Invalid timestamp file' + argsFileOts);
+        throw new Error('Invalid timestamp file ' + argsFileOts);
       } else {
         throw err;
       }
@@ -285,7 +285,7 @@ function verify(argsFileOts, options) {
       if (err instanceof Context.BadMagicError) {
         throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.');
       } else if (err instanceof Context.DeserializationError) {
-        throw new Error('Invalid timestamp file' + argsFileOts);
+        throw new Error('Invalid timestamp file ' + argsFileOts);
       } else {
         throw err;
       }
@@ -318,7 +318,7 @@ function upgrade(argsFileOts, options) {
       if (err instanceof Context.BadMagicError) {
         throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.');
       } else if (err instanceof Context.DeserializationError) {
-        throw new Error('Invalid timestamp file' + argsFileOts);
+        throw new Error('Invalid timestamp file ' + argsFileOts);
       } else {
         throw err;
       }
