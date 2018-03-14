@@ -73,9 +73,6 @@ class StreamDeserializationContext {
   }
 
   readBuffer(l) {
-    // if (this.counter + l > this.buffer.length) {
-    //  throw new TruncationError('Tried to read ' + (this.counter + l) +' bytes but got only ' + this.buffer.length + ' bytes');
-    // }
     if (this.counter >= this.buffer.length) {
       return undefined;
     }
@@ -88,9 +85,6 @@ class StreamDeserializationContext {
   }
 
   read(l) {
-    // if (this.counter + l > this.buffer.length) {
-    //  throw new TruncationError('Tried to read ' + (this.counter + l) +' bytes but got only ' + this.buffer.length + ' bytes');
-    // }
     if (l > this.buffer.length) {
       l = this.buffer.length;
     }
