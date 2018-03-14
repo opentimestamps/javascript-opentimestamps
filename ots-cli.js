@@ -147,8 +147,12 @@ function info(argsFileOts, options) {
         throw err;
       }
     }
-  }).catch(() => {
-    console.log('Could not read: ' + argsFileOts);
+  }).catch(err => {
+    if (err.code === 'ENOENT') {
+      console.error('File not found \'' + err.path + '\'');
+    } else {
+      console.error(err.message);
+    }
     process.exit(1);
   });
 }
@@ -181,7 +185,11 @@ function stamp(argsFiles, options) {
     const detaches = [];
     values.forEach(value => {
       if (options.digest) {
-        detaches.push(DetachedTimestampFile.fromHash(op, value));
+        try {
+          detaches.push(DetachedTimestampFile.fromHash(op, value));
+        } catch (err) {
+          throw new Error('Invalid hash ' + options.digest + ' for ' + options.algorithm);
+        }
       } else {
         detaches.push(DetachedTimestampFile.fromBytes(op, value));
       }
@@ -212,8 +220,12 @@ function stamp(argsFiles, options) {
       console.error(err.message);
       process.exit(1);
     });
-  }).catch(() => {
-    console.error('Could not read: ' + argsFiles);
+  }).catch(err => {
+    if (err.code === 'ENOENT') {
+      console.error('File not found \'' + err.path + '\'');
+    } else {
+      console.error(err.message);
+    }
     process.exit(1);
   });
 }
@@ -237,25 +249,17 @@ function verify(argsFileOts, options) {
   const files = [];
   files.push(Utils.readFilePromise(argsFileOts, null));
   if (options.digest) {
-      // input is a digest
+    // input is a digest
     console.log('Assuming target hash is \'' + options.digest + '\'');
   } else if (options.file) {
-      // defined input file
+    // defined input file
     console.log('Assuming target filename is \'' + options.file + '\'');
-    try {
-      files.push(Utils.readFilePromise(options.file, null));
-    } catch (err) {
-      throw new Error('File not found \'' + options.file + '\'');
-    }
+    files.push(Utils.readFilePromise(options.file, null));
   } else {
-      // default input file
+    // default input file
     const argsFile = argsFileOts.replace('.ots', '');
-    try {
-      console.log('Assuming target filename is \'' + argsFile + '\'');
-      files.push(Utils.readFilePromise(argsFile, null));
-    } catch (err) {
-      throw new Error('File not found \'' + argsFile + '\'');
-    }
+    console.log('Assuming target filename is \'' + argsFile + '\'');
+    files.push(Utils.readFilePromise(argsFile, null));
   }
 
   Promise.all(files).then(values => {
@@ -272,7 +276,11 @@ function verify(argsFileOts, options) {
       } else if (options.algorithm === 'ripemd160') {
         op = new Ops.OpRIPEMD160();
       }
-      detached = DetachedTimestampFile.fromHash(op, Utils.hexToBytes(options.digest));
+      try {
+        detached = DetachedTimestampFile.fromHash(op, Utils.hexToBytes(options.digest));
+      } catch (err) {
+        throw new Error('Invalid hash ' + options.digest + ' for ' + options.algorithm);
+      }
     } else {
       const file = values[1];
       detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), file);
@@ -302,7 +310,11 @@ function verify(argsFileOts, options) {
       process.exit(1);
     });
   }).catch(err => {
-    console.log(err.message);
+    if (err.code === 'ENOENT') {
+      console.error('File not found \'' + err.path + '\'');
+    } else {
+      console.error(err.message);
+    }
     process.exit(1);
   });
 }
@@ -328,7 +340,7 @@ function upgrade(argsFileOts, options) {
     upgradePromise.then(changed => {
       // check timestamp
       if (changed) {
-        console.log('Timestamp has been successfully upgraded!');
+        // console.log('Timestamp has been successfully upgraded!');
         fs.writeFile(argsFileOts + '.bak', new Buffer(ots), 'binary', err => {
           if (err) {
             return console.log(err);
@@ -339,7 +351,6 @@ function upgrade(argsFileOts, options) {
           if (err) {
             return console.log(err);
           }
-          console.log('The file .ots was upgraded!');
         });
       }
       if (detachedOts.timestamp.isTimestampComplete()) {
@@ -352,7 +363,11 @@ function upgrade(argsFileOts, options) {
       process.exit(1);
     });
   }).catch(err => {
-    console.log(err.message);
+    if (err.code === 'ENOENT') {
+      console.error('File not found \'' + err.path + '\'');
+    } else {
+      console.error(err.message);
+    }
     process.exit(1);
   });
 }

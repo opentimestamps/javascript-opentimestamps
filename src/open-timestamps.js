@@ -412,7 +412,7 @@ module.exports = {
           }
 
           calendars.forEach(calendar => {
-            console.log('Checking calendar ' + attestation.uri + ' for ' + Utils.bytesToHex(subStamp.msg));
+            // console.log('Checking calendar ' + attestation.uri + ' for ' + Utils.bytesToHex(subStamp.msg));
             promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations));
           });
         }
