@@ -40,13 +40,13 @@ gulp.task('index', () => {
     stdout: true // default = true, false means don't write stdout
   };
   return gulp.src('./')
-        .pipe(exec('./node_modules/browserify/bin/cmd.js -r ./src/open-timestamps.js index.js -o ./dist/opentimestamps.es6.js', options))
+        .pipe(exec('./node_modules/browserify/bin/cmd.js --standalone "OpenTimestamps" index.js > ./dist/opentimestamps.es6.js', options))
         .pipe(exec('./node_modules/babel-cli/bin/babel.js ./dist/opentimestamps.es6.js -o ./dist/opentimestamps.js', options))
         .pipe(exec.reporter(reportOptions));
 
     /* NOTE: babelify run babel with .babelrc file, but doesn't convert the code
     gulp.task('index', function() {
-        return browserify({ debug: true, entries: [" opentimestamps.es6.js"] })
+        return browserify({ debug: true, entries: ["opentimestamps.es6.js"] })
             .transform(babelify)
             .bundle()
             .pipe(source(' opentimestamps.js'))
