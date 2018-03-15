@@ -264,28 +264,8 @@ function verify(argsFileOts, options) {
 
   Promise.all(files).then(values => {
     const fileOts = values[0];
-    let detached;
 
-    if (options.digest) {
-        // check input params : algorithm
-      let op = new Ops.OpSHA256();
-      if (options.algorithm === 'sha1') {
-        op = new Ops.OpSHA1();
-      } else if (options.algorithm === 'sha256') {
-        op = new Ops.OpSHA256();
-      } else if (options.algorithm === 'ripemd160') {
-        op = new Ops.OpRIPEMD160();
-      }
-      try {
-        detached = DetachedTimestampFile.fromHash(op, Utils.hexToBytes(options.digest));
-      } catch (err) {
-        throw new Error('Invalid hash ' + options.digest + ' for ' + options.algorithm);
-      }
-    } else {
-      const file = values[1];
-      detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), file);
-    }
-
+    // Read ots file and check hash function
     let detachedOts;
     try {
       detachedOts = DetachedTimestampFile.deserialize(fileOts);
@@ -298,6 +278,21 @@ function verify(argsFileOts, options) {
         throw err;
       }
     }
+
+      // Read original file with same hash function of ots
+    let detached;
+    if (options.digest) {
+      try {
+        detached = DetachedTimestampFile.fromHash(detachedOts.fileHashOp, Utils.hexToBytes(options.digest));
+      } catch (err) {
+        throw new Error('Invalid hash ' + options.digest + ' for ' + options.algorithm);
+      }
+    } else {
+      const file = values[1];
+      detached = DetachedTimestampFile.fromBytes(detachedOts.fileHashOp, file);
+    }
+
+    // Opentimestamps verify
     const verifyPromise = OpenTimestamps.verify(detachedOts, detached);
     verifyPromise.then(result => {
       if (result === undefined) {
