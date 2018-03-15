@@ -285,7 +285,7 @@ function verify(argsFileOts, options) {
       try {
         detached = DetachedTimestampFile.fromHash(detachedOts.fileHashOp, Utils.hexToBytes(options.digest));
       } catch (err) {
-        throw new Error('Invalid hash ' + options.digest + ' for ' + options.algorithm);
+        throw new Error('Invalid hash ' + options.digest + ' for ' + detachedOts.fileHashOp._HASHLIB_NAME());
       }
     } else {
       const file = values[1];
