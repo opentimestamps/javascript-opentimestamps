@@ -43,7 +43,8 @@
   },
   "scripts": {
     "test": "./test/ots-cli.sh && tap test/*.js && xo --ignore ./out/* && browserify test/*.js | tape-run",
-    "jsdoc": "jsdoc -c conf.json -R README.md src/"
+    "jsdoc": "jsdoc -c conf.json -R README.md src/",
+    "dist": "gulp"
   },
   "xo": {
     "esnext": true,
