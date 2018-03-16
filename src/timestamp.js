@@ -11,6 +11,7 @@ const bitcore = require('bitcore-lib');
 const Utils = require('./utils.js');
 const Notary = require('./notary.js');
 const Ops = require('./ops.js');
+const Context = require('./context.js');
 
 /**
  * Class representing Timestamp interface
@@ -26,6 +27,11 @@ class Timestamp {
    * @param {string} msg - The server url.
    */
   constructor(msg) {
+    if (!msg || !(msg instanceof Array)) {
+      throw new TypeError('Expected msg to be bytes; got ' + typeof (msg));
+    } else if (msg.length > (new Ops.Op())._MAX_MSG_LENGTH()) {
+      throw new TypeError('Message exceeds Op length limit; ' + msg.length + ' > ' + (new Ops.Op())._MAX_MSG_LENGTH());
+    }
     this.msg = msg;
     this.attestations = [];
     this.ops = new Map();
@@ -87,6 +93,10 @@ class Timestamp {
     // console.log('SERIALIZE');
     // console.log(ctx.toString());
 
+    if (!(this.attestations) && !(this.ops)) {
+      throw new Context.ValueError('An empty timestamp can\'t be serialized');
+    }
+
       // sort
     const sortedAttestations = this.attestations;
     sortedAttestations.sort((a, b) => {
@@ -140,10 +150,10 @@ class Timestamp {
    */
   merge(other) {
     if (!(other instanceof Timestamp)) {
-      throw Object('Can only merge Timestamps together');
+      throw new Context.ValueError('Can only merge Timestamps together');
     }
     if (!Utils.arrEq(this.msg, other.msg)) {
-      throw Object('Can\'t merge timestamps for different messages together');
+      throw new Context.ValueError('Can\'t merge timestamps for different messages together');
     }
 
     other.attestations.forEach(attestation => {

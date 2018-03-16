@@ -7,6 +7,7 @@ const OpenTimestamps = require('./src/open-timestamps.js');
 const Utils = require('./src/utils.js');
 const DetachedTimestampFile = require('./src/detached-timestamp-file.js');
 const Ops = require('./src/ops.js');
+const Context = require('./src/context.js');
 
 // Constants
 const path = process.argv[1].split('/');
@@ -133,11 +134,25 @@ function info(argsFileOts, options) {
   Promise.all([otsPromise]).then(values => {
     const ots = values[0];
 
-    const detachedOts = DetachedTimestampFile.deserialize(ots);
-    const infoResult = OpenTimestamps.info(detachedOts, options);
-    console.log(infoResult);
+    try {
+      const detachedOts = DetachedTimestampFile.deserialize(ots);
+      const infoResult = OpenTimestamps.info(detachedOts, options);
+      console.log(infoResult);
+    } catch (err) {
+      if (err instanceof Context.BadMagicError) {
+        throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.');
+      } else if (err instanceof Context.DeserializationError) {
+        throw new Error('Invalid timestamp file ' + argsFileOts);
+      } else {
+        throw err;
+      }
+    }
   }).catch(err => {
-    console.log('Error: ' + err);
+    if (err.code === 'ENOENT') {
+      console.error('File not found \'' + err.path + '\'');
+    } else {
+      console.error(err.message);
+    }
     process.exit(1);
   });
 }
@@ -170,7 +185,11 @@ function stamp(argsFiles, options) {
     const detaches = [];
     values.forEach(value => {
       if (options.digest) {
-        detaches.push(DetachedTimestampFile.fromHash(op, value));
+        try {
+          detaches.push(DetachedTimestampFile.fromHash(op, value));
+        } catch (err) {
+          throw new Error('Invalid hash ' + options.digest + ' for ' + options.algorithm);
+        }
       } else {
         detaches.push(DetachedTimestampFile.fromBytes(op, value));
       }
@@ -198,11 +217,15 @@ function stamp(argsFiles, options) {
         saveOts(otsFilename, buffer);
       });
     }).catch(err => {
-      console.log('Error: ' + err);
+      console.error(err.message);
       process.exit(1);
     });
   }).catch(err => {
-    console.log('Error: ' + err);
+    if (err.code === 'ENOENT') {
+      console.error('File not found \'' + err.path + '\'');
+    } else {
+      console.error(err.message);
+    }
     process.exit(1);
   });
 }
@@ -226,61 +249,66 @@ function verify(argsFileOts, options) {
   const files = [];
   files.push(Utils.readFilePromise(argsFileOts, null));
   if (options.digest) {
-      // input is a digest
+    // input is a digest
     console.log('Assuming target hash is \'' + options.digest + '\'');
   } else if (options.file) {
-      // defined input file
+    // defined input file
     console.log('Assuming target filename is \'' + options.file + '\'');
-    try {
-      files.push(Utils.readFilePromise(options.file, null));
-    } catch (err) {
-      console.log('File not found \'' + options.file + '\'');
-    }
+    files.push(Utils.readFilePromise(options.file, null));
   } else {
-      // default input file
+    // default input file
     const argsFile = argsFileOts.replace('.ots', '');
-    try {
-      console.log('Assuming target filename is \'' + argsFile + '\'');
-      files.push(Utils.readFilePromise(argsFile, null));
-    } catch (err) {
-      console.log('File not found \'' + argsFile + '\'');
-    }
+    console.log('Assuming target filename is \'' + argsFile + '\'');
+    files.push(Utils.readFilePromise(argsFile, null));
   }
 
   Promise.all(files).then(values => {
     const fileOts = values[0];
-    let detached;
 
-    if (options.digest) {
-        // check input params : algorithm
-      let op = new Ops.OpSHA256();
-      if (options.algorithm === 'sha1') {
-        op = new Ops.OpSHA1();
-      } else if (options.algorithm === 'sha256') {
-        op = new Ops.OpSHA256();
-      } else if (options.algorithm === 'ripemd160') {
-        op = new Ops.OpRIPEMD160();
+    // Read ots file and check hash function
+    let detachedOts;
+    try {
+      detachedOts = DetachedTimestampFile.deserialize(fileOts);
+    } catch (err) {
+      if (err instanceof Context.BadMagicError) {
+        throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.');
+      } else if (err instanceof Context.DeserializationError) {
+        throw new Error('Invalid timestamp file ' + argsFileOts);
+      } else {
+        throw err;
       }
-      detached = DetachedTimestampFile.fromHash(op, Utils.hexToBytes(options.digest));
-    } else {
-      const file = values[1];
-      detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), file);
     }
 
-    const detachedOts = DetachedTimestampFile.deserialize(fileOts);
+      // Read original file with same hash function of ots
+    let detached;
+    if (options.digest) {
+      try {
+        detached = DetachedTimestampFile.fromHash(detachedOts.fileHashOp, Utils.hexToBytes(options.digest));
+      } catch (err) {
+        throw new Error('Invalid hash ' + options.digest + ' for ' + detachedOts.fileHashOp._HASHLIB_NAME());
+      }
+    } else {
+      const file = values[1];
+      detached = DetachedTimestampFile.fromBytes(detachedOts.fileHashOp, file);
+    }
+
+    // Opentimestamps verify
     const verifyPromise = OpenTimestamps.verify(detachedOts, detached);
+
     verifyPromise.then(results => {
-      if (results.attestedTime === undefined) {
-        console.log('Pending or Bad attestation');
       } else {
         console.log('Success! ' + results.chain[0].toUpperCase() + results.chain.slice(1) + ' attests data existed as of ' + (new Date(results.attestedTime * 1000)));
       }
     }).catch(err => {
-      console.log(err);
+      console.log(err.message);
       process.exit(1);
     });
   }).catch(err => {
-    console.log('Error: ' + err);
+    if (err.code === 'ENOENT') {
+      console.error('File not found \'' + err.path + '\'');
+    } else {
+      console.error(err.message);
+    }
     process.exit(1);
   });
 }
@@ -288,12 +316,25 @@ function verify(argsFileOts, options) {
 function upgrade(argsFileOts, options) {
   const otsPromise = Utils.readFilePromise(argsFileOts, null);
   otsPromise.then(ots => {
-    const detachedOts = DetachedTimestampFile.deserialize(ots);
+    let detachedOts;
+
+    try {
+      detachedOts = DetachedTimestampFile.deserialize(ots);
+    } catch (err) {
+      if (err instanceof Context.BadMagicError) {
+        throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.');
+      } else if (err instanceof Context.DeserializationError) {
+        throw new Error('Invalid timestamp file ' + argsFileOts);
+      } else {
+        throw err;
+      }
+    }
+
     const upgradePromise = OpenTimestamps.upgrade(detachedOts, options.calendar);
     upgradePromise.then(changed => {
       // check timestamp
       if (changed) {
-        console.log('Timestamp has been successfully upgraded!');
+        // console.log('Timestamp has been successfully upgraded!');
         fs.writeFile(argsFileOts + '.bak', new Buffer(ots), 'binary', err => {
           if (err) {
             return console.log(err);
@@ -304,17 +345,23 @@ function upgrade(argsFileOts, options) {
           if (err) {
             return console.log(err);
           }
-          console.log('The file .ots was upgraded!');
         });
+      }
+      if (detachedOts.timestamp.isTimestampComplete()) {
+        console.log('Success! Timestamp complete');
       } else {
-        console.log('Timestamp not changed');
+        console.log('Failed! Timestamp not complete');
       }
     }).catch(err => {
-      console.log('Error: ' + err);
+      console.log(err.message);
       process.exit(1);
     });
   }).catch(err => {
-    console.log('Error: ' + err);
+    if (err.code === 'ENOENT') {
+      console.error('File not found \'' + err.path + '\'');
+    } else {
+      console.error(err.message);
+    }
     process.exit(1);
   });
 }

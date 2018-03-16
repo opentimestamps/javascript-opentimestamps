@@ -6,6 +6,40 @@
  * @author EternityWall
  * @license LPGL3
  */
+const Utils = require('./utils.js');
+
+class ValueError extends Error {
+}
+class TypeError extends Error {
+}
+// Base class for all errors encountered during deserialization
+class DeserializationError extends Error {
+}
+// Raise this when the file format magic number is incorrect.
+class BadMagicError extends DeserializationError {
+}
+//  Raise this a major version is unsupported
+class UnsupportedMajorVersion extends DeserializationError {
+}
+// Truncated data encountered while deserializing
+class TruncationError extends DeserializationError {
+}
+// Trailing garbage found after deserialization finished
+// Raised when deserialization otherwise succeeds without errors, but excess
+// data is present after the data we expected to get.
+class TrailingGarbageError extends DeserializationError {
+}
+// Data is too deeply nested to be deserialized
+// Raised when deserializing recursively defined data structures that exceed
+// the recursion limit for that particular data structure.
+class RecursionLimitError extends DeserializationError {
+}
+// Wrong type for specified serializer
+class SerializerTypeError extends TypeError {
+}
+// Inappropriate value to be serialized (of correct type)
+class SerializerValueError extends ValueError {
+}
 
 /** Class representing Stream Deserialization Context for input buffer. */
 class StreamDeserializationContext {
@@ -39,33 +73,24 @@ class StreamDeserializationContext {
   }
 
   readBuffer(l) {
-    if (this.counter === this.buffer.length) {
+    if (this.counter >= this.buffer.length) {
       return undefined;
     }
     if (l > this.buffer.length) {
       l = this.buffer.length;
     }
-    // const uint8Array = new Uint8Array(this.buffer,this.counter,l);
     const uint8Array = this.buffer.slice(this.counter, this.counter + l);
     this.counter += l;
     return uint8Array;
   }
 
   read(l) {
-    if (this.counter === this.buffer.length) {
-      return undefined;
-    }
     if (l > this.buffer.length) {
       l = this.buffer.length;
     }
-    // const uint8Array = new Uint8Array(this.buffer,this.counter,l);
     const uint8Array = this.buffer.slice(this.counter, this.counter + l);
     this.counter += l;
     return Array.from(uint8Array);
-    /* this.buffer.copyTo(output, 0, this.counter, l + this.counter);
-    this.counter += l;
-    return Utils.arrayToBytes(Object.prototype.hasOwnProperty.call(output, 'view') ? output.view : output.buffer);  // different behaviours of buffer object between node and browsers
-    */
   }
   readBool() {
     const b = this.read(1)[0];
@@ -74,6 +99,7 @@ class StreamDeserializationContext {
     } else if (b === 0x00) {
       return false;
     }
+    throw new DeserializationError('read_bool() expected 0xff or 0x00; got +' + b);
   }
   readVaruint() {
     let value = 0;
@@ -95,27 +121,23 @@ class StreamDeserializationContext {
   readVarbytes(maxLen, minLen = 0) {
     const l = this.readVaruint();
     if (l > maxLen) {
-      console.error('varbytes max length exceeded;');
-      return;
+      throw new DeserializationError('varbytes max length exceeded; ' + l + ' > ' + maxLen);
     } else if (l < minLen) {
-      console.error('varbytes min length not met;');
-      return;
+      throw new DeserializationError('varbytes min length not met; ' + l + ' < ' + maxLen);
     }
     return this.read(l);
   }
   assertMagic(expectedMagic) {
     const actualMagic = this.read(expectedMagic.length);
-    if (expectedMagic !== actualMagic) {
-      return false;
+    if (!Utils.arrEq(expectedMagic, actualMagic)) {
+      throw new BadMagicError(expectedMagic, actualMagic);
     }
-    return true;
   }
   assertEof() {
-    const excess = this.read(1);
+    const excess = this.buffer[this.counter];
     if (excess !== undefined) {
-      return true;
+      throw new TrailingGarbageError('Trailing garbage found after end of deserialized data');
     }
-    return false;
   }
   toString() {
     return this.buffer.toHex(0);
@@ -140,8 +162,10 @@ class StreamSerializationContext {
   writeBool(value) {
     if (value === true) {
       this.writeByte(0xff);
-    } else {
+    } else if (value === false) {
       this.writeByte(0x00);
+    } else {
+      throw new TypeError('Expected bool; got ' + typeof (value));
     }
   }
 
@@ -197,5 +221,15 @@ class StreamSerializationContext {
 
 module.exports = {
   StreamDeserialization: StreamDeserializationContext,
-  StreamSerialization: StreamSerializationContext
+  StreamSerialization: StreamSerializationContext,
+  DeserializationError,
+  BadMagicError,
+  UnsupportedMajorVersion,
+  TruncationError,
+  TrailingGarbageError,
+  RecursionLimitError,
+  SerializerTypeError,
+  SerializerValueError,
+  ValueError,
+  TypeError
 };
