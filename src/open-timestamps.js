@@ -337,7 +337,7 @@ module.exports = {
                 const bitcoin = new Bitcoin.BitcoinNode(properties);
                 bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
                   // One Bitcoin attestation is enought
-                  resolve(attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader));
+                  resolve({attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader), chain: 'bitcoin'});
                 }).catch(() => {
                   console.error('Bitcoin block height ' + attestation.height + ' not found');
                   liteVerify();
