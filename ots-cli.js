@@ -296,7 +296,9 @@ function verify(argsFileOts, options) {
     const verifyPromise = OpenTimestamps.verify(detachedOts, detached);
 
     verifyPromise.then(results => {
-      console.log('Success! ' + results.chain[0].toUpperCase() + results.chain.slice(1) + ' attests data existed as of ' + (new Date(results.attestedTime * 1000)));
+      if (results && results.chain) {
+        console.log('Success! ' + results.chain[0].toUpperCase() + results.chain.slice(1) + ' attests data existed as of ' + (new Date(results.attestedTime * 1000)));
+      }
     }).catch(err => {
       console.log(err.message);
       process.exit(1);

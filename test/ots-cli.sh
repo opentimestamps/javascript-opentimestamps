@@ -56,4 +56,10 @@ diff examples/incomplete.txt.ots examples/incomplete.txt.ots.old && \
 cp examples/incomplete.txt.ots.old examples/incomplete.txt.ots && \
 rm examples/incomplete.txt.ots.old && \
 
- echo --- END TESTING ots-cli.js
+# Test : litecoin
+echo ">> node ots-cli.js info examples/hello-world.txt.ltc.ots" && \
+node ots-cli.js info examples/hello-world.txt.ltc.ots | grep "verify LitecoinBlockHeaderAttestation(1386291)" && \
+echo ">> node ots-cli.js verify examples/hello-world.txt.ltc.ots" && \
+node ots-cli.js verify examples/hello-world.txt.ltc.ots | grep "Success! Litecoin attests data existed as of Fri Mar 16 2018 15:43:41" && \
+
+echo --- END TESTING ots-cli.js

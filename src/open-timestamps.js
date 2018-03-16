@@ -263,10 +263,7 @@ module.exports = {
       } else {
         // Timestamp not completed
 
-        self.upgradeTimestamp(detachedStamped.timestamp).then(changed => {
-          if (changed) {
-            console.log('Timestamp upgraded');
-          }
+        self.upgradeTimestamp(detachedStamped.timestamp).then(() => {
           self.verifyTimestamp(detachedStamped.timestamp).then(results => {
             results = results || {attestedTime: undefined, chain: undefined};
             return resolve({attestedTime: results.attestedTime, chain: results.chain});
@@ -352,7 +349,7 @@ module.exports = {
             }
           } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
             found = true;
-            console.log('Checking LitecoinBlockHeaderAttestation');
+            // console.log('Checking LitecoinBlockHeaderAttestation');
 
             options = {};
             options.insight = {};

@@ -308,6 +308,15 @@ class LitecoinBlockHeaderAttestation extends TimeAttestation {
     }
     return super.compareTo(other);
   }
+
+  verifyAgainstBlockheader(digest, block) {
+    if (digest.length !== 32) {
+      throw new Context.ValueError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes');
+    } else if (!Utils.arrEq(digest, Utils.hexToBytes(block.merkleroot))) {
+      throw new Context.ValueError('Digest does not match merkleroot');
+    }
+    return block.time;
+  }
 }
 
 class EthereumBlockHeaderAttestation extends TimeAttestation {
