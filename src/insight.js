@@ -118,13 +118,18 @@ class Insight {
   }
 }
 
-const publicInsightUrls = [
+const publicInsightUrls = {};
+publicInsightUrls.bitcoin = [
   'https://www.localbitcoinschain.com/api',
   'https://search.bitaccess.co/insight-api',
   'https://insight.bitpay.com/api',
   'https://btc-bitcore1.trezor.io/api',
   'https://btc-bitcore4.trezor.io/api',
   'https://blockexplorer.com/api'
+];
+publicInsightUrls.litecoin = [
+  'https://ltc-bitcore1.trezor.io/api',
+  'https://insight.litecore.io/api'
 ];
 
 class MultiInsight {
@@ -140,10 +145,12 @@ class MultiInsight {
     // Sets requests timeout (default = 10s)
     const timeoutOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'timeout');
     const timeout = timeoutOptionSet ? options.timeout : 10;
+    const chainOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'chain');
+    const chain = chainOptionSet ? options.chain : 'bitcoin';
 
     // We need at least 2 insight servers (for confirmation)
     const urlsOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'urls') && options.urls.length > 1;
-    const urls = urlsOptionSet ? options.urls : publicInsightUrls;
+    const urls = urlsOptionSet ? options.urls : publicInsightUrls[chain];
 
     urls.forEach(url => {
       this.insights.push(new Insight(url, timeout));

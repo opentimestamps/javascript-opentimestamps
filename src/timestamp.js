@@ -240,6 +240,10 @@ class Timestamp {
           item.type = 'BitcoinBlockHeaderAttestation';
           item.param = attestation.height;
           item.merkle = Utils.bytesToHex(this.msg.reverse());
+        } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
+          item.type = 'LitecoinBlockHeaderAttestation';
+          item.param = attestation.height;
+          item.merkle = Utils.bytesToHex(this.msg.reverse());
         } else if (attestation instanceof Notary.EthereumBlockHeaderAttestation) {
           item.type = 'EthereumBlockHeaderAttestation';
           item.param = attestation.height;
@@ -347,10 +351,15 @@ class Timestamp {
     let r = '';
     if (this.attestations.length > 0) {
       this.attestations.forEach(attestation => {
+        console.log(attestation);
         r += Timestamp.indention(indent) + 'verify ' + attestation.toString() + strResult(verbosity, this.msg) + '\n';
         if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
           const tx = Utils.bytesToHex(new Ops.OpReverse().call(this.msg));
           r += Timestamp.indention(indent) + '# Bitcoin block merkle root ' + tx + '\n';
+        }
+        if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
+          const tx = Utils.bytesToHex(new Ops.OpReverse().call(this.msg));
+          r += Timestamp.indention(indent) + '# Litecoin block merkle root ' + tx + '\n';
         }
       });
     }
@@ -373,7 +382,7 @@ class Timestamp {
         bitcore.Transaction(Utils.bytesToHex(this.msg));
         let tx = new Ops.OpReverse().call(new Ops.OpSHA256().call(new Ops.OpSHA256().call(this.msg)));
         tx = Utils.bytesToHex(tx);
-        r += Timestamp.indention(indent) + '# Bitcoin transaction id ' + tx + '\n';
+        r += Timestamp.indention(indent) + '# transaction id ' + tx + '\n';
       } catch (err) {
       }
       const op = this.ops.keys().next().value;

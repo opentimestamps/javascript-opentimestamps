@@ -262,9 +262,14 @@ module.exports = {
         });
       } else {
         // Timestamp not completed
-        self.upgradeTimestamp(detachedStamped.timestamp).then(() => {
-          self.verifyTimestamp(detachedStamped.timestamp).then(attestedTime => {
-            return resolve(attestedTime);
+
+        self.upgradeTimestamp(detachedStamped.timestamp).then(changed => {
+          if (changed) {
+            console.log('Timestamp upgraded');
+          }
+          self.verifyTimestamp(detachedStamped.timestamp).then(results => {
+            results = results || {attestedTime: undefined, chain: undefined};
+            return resolve({attestedTime: results.attestedTime, chain: results.chain});
           }).catch(err => {
             return reject(err);
           });
@@ -288,17 +293,18 @@ module.exports = {
       let found = false;
 
       timestamp.allAttestations().forEach((attestation, msg) => {
-        function liteVerify() {
+        function liteVerify(options) {
           // There is no local node available or is turned of
           // Request to insight
           const insightOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'insight');
           const insightOptions = insightOptionSet ? options.insight : null;
+          const chain = insightOptionSet && options.insight.chain ? options.insight.chain : 'bitcoin';
           const insight = new Insight.MultiInsight(insightOptions);
           insight.blockhash(attestation.height).then(blockHash => {
             console.log('Lite-client verification, assuming block ' + blockHash + ' is valid');
             insight.block(blockHash).then(blockHeader => {
               // One Bitcoin attestation is enough
-              resolve(attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader));
+              resolve({attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader), chain});
             }).catch(err => {
               reject(new Error('Bitcoin verification failed: ' + err.message));
             });
@@ -327,7 +333,7 @@ module.exports = {
 
             // if insight url are specified through options, use lite verification
             if (options && options.insight && options.insight.urls) {
-              liteVerify();
+              liteVerify(options);
             } else {
               // Check for local bitcoin configuration
               Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
@@ -344,6 +350,14 @@ module.exports = {
                 liteVerify();
               });
             }
+          } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
+            found = true;
+            console.log('Checking LitecoinBlockHeaderAttestation');
+
+            options = {};
+            options.insight = {};
+            options.insight.chain = 'litecoin';
+            liteVerify(options);
           }
         }
       });
