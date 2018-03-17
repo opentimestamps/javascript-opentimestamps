@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 /**
  * Ops crypto operations module.
@@ -7,18 +7,17 @@
  * @license LPGL3
  */
 
-const crypto = require('crypto');
-const keccak = require('keccak');
-const Utils = require('./utils.js');
+const crypto = require('crypto')
+const keccak = require('keccak')
+const Utils = require('./utils.js')
 
-const _SUBCLS_BY_TAG = new Map();
+const _SUBCLS_BY_TAG = new Map()
 
 /**
  * Timestamp proof operations.
  * Operations are the edges in the timestamp tree, with each operation taking a message and zero or more arguments to produce a result.
  */
 class Op {
-
   /**
    * Maximum length of an Op result
    *
@@ -37,8 +36,8 @@ class Op {
    * Op subclasses should set this limit even lower if doing so is appropriate
    * for them.
    */
-  _MAX_RESULT_LENGTH() {
-    return 4096;
+  _MAX_RESULT_LENGTH () {
+    return 4096
   }
 
   /**
@@ -51,8 +50,8 @@ class Op {
    * Op subclasses should set this limit even lower if doing so is appropriate
    * for them.
    */
-  _MAX_MSG_LENGTH() {
-    return 4096;
+  _MAX_MSG_LENGTH () {
+    return 4096
   }
 
   /**
@@ -60,9 +59,9 @@ class Op {
    * @param {StreamDeserializationContext} ctx - The stream deserialization context.
    * @return {Op} The subclass Operation.
    */
-  static deserialize(ctx) {
-    this.tag = ctx.readBytes(1)[0];
-    return Op.deserializeFromTag(ctx, this.tag);
+  static deserialize (ctx) {
+    this.tag = ctx.readBytes(1)[0]
+    return Op.deserializeFromTag(ctx, this.tag)
   }
 
   /**
@@ -71,19 +70,19 @@ class Op {
    * @param {int} tag - The tag of the operation.
    * @return {Op} The subclass Operation.
    */
-  static deserializeFromTag(ctx, tag) {
+  static deserializeFromTag (ctx, tag) {
     if (_SUBCLS_BY_TAG.get(tag) !== undefined) {
-      return _SUBCLS_BY_TAG.get(tag).deserializeFromTag(ctx, tag);
+      return _SUBCLS_BY_TAG.get(tag).deserializeFromTag(ctx, tag)
     }
-    console.error('Unknown operation tag: ', Utils.bytesToHex([tag]));
+    console.error('Unknown operation tag: ', Utils.bytesToHex([tag]))
   }
 
   /**
    * Serialize operation.
    * @param {StreamSerializationContext} ctx - The stream serialization context.
    */
-  serialize(ctx) {
-    ctx.writeByte(this._TAG());
+  serialize (ctx) {
+    ctx.writeByte(this._TAG())
   }
 
   /**
@@ -92,18 +91,18 @@ class Op {
    * too long, or it causing the result to be too long.
    * @param {byte[]} msg - The message.
    */
-  call(msg) {
+  call (msg) {
     if (msg.length > this._MAX_MSG_LENGTH()) {
-      console.error('Error : Message too long;');
-      return;
+      console.error('Error : Message too long;')
+      return
     }
 
-    const r = this.call(msg);
+    const r = this.call(msg)
 
     if (r.length > this._MAX_RESULT_LENGTH()) {
-      console.error('Error : Result too long;');
+      console.error('Error : Result too long;')
     }
-    return r;
+    return r
   }
 }
 
@@ -112,29 +111,28 @@ class Op {
  * @extends OpUnary
  */
 class OpBinary extends Op {
-
-  constructor(arg_) {
-    super();
+  constructor (arg_) {
+    super()
     if (arg_ === undefined) {
-      this.arg = [];
+      this.arg = []
     } else {
-      this.arg = arg_;
+      this.arg = arg_
     }
   }
 
-  static deserializeFromTag(ctx, tag) {
+  static deserializeFromTag (ctx, tag) {
     if (_SUBCLS_BY_TAG.get(tag) !== undefined) {
-      const arg = ctx.readVarbytes(new Op()._MAX_RESULT_LENGTH(), 1);
+      const arg = ctx.readVarbytes(new Op()._MAX_RESULT_LENGTH(), 1)
       // console.log('read: ' + Utils.bytesToHex(arg));
-      return new (_SUBCLS_BY_TAG.get(tag))(arg);
+      return new (_SUBCLS_BY_TAG.get(tag))(arg)
     }
   }
-  serialize(ctx) {
-    super.serialize(ctx);
-    ctx.writeVarbytes(this.arg);
+  serialize (ctx) {
+    super.serialize(ctx)
+    ctx.writeVarbytes(this.arg)
   }
-  toString() {
-    return this._TAG_NAME() + ' ' + Utils.bytesToHex(this.arg);
+  toString () {
+    return this._TAG_NAME() + ' ' + Utils.bytesToHex(this.arg)
   }
 }
 
@@ -143,28 +141,28 @@ class OpBinary extends Op {
  * @extends OpBinary
  */
 class OpAppend extends OpBinary {
-  constructor(arg_) {
-    super(arg_);
+  constructor (arg_) {
+    super(arg_)
     if (arg_ === undefined) {
-      this.arg = [];
+      this.arg = []
     } else {
-      this.arg = arg_;
+      this.arg = arg_
     }
   }
-  _TAG() {
-    return 0xf0;
+  _TAG () {
+    return 0xf0
   }
-  _TAG_NAME() {
-    return 'append';
+  _TAG_NAME () {
+    return 'append'
   }
-  call(msg) {
-    return msg.concat(this.arg);
+  call (msg) {
+    return msg.concat(this.arg)
   }
-  static deserializeFromTag(ctx, tag) {
-    return super.deserializeFromTag(ctx, tag);
+  static deserializeFromTag (ctx, tag) {
+    return super.deserializeFromTag(ctx, tag)
   }
-  equals(another) {
-    return (another instanceof OpAppend) && Utils.arrEq(this.arg, another.arg);
+  equals (another) {
+    return (another instanceof OpAppend) && Utils.arrEq(this.arg, another.arg)
   }
 }
 
@@ -173,28 +171,28 @@ class OpAppend extends OpBinary {
  * @extends OpBinary
  */
 class OpPrepend extends OpBinary {
-  constructor(arg_) {
-    super(arg_);
+  constructor (arg_) {
+    super(arg_)
     if (arg_ === undefined) {
-      this.arg = [];
+      this.arg = []
     } else {
-      this.arg = arg_;
+      this.arg = arg_
     }
   }
-  _TAG() {
-    return 0xf1;
+  _TAG () {
+    return 0xf1
   }
-  _TAG_NAME() {
-    return 'prepend';
+  _TAG_NAME () {
+    return 'prepend'
   }
-  call(msg) {
-    return this.arg.concat(msg);
+  call (msg) {
+    return this.arg.concat(msg)
   }
-  static deserializeFromTag(ctx, tag) {
-    return super.deserializeFromTag(ctx, tag);
+  static deserializeFromTag (ctx, tag) {
+    return super.deserializeFromTag(ctx, tag)
   }
-  equals(another) {
-    return (another instanceof OpPrepend) && Utils.arrEq(this.arg, another.arg);
+  equals (another) {
+    return (another instanceof OpPrepend) && Utils.arrEq(this.arg, another.arg)
   }
 }
 
@@ -203,15 +201,14 @@ class OpPrepend extends OpBinary {
  * @extends Op
  */
 class OpUnary extends Op {
-
-  static deserializeFromTag(ctx, tag) {
+  static deserializeFromTag (ctx, tag) {
     if (_SUBCLS_BY_TAG.get(tag) !== undefined) {
-      return new (_SUBCLS_BY_TAG.get(tag))();
+      return new (_SUBCLS_BY_TAG.get(tag))()
     }
-    console.error('Unknown operation tag: ', Utils.bytesToHex([tag]));
+    console.error('Unknown operation tag: ', Utils.bytesToHex([tag]))
   }
-  toString() {
-    return this._TAG_NAME();
+  toString () {
+    return this._TAG_NAME()
   }
 }
 
@@ -220,24 +217,23 @@ class OpUnary extends Op {
  * @extends OpUnary
  */
 class OpReverse extends OpUnary {
-
-  _TAG() {
-    return 0xf2;
+  _TAG () {
+    return 0xf2
   }
-  _TAG_NAME() {
-    return 'reverse';
+  _TAG_NAME () {
+    return 'reverse'
   }
-  call(msg) {
+  call (msg) {
     if (msg.length === 0) {
-      console.error('Can\'t reverse an empty message');
+      console.error('Can\'t reverse an empty message')
     }
-    return msg.reverse();
+    return msg.reverse()
   }
-  static deserializeFromTag(ctx, tag) {
-    return super.deserializeFromTag(ctx, tag);
+  static deserializeFromTag (ctx, tag) {
+    return super.deserializeFromTag(ctx, tag)
   }
-  equals(another) {
-    return (another instanceof OpReverse) && Utils.arrEq(this.arg, another.arg);
+  equals (another) {
+    return (another instanceof OpReverse) && Utils.arrEq(this.arg, another.arg)
   }
 }
 
@@ -246,26 +242,25 @@ class OpReverse extends OpUnary {
  * @extends OpUnary
  */
 class OpHexlify extends OpUnary {
-
-  _TAG() {
-    return 0xf3;
+  _TAG () {
+    return 0xf3
   }
-  _TAG_NAME() {
-    return 'hexlify';
+  _TAG_NAME () {
+    return 'hexlify'
   }
-  _MAX_MSG_LENGTH() {
-    return OpUnary._MAX_RESULT_LENGTH(); // 2
+  _MAX_MSG_LENGTH () {
+    return OpUnary._MAX_RESULT_LENGTH() // 2
   }
-  call(msg) {
+  call (msg) {
     if (msg.length === 0) {
-      console.error('Can\'t hexlify an empty message');
+      console.error('Can\'t hexlify an empty message')
     }
   }
-  static deserializeFromTag(ctx, tag) {
-    return super.deserializeFromTag(ctx, tag);
+  static deserializeFromTag (ctx, tag) {
+    return super.deserializeFromTag(ctx, tag)
   }
-  equals(another) {
-    return (another instanceof OpHexlify) && Utils.arrEq(this.arg, another.arg);
+  equals (another) {
+    return (another instanceof OpHexlify) && Utils.arrEq(this.arg, another.arg)
   }
 }
 
@@ -277,50 +272,49 @@ class OpHexlify extends OpUnary {
  * @extends OpUnary
  */
 class CryptOp extends OpUnary {
-
-  _HASHLIB_NAME() {
-    return 0x00;
+  _HASHLIB_NAME () {
+    return 0x00
   }
 
-  call(cls, msg) {
-    let shasum;
+  call (cls, msg) {
+    let shasum
     if (cls._HASHLIB_NAME() === 'keccak256') {
-      shasum = keccak(cls._HASHLIB_NAME()).update(new Buffer(msg));
+      shasum = keccak(cls._HASHLIB_NAME()).update(new Buffer(msg))
     } else {
-      shasum = crypto.createHash(cls._HASHLIB_NAME()).update(new Buffer(msg));
+      shasum = crypto.createHash(cls._HASHLIB_NAME()).update(new Buffer(msg))
     }
-    const hashDigest = shasum.digest();
-    const output = [hashDigest.length];
+    const hashDigest = shasum.digest()
+    const output = [hashDigest.length]
     // from buffer to array
     for (let i = 0; i < hashDigest.length; i++) {
-      output[i] = hashDigest[i];
+      output[i] = hashDigest[i]
     }
-    return output;
+    return output
   }
 
-  static deserializeFromTag(ctx, tag) {
-    return super.deserializeFromTag(ctx, tag);
+  static deserializeFromTag (ctx, tag) {
+    return super.deserializeFromTag(ctx, tag)
   }
 
-  hashFd(ctx) {
-    let hasher;
+  hashFd (ctx) {
+    let hasher
     if (this._HASHLIB_NAME() === 'keccak256') {
-      hasher = keccak(this._HASHLIB_NAME());
+      hasher = keccak(this._HASHLIB_NAME())
     } else {
-      hasher = crypto.createHash(this._HASHLIB_NAME());
+      hasher = crypto.createHash(this._HASHLIB_NAME())
     }
-    let chunk = ctx.readBuffer(1048576);
+    let chunk = ctx.readBuffer(1048576)
     while (chunk !== undefined && chunk.length > 0) {
-      hasher.update(chunk);
-      chunk = ctx.readBuffer(1048576); // (2**20) = 1MB chunks
+      hasher.update(chunk)
+      chunk = ctx.readBuffer(1048576) // (2**20) = 1MB chunks
     }
     // from buffer to array
-    const hashDigest = hasher.digest();
-    const output = [hashDigest.length];
+    const hashDigest = hasher.digest()
+    const output = [hashDigest.length]
     for (let i = 0; i < hashDigest.length; i++) {
-      output[i] = hashDigest[i];
+      output[i] = hashDigest[i]
     }
-    return output;
+    return output
   }
 }
 
@@ -337,26 +331,26 @@ class CryptOp extends OpUnary {
  * @extends CryptOp
  */
 class OpSHA1 extends CryptOp {
-  _TAG() {
-    return 0x02;
+  _TAG () {
+    return 0x02
   }
-  _TAG_NAME() {
-    return 'sha1';
+  _TAG_NAME () {
+    return 'sha1'
   }
-  _HASHLIB_NAME() {
-    return 'sha1';
+  _HASHLIB_NAME () {
+    return 'sha1'
   }
-  _DIGEST_LENGTH() {
-    return 20;
+  _DIGEST_LENGTH () {
+    return 20
   }
-  static deserializeFromTag(ctx, tag) {
-    return super.deserializeFromTag(ctx, tag);
+  static deserializeFromTag (ctx, tag) {
+    return super.deserializeFromTag(ctx, tag)
   }
-  call(msg) {
-    return super.call(this, msg);
+  call (msg) {
+    return super.call(this, msg)
   }
-  equals(another) {
-    return another instanceof OpSHA1;
+  equals (another) {
+    return another instanceof OpSHA1
   }
 }
 
@@ -367,26 +361,26 @@ class OpSHA1 extends CryptOp {
  * @extends CryptOp
  */
 class OpRIPEMD160 extends CryptOp {
-  _TAG() {
-    return 0x03;
+  _TAG () {
+    return 0x03
   }
-  _TAG_NAME() {
-    return 'ripemd160';
+  _TAG_NAME () {
+    return 'ripemd160'
   }
-  _HASHLIB_NAME() {
-    return 'ripemd160';
+  _HASHLIB_NAME () {
+    return 'ripemd160'
   }
-  _DIGEST_LENGTH() {
-    return 20;
+  _DIGEST_LENGTH () {
+    return 20
   }
-  static deserializeFromTag(ctx, tag) {
-    return super.deserializeFromTag(ctx, tag);
+  static deserializeFromTag (ctx, tag) {
+    return super.deserializeFromTag(ctx, tag)
   }
-  call(msg) {
-    return super.call(this, msg);
+  call (msg) {
+    return super.call(this, msg)
   }
-  equals(another) {
-    return another instanceof OpRIPEMD160;
+  equals (another) {
+    return another instanceof OpRIPEMD160
   }
 }
 
@@ -397,28 +391,27 @@ class OpRIPEMD160 extends CryptOp {
  * @extends CryptOp
  */
 class OpSHA256 extends CryptOp {
+  _TAG () {
+    return 0x08
+  }
+  _TAG_NAME () {
+    return 'sha256'
+  }
+  _HASHLIB_NAME () {
+    return 'sha256'
+  }
+  _DIGEST_LENGTH () {
+    return 32
+  }
+  static deserializeFromTag (ctx, tag) {
+    return super.deserializeFromTag(ctx, tag)
+  }
+  call (msg) {
+    return super.call(this, msg)
+  }
 
-  _TAG() {
-    return 0x08;
-  }
-  _TAG_NAME() {
-    return 'sha256';
-  }
-  _HASHLIB_NAME() {
-    return 'sha256';
-  }
-  _DIGEST_LENGTH() {
-    return 32;
-  }
-  static deserializeFromTag(ctx, tag) {
-    return super.deserializeFromTag(ctx, tag);
-  }
-  call(msg) {
-    return super.call(this, msg);
-  }
-
-  equals(another) {
-    return another instanceof OpSHA256;
+  equals (another) {
+    return another instanceof OpSHA256
   }
 }
 
@@ -429,39 +422,38 @@ class OpSHA256 extends CryptOp {
  * @extends CryptOp
  */
 class OpKeccak256 extends CryptOp {
+  _TAG () {
+    return 0x67
+  }
+  _TAG_NAME () {
+    return 'keccak256'
+  }
+  _HASHLIB_NAME () {
+    return 'keccak256'
+  }
+  _DIGEST_LENGTH () {
+    return 32
+  }
+  static deserializeFromTag (ctx, tag) {
+    return super.deserializeFromTag(ctx, tag)
+  }
+  call (msg) {
+    return super.call(this, msg)
+  }
 
-  _TAG() {
-    return 0x67;
-  }
-  _TAG_NAME() {
-    return 'keccak256';
-  }
-  _HASHLIB_NAME() {
-    return 'keccak256';
-  }
-  _DIGEST_LENGTH() {
-    return 32;
-  }
-  static deserializeFromTag(ctx, tag) {
-    return super.deserializeFromTag(ctx, tag);
-  }
-  call(msg) {
-    return super.call(this, msg);
-  }
-
-  equals(another) {
-    return another instanceof OpKeccak256;
+  equals (another) {
+    return another instanceof OpKeccak256
   }
 }
 
-_SUBCLS_BY_TAG.set(new OpAppend()._TAG(), OpAppend);
-_SUBCLS_BY_TAG.set(new OpPrepend()._TAG(), OpPrepend);
-_SUBCLS_BY_TAG.set(new OpReverse()._TAG(), OpReverse);
-_SUBCLS_BY_TAG.set(new OpHexlify()._TAG(), OpHexlify);
-_SUBCLS_BY_TAG.set(new OpSHA1()._TAG(), OpSHA1);
-_SUBCLS_BY_TAG.set(new OpRIPEMD160()._TAG(), OpRIPEMD160);
-_SUBCLS_BY_TAG.set(new OpSHA256()._TAG(), OpSHA256);
-_SUBCLS_BY_TAG.set(new OpKeccak256()._TAG(), OpKeccak256);
+_SUBCLS_BY_TAG.set(new OpAppend()._TAG(), OpAppend)
+_SUBCLS_BY_TAG.set(new OpPrepend()._TAG(), OpPrepend)
+_SUBCLS_BY_TAG.set(new OpReverse()._TAG(), OpReverse)
+_SUBCLS_BY_TAG.set(new OpHexlify()._TAG(), OpHexlify)
+_SUBCLS_BY_TAG.set(new OpSHA1()._TAG(), OpSHA1)
+_SUBCLS_BY_TAG.set(new OpRIPEMD160()._TAG(), OpRIPEMD160)
+_SUBCLS_BY_TAG.set(new OpSHA256()._TAG(), OpSHA256)
+_SUBCLS_BY_TAG.set(new OpKeccak256()._TAG(), OpKeccak256)
 
 module.exports = {
   Op,
@@ -474,4 +466,4 @@ module.exports = {
   OpSHA256,
   OpKeccak256,
   CryptOp
-};
+}

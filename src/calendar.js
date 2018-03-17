@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 /**
  * Calendar module.
@@ -7,18 +7,18 @@
  * @license LPGL3
  */
 
-const requestPromise = require('request-promise');
-const Promise = require('promise');
+const requestPromise = require('request-promise')
+const Promise = require('promise')
 /*
 const bitcoin = require('bitcoinjs-lib') // v2.x.x
 const bitcoinMessage = require('bitcoinjs-message');
 */
-delete global._bitcore;
-const bitcore = require('bitcore-lib');
-const Message = require('bitcore-message');
-const Utils = require('./utils.js');
-const Context = require('./context.js');
-const Timestamp = require('./timestamp.js');
+delete global._bitcore
+const bitcore = require('bitcore-lib')
+const Message = require('bitcore-message')
+const Utils = require('./utils.js')
+const Context = require('./context.js')
+const Timestamp = require('./timestamp.js')
 
 /* Exceptions */
 class CommitmentNotFoundError extends Error {
@@ -30,29 +30,28 @@ class ExceededSizeError extends Error {
 
 /** Class representing Remote Calendar server interface */
 class RemoteCalendar {
-
   /**
    * Create a RemoteCalendar.
    * @param {string} url - The server url.
    */
-  constructor(url) {
-    this.url = url;
+  constructor (url) {
+    this.url = url
   }
 
   /**
    * Set private key.
    * @param key The private key.
    */
-  setKey(key) {
-    this.key = key;
+  setKey (key) {
+    this.key = key
   }
 
   /**
   * Get private key.
   * @return The private key.
   */
-  getKey() {
-    return this.key;
+  getKey () {
+    return this.key
   }
 
   /**
@@ -73,7 +72,7 @@ class RemoteCalendar {
    * @returns {Promise} A promise that returns {@link resolve} if resolved
    * and {@link reject} if rejected.
    */
-  submit(digest) {
+  submit (digest) {
     // console.log('digest ', Utils.bytesToHex(digest));
 
     const options = {
@@ -86,7 +85,7 @@ class RemoteCalendar {
       },
       encoding: null,
       body: new Buffer(digest)
-    };
+    }
     if (this.key !== undefined) {
       /* var privateKey = this.key.d.toBuffer(32);
       var message = String(digest);
@@ -94,30 +93,30 @@ class RemoteCalendar {
       var signature = bitcoinMessage.sign(message, messagePrefix, privateKey, this.key.compressed).toString('base64');
       console.log(signature);
 */
-      const privateKey = bitcore.PrivateKey.fromWIF(this.key);
-      const message = digest.toString('hex');
-      const signature = Message(message).sign(privateKey);
-      console.log(signature);
+      const privateKey = bitcore.PrivateKey.fromWIF(this.key)
+      const message = digest.toString('hex')
+      const signature = Message(message).sign(privateKey)
+      console.log(signature)
 
-      options.headers['x-signature'] = signature;
+      options.headers['x-signature'] = signature
     }
 
     return new Promise((resolve, reject) => {
       requestPromise(options)
-              .then(body => {
-                // console.log('body ', body);
-                if (body.size > 10000) {
-                  return reject(new ExceededSizeError('Calendar response exceeded size limit'));
-                }
+        .then(body => {
+          // console.log('body ', body);
+          if (body.size > 10000) {
+            return reject(new ExceededSizeError('Calendar response exceeded size limit'))
+          }
 
-                const ctx = new Context.StreamDeserialization(body);
-                const timestamp = Timestamp.deserialize(ctx, digest);
-                resolve(timestamp);
-              })
-              .catch(err => {
-                return reject(new URLError(err.error.toString()));
-              });
-    });
+          const ctx = new Context.StreamDeserialization(body)
+          const timestamp = Timestamp.deserialize(ctx, digest)
+          resolve(timestamp)
+        })
+        .catch(err => {
+          return reject(new URLError(err.error.toString()))
+        })
+    })
   }
 
   /**
@@ -126,7 +125,7 @@ class RemoteCalendar {
    * @returns {Promise} A promise that returns {@link resolve} if resolved
    * and {@link reject} if rejected.
    */
-  getTimestamp(commitment) {
+  getTimestamp (commitment) {
     // console.error('commitment ', Utils.bytesToHex(commitment));
 
     const options = {
@@ -138,27 +137,27 @@ class RemoteCalendar {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       encoding: null
-    };
+    }
 
     return new Promise((resolve, reject) => {
       requestPromise(options)
-          .then(body => {
-            // /console.log('body ', body);
-            if (body.size > 10000) {
-              return reject(new ExceededSizeError('Calendar response exceeded size limit'));
-            }
-            const ctx = new Context.StreamDeserialization(body);
+        .then(body => {
+          // /console.log('body ', body);
+          if (body.size > 10000) {
+            return reject(new ExceededSizeError('Calendar response exceeded size limit'))
+          }
+          const ctx = new Context.StreamDeserialization(body)
 
-            const timestamp = Timestamp.deserialize(ctx, commitment);
-            return resolve(timestamp);
-          })
-          .catch(err => {
-            if (err.statusCode === 404) {
-              return reject(new CommitmentNotFoundError(err.error.toString()));
-            }
-            return reject(new URLError(err.error.toString()));
-          });
-    });
+          const timestamp = Timestamp.deserialize(ctx, commitment)
+          return resolve(timestamp)
+        })
+        .catch(err => {
+          if (err.statusCode === 404) {
+            return reject(new CommitmentNotFoundError(err.error.toString()))
+          }
+          return reject(new URLError(err.error.toString()))
+        })
+    })
   }
 }
 
@@ -167,4 +166,4 @@ module.exports = {
   CommitmentNotFoundError,
   URLError,
   ExceededSizeError
-};
+}

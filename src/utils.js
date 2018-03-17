@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 /**
  * Utils module.
@@ -7,9 +7,9 @@
  * @license LPGL3
  */
 
-const crypto = require('crypto');
-const fs = require('fs');
-const properties = require('properties');
+const crypto = require('crypto')
+const fs = require('fs')
+const properties = require('properties')
 
 /**
  * Convert a hex string to a byte array
@@ -17,12 +17,12 @@ const properties = require('properties');
  * @returns {Array}
  */
 exports.hexToBytes = function (hex) {
-  const bytes = [];
+  const bytes = []
   for (let c = 0; c < hex.length; c += 2) {
-    bytes.push(parseInt(hex.substr(c, 2), 16));
+    bytes.push(parseInt(hex.substr(c, 2), 16))
   }
-  return bytes;
-};
+  return bytes
+}
 
 /**
  * Convert a byte array to a hex string
@@ -30,13 +30,13 @@ exports.hexToBytes = function (hex) {
  * @returns {string}
  */
 exports.bytesToHex = function (bytes) {
-  const hex = [];
+  const hex = []
   for (let i = 0; i < bytes.length; i++) {
-    hex.push((bytes[i] >>> 4).toString(16));
-    hex.push((bytes[i] & 0xF).toString(16));
+    hex.push((bytes[i] >>> 4).toString(16))
+    hex.push((bytes[i] & 0xF).toString(16))
   }
-  return hex.join('');
-};
+  return hex.join('')
+}
 
 /**
  * Convert chars to hexadecimal representation
@@ -44,14 +44,14 @@ exports.bytesToHex = function (bytes) {
  * @returns {string}
  */
 exports.charsToHex = function (bytes) {
-  const hex = [];
+  const hex = []
   for (let i = 0; i < bytes.length; i++) {
-    const b = bytes[i].charCodeAt();
-    hex.push((b >>> 4).toString(16));
-    hex.push((b & 0xF).toString(16));
+    const b = bytes[i].charCodeAt()
+    hex.push((b >>> 4).toString(16))
+    hex.push((b & 0xF).toString(16))
   }
-  return hex.join('');
-};
+  return hex.join('')
+}
 
 /**
  * Convert char to byte representation
@@ -59,8 +59,8 @@ exports.charsToHex = function (bytes) {
  * @returns {string}
  */
 exports.charToByte = function (char) {
-  return char.charCodeAt(0);
-};
+  return char.charCodeAt(0)
+}
 
 /**
  * Convert chars to bytes representation
@@ -68,97 +68,97 @@ exports.charToByte = function (char) {
  * @returns {Array}
  */
 exports.charsToBytes = function (chars) {
-  const bytes = [];
+  const bytes = []
   for (let i = 0; i < chars.length; i++) {
-    const b = chars.charCodeAt(i);
-    bytes.push(b);
+    const b = chars.charCodeAt(i)
+    bytes.push(b)
   }
-  return bytes;
-};
+  return bytes
+}
 
 exports.bytesToChars = function (buffer) {
-  let charts = '';
+  let charts = ''
   for (let b = 0; b < buffer.length; b++) {
-    charts += String.fromCharCode(b)[0];
+    charts += String.fromCharCode(b)[0]
   }
-  return charts;
-};
+  return charts
+}
 
 exports.toBytes = function (str) {
-  const arr = [];
+  const arr = []
   for (let i = 0; i < str.length; i++) {
-    arr.push(str.charCodeAt(i));
+    arr.push(str.charCodeAt(i))
   }
-  return arr;
-};
+  return arr
+}
 
 exports.arrayToBytes = function (buffer) {
-  const bytes = [];
+  const bytes = []
   for (let c = 0; c < buffer.length; c++) {
-    bytes.push(parseInt(buffer[c], 10));
+    bytes.push(parseInt(buffer[c], 10))
   }
-  return bytes;
-};
+  return bytes
+}
 
 exports.arrCompare = function (left, right) {
   for (let i = 0, j = 0; i < left.length && j < right.length; i++, j++) {
-    const a = (left[i] & 0xff);
-    const b = (right[j] & 0xff);
+    const a = (left[i] & 0xff)
+    const b = (right[j] & 0xff)
     if (a !== b) {
-      return a - b;
+      return a - b
     }
   }
-  return left.length - right.length;
-};
+  return left.length - right.length
+}
 
 exports.arrEq = function (arr1, arr2) {
-  let i;
+  let i
   for (i = 0; i < arr1.length; i++) {
     if (arr1[i] !== arr2[i]) {
-      return false;
+      return false
     }
   }
-  return i === arr2.length;
-};
+  return i === arr2.length
+}
 
 exports.randBytes = function (n) {
-  return crypto.randomBytes(n);
-};
+  return crypto.randomBytes(n)
+}
 
 exports.randString = function (n) {
   if (n <= 0) {
-    return '';
+    return ''
   }
-  let rs = '';
+  let rs = ''
   try {
-    rs = crypto.randomBytes(Math.ceil(n / 2)).toString('hex').slice(0, n);
-        /* note: could do this non-blocking, but still might fail */
+    rs = crypto.randomBytes(Math.ceil(n / 2)).toString('hex').slice(0, n)
+    /* note: could do this non-blocking, but still might fail */
   } catch (err) {
-        /* known exception cause: depletion of entropy info for randomBytes */
-    console.error('Exception generating random string: ' + err);
-        /* weaker random fallback */
-    rs = '';
-    const r = n % 8;
-    const q = (n - r) / 8;
-    let i;
+    /* known exception cause: depletion of entropy info for randomBytes */
+    console.error('Exception generating random string: ' + err)
+    /* weaker random fallback */
+    rs = ''
+    const r = n % 8
+    const q = (n - r) / 8
+    let i
 
     for (i = 0; i < q; i++) {
-      rs += Math.random().toString(16).slice(2);
+      rs += Math.random().toString(16).slice(2)
     }
     if (r > 0) {
-      rs += Math.random().toString(16).slice(2, i);
+      rs += Math.random().toString(16).slice(2, i)
     }
   }
-  return rs;
-};
+  return rs
+}
 
 exports.softFail = function (promise) {
   return new Promise(resolve => {
     promise
-        .then(resolve)
-        .catch(resolve);
-  });
-};
+      .then(resolve)
+      .catch(resolve)
+  })
+}
 
 /**
  * fs.readfile promisified
@@ -169,30 +169,30 @@ exports.readFilePromise = function (filename, mode) {
   return new Promise((resolve, reject) => {
     fs.readFile(filename, mode, (err, buffer) => {
       if (err) {
-        reject(err);
+        reject(err)
       } else {
-        resolve(buffer);
+        resolve(buffer)
       }
-    });
-  });
-};
+    })
+  })
+}
 
 exports.readSignatureFile = function (file) {
   return new Promise((resolve, reject) => {
     properties.parse(file, {path: true, variables: false}, (error, obj) => {
       if (error) {
-        return reject(error);
+        return reject(error)
       }
       if (obj === undefined || obj.length === 0) {
-        return reject(new Error('File empty'));
+        return reject(new Error('File empty'))
       }
-      const map = new Map();
+      const map = new Map()
       Object.entries(obj).forEach(item => {
-        const calendar = 'https://' + item[0];
-        const wif = item[1];
-        map.set(calendar, wif);
-      });
-      return resolve(map);
-    });
-  });
-};
+        const calendar = 'https://' + item[0]
+        const wif = item[1]
+        map.set(calendar, wif)
+      })
+      return resolve(map)
+    })
+  })
+}

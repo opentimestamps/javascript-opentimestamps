@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 /**
  * Insight module.
@@ -7,21 +7,20 @@
  * @license LPGL3
  */
 
-const requestPromise = require('request-promise');
-const Promise = require('promise');
-const Utils = require('./utils.js');
+const requestPromise = require('request-promise')
+const Promise = require('promise')
+const Utils = require('./utils.js')
 
 /** Class used to query Insight API */
 class Insight {
-
   /**
    * Create a RemoteCalendar.
    * @param {int} timeout - timeout (in seconds) used for calls to insight servers
    */
-  constructor(url, timeout) {
-    this.urlBlockindex = url + '/block-index';
-    this.urlBlock = url + '/block';
-    this.timeout = timeout * 1000;
+  constructor (url, timeout) {
+    this.urlBlockindex = url + '/block-index'
+    this.urlBlock = url + '/block'
+    this.timeout = timeout * 1000
 
     // this.urlBlockindex = 'https://search.bitaccess.co/insight-api/block-index';
     // this.urlBlock = 'https://search.bitaccess.co/insight-api/block';
@@ -48,7 +47,7 @@ class Insight {
    * @returns {Promise} A promise that returns {@link resolve} if resolved
    * and {@link reject} if rejected.
    */
-  blockhash(height) {
+  blockhash (height) {
     const options = {
       url: this.urlBlockindex + '/' + height,
       method: 'GET',
@@ -59,25 +58,25 @@ class Insight {
       },
       json: true,
       timeout: this.timeout
-    };
+    }
 
     return new Promise((resolve, reject) => {
       requestPromise(options)
-          .then(body => {
-            // console.log('body ', body);
-            if (body.size === 0) {
-              console.error('Insight response error body ');
-              reject();
-              return;
-            }
+        .then(body => {
+          // console.log('body ', body);
+          if (body.size === 0) {
+            console.error('Insight response error body ')
+            reject()
+            return
+          }
 
-            resolve(body.blockHash);
-          })
-          .catch(err => {
-            console.error('Insight response error: ' + err);
-            reject();
-          });
-    });
+          resolve(body.blockHash)
+        })
+        .catch(err => {
+          console.error('Insight response error: ' + err)
+          reject()
+        })
+    })
   }
 
   /**
@@ -86,7 +85,7 @@ class Insight {
    * @returns {Promise} A promise that returns {@link resolve} if resolved
    * and {@link reject} if rejected.
    */
-  block(hash) {
+  block (hash) {
     const options = {
       url: this.urlBlock + '/' + hash,
       method: 'GET',
@@ -97,28 +96,28 @@ class Insight {
       },
       json: true,
       timeout: this.timeout
-    };
+    }
 
     return new Promise((resolve, reject) => {
       requestPromise(options)
-          .then(body => {
-            // console.log('body ', body);
-            if (body.size === 0) {
-              console.error('Insight response error body ');
-              reject();
-              return;
-            }
-            resolve({merkleroot: body.merkleroot, time: body.time});
-          })
-          .catch(err => {
-            console.error('Insight response error: ' + err);
-            reject();
-          });
-    });
+        .then(body => {
+          // console.log('body ', body);
+          if (body.size === 0) {
+            console.error('Insight response error body ')
+            reject()
+            return
+          }
+          resolve({merkleroot: body.merkleroot, time: body.time})
+        })
+        .catch(err => {
+          console.error('Insight response error: ' + err)
+          reject()
+        })
+    })
   }
 }
 
-const publicInsightUrls = {};
+const publicInsightUrls = {}
 publicInsightUrls.bitcoin = [
   'https://www.localbitcoinschain.com/api',
   'https://search.bitaccess.co/insight-api',
@@ -126,94 +125,92 @@ publicInsightUrls.bitcoin = [
   'https://btc-bitcore1.trezor.io/api',
   'https://btc-bitcore4.trezor.io/api',
   'https://blockexplorer.com/api'
-];
+]
 publicInsightUrls.litecoin = [
   'https://ltc-bitcore1.trezor.io/api',
   'https://insight.litecore.io/api'
-];
+]
 
 class MultiInsight {
-
   /** Constructor
    * @param {object} options - Options
    *    urls: array of insight server urls
    *    timeout: timeout(in seconds) used for calls to insight servers
    */
-  constructor(options) {
-    this.insights = [];
+  constructor (options) {
+    this.insights = []
 
     // Sets requests timeout (default = 10s)
-    const timeoutOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'timeout');
-    const timeout = timeoutOptionSet ? options.timeout : 10;
-    const chainOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'chain');
-    const chain = chainOptionSet ? options.chain : 'bitcoin';
+    const timeoutOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'timeout')
+    const timeout = timeoutOptionSet ? options.timeout : 10
+    const chainOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'chain')
+    const chain = chainOptionSet ? options.chain : 'bitcoin'
 
     // We need at least 2 insight servers (for confirmation)
-    const urlsOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'urls') && options.urls.length > 1;
-    const urls = urlsOptionSet ? options.urls : publicInsightUrls[chain];
+    const urlsOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'urls') && options.urls.length > 1
+    const urls = urlsOptionSet ? options.urls : publicInsightUrls[chain]
 
     urls.forEach(url => {
-      this.insights.push(new Insight(url, timeout));
-    });
+      this.insights.push(new Insight(url, timeout))
+    })
   }
 
-  blockhash(height) {
-    const res = [];
+  blockhash (height) {
+    const res = []
     this.insights.forEach(insight => {
-      res.push(insight.blockhash(height));
-    });
+      res.push(insight.blockhash(height))
+    })
     return new Promise((resolve, reject) => {
       Promise.all(res.map(Utils.softFail)).then(results => {
         // console.log('results=' + results);
-        const set = new Set();
-        let found = false;
+        const set = new Set()
+        let found = false
         results.forEach(result => {
           if (result !== undefined && !found) {
             if (set.has(result)) {
               // return if two results are equal
-              resolve(result);
-              found = true;
+              resolve(result)
+              found = true
             }
-            set.add(result);
+            set.add(result)
           }
-        });
+        })
         if (!found) {
-          reject();
+          reject()
         }
-      });
-    });
+      })
+    })
   }
 
-  block(hash) {
-    const res = [];
+  block (hash) {
+    const res = []
     this.insights.forEach(insight => {
-      res.push(insight.block(hash));
-    });
+      res.push(insight.block(hash))
+    })
     return new Promise((resolve, reject) => {
       Promise.all(res.map(Utils.softFail)).then(results => {
         // console.log('results=' + results);
-        const resultSet = new Set();
-        let found = false;
+        const resultSet = new Set()
+        let found = false
         results.forEach(result => {
           if (result !== undefined && !found) {
             if (resultSet.has(JSON.stringify(result))) {
               // return if two results are equal
-              resolve(result);
-              found = true;
+              resolve(result)
+              found = true
             }
-            resultSet.add(JSON.stringify(result));
+            resultSet.add(JSON.stringify(result))
           }
-        });
+        })
         if (!found) {
-          reject();
+          reject()
         }
-      });
-    });
+      })
+    })
   }
-
 }
 
 module.exports = {
   Insight,
   MultiInsight
-};
+}

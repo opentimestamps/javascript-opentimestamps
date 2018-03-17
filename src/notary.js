@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 /**
  * Notary module.
@@ -7,66 +7,65 @@
  * @license LPGL3
  */
 
-const Context = require('./context.js');
-const Utils = require('./utils.js');
+const Context = require('./context.js')
+const Utils = require('./utils.js')
 
 /** Class representing Timestamp signature verification */
 class TimeAttestation {
-
-  _TAG_SIZE() {
-    return 8;
+  _TAG_SIZE () {
+    return 8
   }
 
-  _MAX_PAYLOAD_SIZE() {
-    return 8192;
+  _MAX_PAYLOAD_SIZE () {
+    return 8192
   }
 
-    /**
+  /**
      * Deserialize a general Time Attestation to the specific subclass Attestation.
      * @param {StreamDeserializationContext} ctx - The stream deserialization context.
      * @return {Attestation} The specific subclass Attestation.
      */
-  static deserialize(ctx) {
-        // console.log('attestation deserialize');
+  static deserialize (ctx) {
+    // console.log('attestation deserialize');
 
-    const tag = ctx.readBytes(new TimeAttestation()._TAG_SIZE());
-        // console.log('tag: ', Utils.bytesToHex(tag));
+    const tag = ctx.readBytes(new TimeAttestation()._TAG_SIZE())
+    // console.log('tag: ', Utils.bytesToHex(tag));
 
-    const serializedAttestation = ctx.readVarbytes(new TimeAttestation()._MAX_PAYLOAD_SIZE());
-        // console.log('serializedAttestation: ', Utils.bytesToHex(serializedAttestation));
+    const serializedAttestation = ctx.readVarbytes(new TimeAttestation()._MAX_PAYLOAD_SIZE())
+    // console.log('serializedAttestation: ', Utils.bytesToHex(serializedAttestation));
 
-    const ctxPayload = new Context.StreamDeserialization(serializedAttestation);
+    const ctxPayload = new Context.StreamDeserialization(serializedAttestation)
 
-        /* eslint no-use-before-define: ["error", { "classes": false }] */
+    /* eslint no-use-before-define: ["error", { "classes": false }] */
     if (Utils.arrEq(tag, new PendingAttestation()._TAG()) === true) {
-      return PendingAttestation.deserialize(ctxPayload);
+      return PendingAttestation.deserialize(ctxPayload)
     } else if (Utils.arrEq(tag, new BitcoinBlockHeaderAttestation()._TAG()) === true) {
-      return BitcoinBlockHeaderAttestation.deserialize(ctxPayload);
+      return BitcoinBlockHeaderAttestation.deserialize(ctxPayload)
     } else if (Utils.arrEq(tag, new LitecoinBlockHeaderAttestation()._TAG()) === true) {
-      return LitecoinBlockHeaderAttestation.deserialize(ctxPayload);
+      return LitecoinBlockHeaderAttestation.deserialize(ctxPayload)
     } else if (Utils.arrEq(tag, new EthereumBlockHeaderAttestation()._TAG()) === true) {
-      return EthereumBlockHeaderAttestation.deserialize(ctxPayload);
+      return EthereumBlockHeaderAttestation.deserialize(ctxPayload)
     }
-    return UnknownAttestation.deserialize(ctxPayload, tag);
+    return UnknownAttestation.deserialize(ctxPayload, tag)
   }
 
-    /**
+  /**
      * Serialize a a general Time Attestation to the specific subclass Attestation.
      * @param {StreamSerializationContext} ctx - The output stream serialization context.
      */
-  serialize(ctx) {
-    ctx.writeBytes(this._TAG());
-    const ctxPayload = new Context.StreamSerialization();
-    this.serializePayload(ctxPayload);
-    ctx.writeVarbytes(ctxPayload.getOutput());
+  serialize (ctx) {
+    ctx.writeBytes(this._TAG())
+    const ctxPayload = new Context.StreamSerialization()
+    this.serializePayload(ctxPayload)
+    ctx.writeVarbytes(ctxPayload.getOutput())
   }
 
-  compareTo(other) {
-    const deltaTag = Utils.arrCompare(this._TAG(), other._TAG());
+  compareTo (other) {
+    const deltaTag = Utils.arrCompare(this._TAG(), other._TAG())
     if (deltaTag === 0) {
-      return Utils.arrCompare(this.uri, other.uri);
+      return Utils.arrCompare(this.uri, other.uri)
     }
-    return deltaTag;
+    return deltaTag
   }
 }
 
@@ -75,41 +74,40 @@ class TimeAttestation {
  * @extends TimeAttestation
  */
 class UnknownAttestation extends TimeAttestation {
-
-  _TAG() {
-    return this._tag;
+  _TAG () {
+    return this._tag
   }
 
-  constructor(tag, payload) {
-    super();
-    this._tag = tag;
-    this.payload = payload;
+  constructor (tag, payload) {
+    super()
+    this._tag = tag
+    this.payload = payload
   }
 
-  serializePayload(ctx) {
-    ctx.writeBytes(this.payload);
+  serializePayload (ctx) {
+    ctx.writeBytes(this.payload)
   }
 
-  static deserialize(ctxPayload, tag) {
-    const payload = ctxPayload.readBytes(new TimeAttestation()._MAX_PAYLOAD_SIZE());
-    return new UnknownAttestation(tag, payload);
+  static deserialize (ctxPayload, tag) {
+    const payload = ctxPayload.readBytes(new TimeAttestation()._MAX_PAYLOAD_SIZE())
+    return new UnknownAttestation(tag, payload)
   }
 
-  toString() {
-    return 'UnknownAttestation ' + Utils.bytesToHex(this._TAG()) + ' ' + Utils.bytesToHex(this.payload);
+  toString () {
+    return 'UnknownAttestation ' + Utils.bytesToHex(this._TAG()) + ' ' + Utils.bytesToHex(this.payload)
   }
 
-  equals(another) {
+  equals (another) {
     return (another instanceof UnknownAttestation) &&
             (Utils.arrEq(this._TAG(), another._TAG())) &&
-            (Utils.arrEq(this.payload, another.payload));
+            (Utils.arrEq(this.payload, another.payload))
   }
 
-  compareTo(other) {
+  compareTo (other) {
     if (other instanceof UnknownAttestation) {
-      return Utils.arrCompare(this.payload, other.payload);
+      return Utils.arrCompare(this.payload, other.payload)
     }
-    return super.compareTo(other);
+    return super.compareTo(other)
   }
 }
 
@@ -133,67 +131,67 @@ class UnknownAttestation extends TimeAttestation {
  * @extends TimeAttestation
  */
 class PendingAttestation extends TimeAttestation {
-  _TAG() {
-    return [0x83, 0xdf, 0xe3, 0x0d, 0x2e, 0xf9, 0x0c, 0x8e];
+  _TAG () {
+    return [0x83, 0xdf, 0xe3, 0x0d, 0x2e, 0xf9, 0x0c, 0x8e]
   }
 
-  _MAX_URI_LENGTH() {
-    return 1000;
+  _MAX_URI_LENGTH () {
+    return 1000
   }
 
-  _ALLOWED_URI_CHARS() {
-    return 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._/:';
+  _ALLOWED_URI_CHARS () {
+    return 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._/:'
   }
 
-  constructor(uri_) {
-    super();
-    this.uri = uri_;
+  constructor (uri_) {
+    super()
+    this.uri = uri_
   }
 
-  static checkUri(uri) {
+  static checkUri (uri) {
     if (uri.length > new PendingAttestation()._MAX_URI_LENGTH()) {
-      console.error('URI exceeds maximum length');
-      return false;
+      console.error('URI exceeds maximum length')
+      return false
     }
     for (let i = 0; i < uri.length; i++) {
-      const char = String.fromCharCode(uri[i]);
+      const char = String.fromCharCode(uri[i])
       if (new PendingAttestation()._ALLOWED_URI_CHARS().indexOf(char) < 0) {
-        console.error('URI contains invalid character ');
-        return false;
+        console.error('URI contains invalid character ')
+        return false
       }
     }
-    return true;
+    return true
   }
 
-  static deserialize(ctxPayload) {
-    const utf8Uri = ctxPayload.readVarbytes(new PendingAttestation()._MAX_URI_LENGTH());
+  static deserialize (ctxPayload) {
+    const utf8Uri = ctxPayload.readVarbytes(new PendingAttestation()._MAX_URI_LENGTH())
     if (this.checkUri(utf8Uri) === false) {
-      console.error('Invalid URI: ');
-      return;
+      console.error('Invalid URI: ')
+      return
     }
-    const decode = new Buffer(utf8Uri).toString('ascii');
-    return new PendingAttestation(decode);
+    const decode = new Buffer(utf8Uri).toString('ascii')
+    return new PendingAttestation(decode)
   }
 
-  serializePayload(ctx) {
-    ctx.writeVarbytes(Utils.charsToBytes(this.uri));
+  serializePayload (ctx) {
+    ctx.writeVarbytes(Utils.charsToBytes(this.uri))
   }
 
-  toString() {
-    return 'PendingAttestation(\'' + this.uri + '\')';
+  toString () {
+    return 'PendingAttestation(\'' + this.uri + '\')'
   }
 
-  equals(another) {
+  equals (another) {
     return (another instanceof PendingAttestation) &&
             (Utils.arrEq(this._TAG(), another._TAG())) &&
-            (this.uri === another.uri);
+            (this.uri === another.uri)
   }
 
-  compareTo(other) {
+  compareTo (other) {
     if (other instanceof PendingAttestation) {
-      return Utils.arrCompare(Utils.charsToBytes(this.uri), Utils.charsToBytes(other.uri));
+      return Utils.arrCompare(Utils.charsToBytes(this.uri), Utils.charsToBytes(other.uri))
     }
-    return super.compareTo(other);
+    return super.compareTo(other)
   }
 }
 
@@ -222,153 +220,148 @@ class PendingAttestation extends TimeAttestation {
  * @extends TimeAttestation
  */
 class BitcoinBlockHeaderAttestation extends TimeAttestation {
-
-  _TAG() {
-    return [0x05, 0x88, 0x96, 0x0d, 0x73, 0xd7, 0x19, 0x01];
+  _TAG () {
+    return [0x05, 0x88, 0x96, 0x0d, 0x73, 0xd7, 0x19, 0x01]
   }
 
-  constructor(height_) {
-    super();
-    this.height = height_;
+  constructor (height_) {
+    super()
+    this.height = height_
   }
 
-  static deserialize(ctxPayload) {
-    const height = ctxPayload.readVaruint();
-    return new BitcoinBlockHeaderAttestation(height);
+  static deserialize (ctxPayload) {
+    const height = ctxPayload.readVaruint()
+    return new BitcoinBlockHeaderAttestation(height)
   }
 
-  serializePayload(ctx) {
-    ctx.writeVaruint(this.height);
+  serializePayload (ctx) {
+    ctx.writeVaruint(this.height)
   }
 
-  toString() {
-    return 'BitcoinBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')';
+  toString () {
+    return 'BitcoinBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')'
   }
 
-  equals(another) {
+  equals (another) {
     return (another instanceof BitcoinBlockHeaderAttestation) &&
             (Utils.arrEq(this._TAG(), another._TAG())) &&
-            (this.height === another.height);
+            (this.height === another.height)
   }
 
-  compareTo(other) {
+  compareTo (other) {
     if (other instanceof BitcoinBlockHeaderAttestation) {
-      return this.height - other.height;
+      return this.height - other.height
     }
-    return super.compareTo(other);
+    return super.compareTo(other)
   }
 
   /*
    Verify attestation against a block header
    Returns the block time on success; raises VerificationError on failure.
    */
-  verifyAgainstBlockheader(digest, block) {
+  verifyAgainstBlockheader (digest, block) {
     if (digest.length !== 32) {
-      throw new Context.ValueError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes');
+      throw new Context.ValueError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes')
     } else if (!Utils.arrEq(digest, Utils.hexToBytes(block.merkleroot))) {
-      throw new Context.ValueError('Digest does not match merkleroot');
+      throw new Context.ValueError('Digest does not match merkleroot')
     }
-    return block.time;
+    return block.time
   }
-
 }
 class LitecoinBlockHeaderAttestation extends TimeAttestation {
-
-  _TAG() {
-    return [0x06, 0x86, 0x9a, 0x0d, 0x73, 0xd7, 0x1b, 0x45];
+  _TAG () {
+    return [0x06, 0x86, 0x9a, 0x0d, 0x73, 0xd7, 0x1b, 0x45]
   }
 
-  constructor(height_) {
-    super();
-    this.height = height_;
+  constructor (height_) {
+    super()
+    this.height = height_
   }
 
-  static deserialize(ctxPayload) {
-    const height = ctxPayload.readVaruint();
-    return new LitecoinBlockHeaderAttestation(height);
+  static deserialize (ctxPayload) {
+    const height = ctxPayload.readVaruint()
+    return new LitecoinBlockHeaderAttestation(height)
   }
 
-  serializePayload(ctx) {
-    ctx.writeVaruint(this.height);
+  serializePayload (ctx) {
+    ctx.writeVaruint(this.height)
   }
 
-  toString() {
-    return 'LitecoinBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')';
+  toString () {
+    return 'LitecoinBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')'
   }
 
-  equals(another) {
+  equals (another) {
     return (another instanceof LitecoinBlockHeaderAttestation) &&
             (Utils.arrEq(this._TAG(), another._TAG())) &&
-            (this.height === another.height);
+            (this.height === another.height)
   }
 
-  compareTo(other) {
+  compareTo (other) {
     if (other instanceof LitecoinBlockHeaderAttestation) {
-      return this.height - other.height;
+      return this.height - other.height
     }
-    return super.compareTo(other);
+    return super.compareTo(other)
   }
 
-  verifyAgainstBlockheader(digest, block) {
+  verifyAgainstBlockheader (digest, block) {
     if (digest.length !== 32) {
-      throw new Context.ValueError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes');
+      throw new Context.ValueError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes')
     } else if (!Utils.arrEq(digest, Utils.hexToBytes(block.merkleroot))) {
-      throw new Context.ValueError('Digest does not match merkleroot');
+      throw new Context.ValueError('Digest does not match merkleroot')
     }
-    return block.time;
+    return block.time
   }
 }
 
 class EthereumBlockHeaderAttestation extends TimeAttestation {
-
-  _TAG() {
-    return [0x30, 0xfe, 0x80, 0x87, 0xb5, 0xc7, 0xea, 0xd7];
+  _TAG () {
+    return [0x30, 0xfe, 0x80, 0x87, 0xb5, 0xc7, 0xea, 0xd7]
   }
 
-  constructor(height_) {
-    super();
-    this.height = height_;
+  constructor (height_) {
+    super()
+    this.height = height_
   }
 
-  static deserialize(ctxPayload) {
-    const height = ctxPayload.readVaruint();
-    return new EthereumBlockHeaderAttestation(height);
+  static deserialize (ctxPayload) {
+    const height = ctxPayload.readVaruint()
+    return new EthereumBlockHeaderAttestation(height)
   }
 
-  serializePayload(ctx) {
-    ctx.writeVaruint(this.height);
+  serializePayload (ctx) {
+    ctx.writeVaruint(this.height)
   }
 
-  toString() {
-    return 'EthereumBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')';
+  toString () {
+    return 'EthereumBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')'
   }
 
   /*
     Verify attestation against a block header
     Returns the block time on success; raises VerificationError on failure.
     */
-  verifyAgainstBlockheader(digest, block) {
+  verifyAgainstBlockheader (digest, block) {
     if (digest.length !== 32) {
-      throw new Context.ValueError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes');
+      throw new Context.ValueError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes')
     } else if (digest !== Utils.hexToBytes(block.transactionsRoot)) {
-      throw new Context.ValueError('Digest does not match merkleroot');
+      throw new Context.ValueError('Digest does not match merkleroot')
     }
-    return block.timestamp;
+    return block.timestamp
   }
 
-  equals(another) {
+  equals (another) {
     return (another instanceof EthereumBlockHeaderAttestation) &&
             (Utils.arrEq(this._TAG(), another._TAG())) &&
-            (this.height === another.height);
+            (this.height === another.height)
   }
 
-  compareTo(other) {
+  compareTo (other) {
     if (other instanceof BitcoinBlockHeaderAttestation) {
-      return this.height - other.height;
+      return this.height - other.height
     }
-    return super.compareTo(other);
+    return super.compareTo(other)
   }
-
 }
 
 module.exports = {
@@ -378,4 +371,4 @@ module.exports = {
   BitcoinBlockHeaderAttestation,
   LitecoinBlockHeaderAttestation,
   EthereumBlockHeaderAttestation
-};
+}

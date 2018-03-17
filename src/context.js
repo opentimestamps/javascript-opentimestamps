@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 /**
  * Context input/output buffer module.
@@ -6,7 +6,7 @@
  * @author EternityWall
  * @license LPGL3
  */
-const Utils = require('./utils.js');
+const Utils = require('./utils.js')
 
 class ValueError extends Error {
 }
@@ -43,180 +43,177 @@ class SerializerValueError extends ValueError {
 
 /** Class representing Stream Deserialization Context for input buffer. */
 class StreamDeserializationContext {
-
-  constructor(stream) {
-    this.buffer = [];
+  constructor (stream) {
+    this.buffer = []
     if (stream instanceof Buffer) {
-      this.buffer = stream;
+      this.buffer = stream
     } else if (stream instanceof ArrayBuffer) {
-      this.buffer = stream;
+      this.buffer = stream
     } else if (stream instanceof Uint8Array) {
-      this.buffer = stream;
+      this.buffer = stream
     } else if (typeof (stream) === 'string') {
-      this.buffer = Buffer.from(stream, 'binary');
+      this.buffer = Buffer.from(stream, 'binary')
     } else if (stream instanceof String) {
-      this.buffer = Buffer.from(stream, 'binary');
+      this.buffer = Buffer.from(stream, 'binary')
     } else if (stream instanceof Array) {
       // Avoid using extended native objects
       // const uint8Array = Uint8Array.from(stream);
-      this.buffer = new Buffer(stream);
+      this.buffer = new Buffer(stream)
     }
-    this.counter = 0;
+    this.counter = 0
   }
 
-  getOutput() {
-    return this.buffer;
+  getOutput () {
+    return this.buffer
   }
 
-  getCounter() {
-    return this.counter;
+  getCounter () {
+    return this.counter
   }
 
-  readBuffer(l) {
+  readBuffer (l) {
     if (this.counter >= this.buffer.length) {
-      return undefined;
+      return undefined
     }
     if (l > this.buffer.length) {
-      l = this.buffer.length;
+      l = this.buffer.length
     }
-    const uint8Array = this.buffer.slice(this.counter, this.counter + l);
-    this.counter += l;
-    return uint8Array;
+    const uint8Array = this.buffer.slice(this.counter, this.counter + l)
+    this.counter += l
+    return uint8Array
   }
 
-  read(l) {
+  read (l) {
     if (l > this.buffer.length) {
-      l = this.buffer.length;
+      l = this.buffer.length
     }
-    const uint8Array = this.buffer.slice(this.counter, this.counter + l);
-    this.counter += l;
-    return Array.from(uint8Array);
+    const uint8Array = this.buffer.slice(this.counter, this.counter + l)
+    this.counter += l
+    return Array.from(uint8Array)
   }
-  readBool() {
-    const b = this.read(1)[0];
+  readBool () {
+    const b = this.read(1)[0]
     if (b === 0xff) {
-      return true;
+      return true
     } else if (b === 0x00) {
-      return false;
+      return false
     }
-    throw new DeserializationError('read_bool() expected 0xff or 0x00; got +' + b);
+    throw new DeserializationError('read_bool() expected 0xff or 0x00; got +' + b)
   }
-  readVaruint() {
-    let value = 0;
-    let shift = 0;
-    let b;
+  readVaruint () {
+    let value = 0
+    let shift = 0
+    let b
     do {
-      b = this.read(1)[0];
-      value |= (b & 0b01111111) << shift;
-      shift += 7;
-    } while (b & 0b10000000);
-    return value;
+      b = this.read(1)[0]
+      value |= (b & 0b01111111) << shift
+      shift += 7
+    } while (b & 0b10000000)
+    return value
   }
-  readBytes(expectedLength) {
+  readBytes (expectedLength) {
     if (expectedLength === undefined) {
-      expectedLength = this.readVarbytes();
+      expectedLength = this.readVarbytes()
     }
-    return this.read(expectedLength);
+    return this.read(expectedLength)
   }
-  readVarbytes(maxLen, minLen = 0) {
-    const l = this.readVaruint();
+  readVarbytes (maxLen, minLen = 0) {
+    const l = this.readVaruint()
     if (l > maxLen) {
-      throw new DeserializationError('varbytes max length exceeded; ' + l + ' > ' + maxLen);
+      throw new DeserializationError('varbytes max length exceeded; ' + l + ' > ' + maxLen)
     } else if (l < minLen) {
-      throw new DeserializationError('varbytes min length not met; ' + l + ' < ' + maxLen);
+      throw new DeserializationError('varbytes min length not met; ' + l + ' < ' + maxLen)
     }
-    return this.read(l);
+    return this.read(l)
   }
-  assertMagic(expectedMagic) {
-    const actualMagic = this.read(expectedMagic.length);
+  assertMagic (expectedMagic) {
+    const actualMagic = this.read(expectedMagic.length)
     if (!Utils.arrEq(expectedMagic, actualMagic)) {
-      throw new BadMagicError(expectedMagic, actualMagic);
+      throw new BadMagicError(expectedMagic, actualMagic)
     }
   }
-  assertEof() {
-    const excess = this.buffer[this.counter];
+  assertEof () {
+    const excess = this.buffer[this.counter]
     if (excess !== undefined) {
-      throw new TrailingGarbageError('Trailing garbage found after end of deserialized data');
+      throw new TrailingGarbageError('Trailing garbage found after end of deserialized data')
     }
   }
-  toString() {
-    return this.buffer.toHex(0);
+  toString () {
+    return this.buffer.toHex(0)
   }
 }
 
 /** Class representing Stream Serialization Context for output buffer. */
 class StreamSerializationContext {
+  constructor () {
+    this.buffer = new Uint8Array(1024 * 4)
+    this.length = 0
+  }
+  getOutput () {
+    const output = this.buffer.slice(0, this.length)
+    return output
+  }
+  getLenght () {
+    return this.length
+  }
 
-  constructor() {
-    this.buffer = new Uint8Array(1024 * 4);
-    this.length = 0;
-  }
-  getOutput() {
-    const output = this.buffer.slice(0, this.length);
-    return output;
-  }
-  getLenght() {
-    return this.length;
-  }
-
-  writeBool(value) {
+  writeBool (value) {
     if (value === true) {
-      this.writeByte(0xff);
+      this.writeByte(0xff)
     } else if (value === false) {
-      this.writeByte(0x00);
+      this.writeByte(0x00)
     } else {
-      throw new TypeError('Expected bool; got ' + typeof (value));
+      throw new TypeError('Expected bool; got ' + typeof (value))
     }
   }
 
-  writeVaruint(value) {
+  writeVaruint (value) {
     if (value === 0) {
-      this.writeByte(0);
+      this.writeByte(0)
     } else {
       while (value !== 0) {
-        let b = value & 0b01111111;
+        let b = value & 0b01111111
         if (value > 0b01111111) {
-          b |= 0b10000000;
+          b |= 0b10000000
         }
-        this.writeByte(b);
+        this.writeByte(b)
         if (value <= 0b01111111) {
-          break;
+          break
         }
-        value >>= 7;
+        value >>= 7
       }
     }
   }
-  writeByte(value) {
+  writeByte (value) {
     if (this.counter >= this.length) {
-      const newLenght = this.length * 2;
-      const swapBuffer = new Uint8Array(newLenght);
-      swapBuffer.set(this.buffer, 0);
-      this.buffer = swapBuffer;
-      this.length = newLenght;
+      const newLenght = this.length * 2
+      const swapBuffer = new Uint8Array(newLenght)
+      swapBuffer.set(this.buffer, 0)
+      this.buffer = swapBuffer
+      this.length = newLenght
     }
 
     if (isNaN(value)) {
-      this.buffer[this.length] = value.codePointAt();
+      this.buffer[this.length] = value.codePointAt()
     } else {
-      this.buffer[this.length] = value;
+      this.buffer[this.length] = value
     }
-    this.length++;
+    this.length++
   }
 
-  writeBytes(value) {
+  writeBytes (value) {
     value.forEach(x => {
-      this.writeByte(x);
-    });
+      this.writeByte(x)
+    })
   }
 
-  writeVarbytes(value) {
-    this.writeVaruint(value.length);
-    this.writeBytes(value);
+  writeVarbytes (value) {
+    this.writeVaruint(value.length)
+    this.writeBytes(value)
   }
-  toString() {
-    return this.buffer.toHex(0);
+  toString () {
+    return this.buffer.toHex(0)
   }
-
 }
 
 module.exports = {
@@ -232,4 +229,4 @@ module.exports = {
   SerializerValueError,
   ValueError,
   TypeError
-};
+}
