@@ -253,27 +253,13 @@ module.exports = {
 
     const self = this
     return new Promise((resolve, reject) => {
-      if (detachedStamped.timestamp.isTimestampComplete()) {
-        // Timestamp completed
-        self.verifyTimestamp(detachedStamped.timestamp, options).then(attestedTime => {
-          return resolve(attestedTime)
+      self.upgradeTimestamp(detachedStamped.timestamp).then(() => {
+        self.verifyTimestamp(detachedStamped.timestamp, options).then(results => {
+          return resolve(results)
         }).catch(err => {
           return reject(err)
         })
-      } else {
-        // Timestamp not completed
-
-        self.upgradeTimestamp(detachedStamped.timestamp).then(() => {
-          self.verifyTimestamp(detachedStamped.timestamp).then(results => {
-            results = results || {attestedTime: undefined, chain: undefined}
-            return resolve({attestedTime: results.attestedTime, chain: results.chain})
-          }).catch(err => {
-            return reject(err)
-          })
-        }).catch(err => {
-          return reject(err)
-        })
-      }
+      })
     })
   },
 
@@ -285,81 +271,106 @@ module.exports = {
    * @return {int} unix timestamp if verified, undefined otherwise.
    */
   verifyTimestamp (timestamp, options) {
-    return new Promise((resolve, reject) => {
-      // upgradeTimestamp(timestamp, args);
-      let found = false
+    const res = []
+    const self = this
 
-      timestamp.allAttestations().forEach((attestation, msg) => {
-        function liteVerify (options) {
-          // There is no local node available or is turned of
-          // Request to insight
-          const insightOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'insight')
-          const insightOptions = insightOptionSet ? options.insight : null
-          const chain = insightOptionSet && options.insight.chain ? options.insight.chain : 'bitcoin'
-          const insight = new Insight.MultiInsight(insightOptions)
-          insight.blockhash(attestation.height).then(blockHash => {
-            console.log('Lite-client verification, assuming block ' + blockHash + ' is valid')
-            insight.block(blockHash).then(blockHeader => {
-              // One Bitcoin attestation is enough
-              resolve({attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader), chain})
-            }).catch(err => {
-              reject(new Error('Bitcoin verification failed: ' + err.message))
+    // check all completed attestations
+    const completedAttestations = timestamp.allAttestations();
+    completedAttestations.forEach((attestation, msg) => {
+      res.push(self.verifyAttestation(attestation, msg, options))
+    })
+
+      function min(a,b) { return a.attestedTime < b.attestedTime ? a : b; }
+      function groupBy(xs, key) {
+          return xs.reduce(function(rv, x) {
+              (rv[x[key]] = rv[x[key]] || []).push(x);
+              return rv;
+          }, {});
+      };
+
+    // verify all completed attestations
+    return new Promise((resolve, reject) => {
+      Promise.all(res.map(Utils.softFail)).then(results => {
+        var outputs = {};
+        const filtered = results.filter(i => {if(i instanceof Error) return undefined; else return i;})
+        const groupByChain = groupBy(filtered, 'chain');
+
+        Object.keys(groupByChain).map(key => groupByChain[key]).forEach((items)=>{
+            var item = items.sort(min)[0];
+            outputs[item.chain] = item.attestedTime;
+        })
+
+        return resolve(outputs)
+      }).catch(err => {
+        reject(err)
+      })
+    })
+  },
+
+  verifyAttestation (attestation, msg, options) {
+    return new Promise((resolve, reject) => {
+      function liteVerify (options) {
+        // There is no local node available or is turned of
+        // Request to insight
+        const insightOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'insight')
+        const insightOptions = insightOptionSet ? options.insight : null
+        const chain = insightOptionSet && options.insight.chain ? options.insight.chain : 'bitcoin'
+        const insight = new Insight.MultiInsight(insightOptions)
+        insight.blockhash(attestation.height).then(blockHash => {
+          console.log('Lite-client verification, assuming block ' + blockHash + ' is valid')
+          insight.block(blockHash).then(blockHeader => {
+            // One Bitcoin attestation is enough
+            resolve({ attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader), chain})
+          }).catch(err => {
+            reject(new Error('Bitcoin verification failed: ' + err.message))
+          })
+        }).catch(() => {
+          reject(new Error('Bitcoin block height ' + attestation.height + ' not found'))
+        })
+      }
+
+      if (attestation instanceof Notary.PendingAttestation) {
+        return reject(new Error('PendingAttestation'))
+      } else if (attestation instanceof Notary.UnknownAttestation) {
+          return reject(new Error('UnknownAttestation'))
+      } else if (attestation instanceof Notary.EthereumBlockHeaderAttestation) {
+        try {
+          const web3 = new Web3()
+          web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'))
+          const block = web3.eth.getBlock(attestation.height)
+          const attestedTime = attestation.verifyAgainstBlockheader(msg, block)
+          // console.log("Success! Ethereum attests data existed as of " % time.strftime('%c %Z', time.localtime(attestedTime)))
+          return resolve(attestedTime)
+        } catch (err) {
+          return reject(err)
+        }
+      } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
+        if (options && options.insight && options.insight.urls) {
+          liteVerify(options)
+        } else {
+          // Check for local bitcoin configuration
+          Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
+            const bitcoin = new Bitcoin.BitcoinNode(properties)
+            bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
+              // One Bitcoin attestation is enought
+              resolve({
+                attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
+                chain: 'bitcoin'
+              })
+            }).catch(() => {
+              console.error('Bitcoin block height ' + attestation.height + ' not found')
+              liteVerify()
             })
           }).catch(() => {
-            reject(new Error('Bitcoin block height ' + attestation.height + ' not found'))
+            console.error('Could not connect to local Bitcoin node')
+            liteVerify()
           })
         }
-
-        if (!found) { // Verify only the first BitcoinBlockHeaderAttestation
-          if (attestation instanceof Notary.PendingAttestation) {
-            // console.log('PendingAttestation: pass ');
-          } else if (attestation instanceof Notary.EthereumBlockHeaderAttestation) {
-            found = true
-            try {
-              const web3 = new Web3()
-              web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'))
-              const block = web3.eth.getBlock(attestation.height)
-              const attestedTime = attestation.verifyAgainstBlockheader(msg, block)
-              // console.log("Success! Ethereum attests data existed as of " % time.strftime('%c %Z', time.localtime(attestedTime)))
-              return resolve(attestedTime)
-            } catch (err) {
-              return reject(err)
-            }
-          } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-            found = true
-
-            // if insight url are specified through options, use lite verification
-            if (options && options.insight && options.insight.urls) {
-              liteVerify(options)
-            } else {
-              // Check for local bitcoin configuration
-              Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
-                const bitcoin = new Bitcoin.BitcoinNode(properties)
-                bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
-                  // One Bitcoin attestation is enought
-                  resolve({attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader), chain: 'bitcoin'})
-                }).catch(() => {
-                  console.error('Bitcoin block height ' + attestation.height + ' not found')
-                  liteVerify()
-                })
-              }).catch(() => {
-                console.error('Could not connect to local Bitcoin node')
-                liteVerify()
-              })
-            }
-          } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
-            found = true
-            // console.log('Checking LitecoinBlockHeaderAttestation');
-
-            options = {}
-            options.insight = {}
-            options.insight.chain = 'litecoin'
-            liteVerify(options)
-          }
-        }
-      })
-      if (!found) {
-        resolve()
+      } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
+        options = {}
+        options.insight = {}
+        options.insight.chain = 'litecoin'
+        liteVerify(options)
       }
     })
   },
@@ -401,31 +412,32 @@ module.exports = {
     const promises = []
     const self = this
 
-    if (timestamp.isTimestampComplete()) {
-      return new Promise(resolve => {
-        resolve(false)
-      })
+    function isPending(stamp){
+        if(stamp.isTimestampComplete()){
+          return undefined
+        }else{
+          return stamp
+        }
     }
-    // console.log(timestamp.directlyVerified().length);
-    timestamp.directlyVerified().forEach(subStamp => {
+
+    timestamp.directlyVerified().filter(stamp => isPending(stamp)).forEach(subStamp => {
       subStamp.attestations.forEach(attestation => {
-        if (attestation instanceof Notary.PendingAttestation) {
-          const commitment = subStamp.msg
+        if (attestation instanceof Notary.PendingAttestation){
+            const commitment = subStamp.msg
+            // check to force override calendars
+            const calendars = []
+            if (calendarUrls && calendarUrls.length > 0) {
+                calendarUrls.forEach(calendar => {
+                    calendars.push(new Calendar.RemoteCalendar(calendar))
+                })
+            } else {
+                calendars.push(new Calendar.RemoteCalendar(attestation.uri))
+            }
 
-          // check to force override calendars
-          const calendars = []
-          if (calendarUrls && calendarUrls.length > 0) {
-            calendarUrls.forEach(calendar => {
-              calendars.push(new Calendar.RemoteCalendar(calendar))
+            calendars.forEach(calendar => {
+                // console.log('Checking calendar ' + attestation.uri + ' for ' + Utils.bytesToHex(subStamp.msg));
+                promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations))
             })
-          } else {
-            calendars.push(new Calendar.RemoteCalendar(attestation.uri))
-          }
-
-          calendars.forEach(calendar => {
-            // console.log('Checking calendar ' + attestation.uri + ' for ' + Utils.bytesToHex(subStamp.msg));
-            promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations))
-          })
         }
       })
     })
