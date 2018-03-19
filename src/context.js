@@ -58,7 +58,7 @@ class StreamDeserializationContext {
     } else if (stream instanceof Array) {
       // Avoid using extended native objects
       // const uint8Array = Uint8Array.from(stream);
-      this.buffer = new Buffer(stream)
+      this.buffer = Buffer.from(stream)
     }
     this.counter = 0
   }

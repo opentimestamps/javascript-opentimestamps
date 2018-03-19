@@ -84,7 +84,7 @@ class RemoteCalendar {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       encoding: null,
-      body: new Buffer(digest)
+      body: Buffer.from(digest)
     }
     if (this.key !== undefined) {
       /* var privateKey = this.key.d.toBuffer(32);

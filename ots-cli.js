@@ -213,7 +213,7 @@ function stamp (argsFiles, options) {
         } else {
           otsFilename = argsFiles[i] + '.ots'
         }
-        const buffer = new Buffer(ots.serializeToBytes())
+        const buffer = Buffer.from(ots.serializeToBytes())
         saveOts(otsFilename, buffer)
       })
     }).catch(err => {
@@ -231,8 +231,8 @@ function stamp (argsFiles, options) {
 }
 
 function saveOts (otsFilename, buffer) {
-  fs.exists(otsFilename, fileExist => {
-    if (fileExist) {
+  fs.stat(otsFilename, (err, stats) => {
+    if (!err) {
       console.log('The timestamp proof \'' + otsFilename + '\' already exists')
     } else {
       fs.writeFile(otsFilename, buffer, 'binary', err => {
@@ -335,13 +335,13 @@ function upgrade (argsFileOts, options) {
       // check timestamp
       if (changed) {
         // console.log('Timestamp has been successfully upgraded!');
-        fs.writeFile(argsFileOts + '.bak', new Buffer(ots), 'binary', err => {
+        fs.writeFile(argsFileOts + '.bak', Buffer.from(ots), 'binary', err => {
           if (err) {
             return console.log(err)
           }
           console.log('The file .bak was saved!')
         })
-        fs.writeFile(argsFileOts, new Buffer(detachedOts.serializeToBytes()), 'binary', err => {
+        fs.writeFile(argsFileOts, Buffer.from(detachedOts.serializeToBytes()), 'binary', err => {
           if (err) {
             return console.log(err)
           }

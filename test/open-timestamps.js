@@ -85,7 +85,7 @@ test('OpenTimestamps.info()', assert => {
   const otsInfoCalc = OpenTimestamps.info(detachedOts)
   assert.false(otsInfoCalc === undefined)
   assert.false(incompleteOts === undefined)
-  assert.true(incompleteOtsInfo.equals(new Buffer(otsInfoCalc)))
+  assert.true(incompleteOtsInfo.equals(Buffer.from(otsInfoCalc)))
   assert.end()
 })
 
@@ -94,7 +94,7 @@ test('OpenTimestamps.info()', assert => {
   const merkle2OtsInfoCalc = OpenTimestamps.info(detachedOts)
   assert.false(merkle2OtsInfoCalc === undefined)
   assert.false(merkle2Ots === undefined)
-  assert.true(merkle2OtsInfo.equals(new Buffer(merkle2OtsInfoCalc)))
+  assert.true(merkle2OtsInfo.equals(Buffer.from(merkle2OtsInfoCalc)))
   assert.end()
 })
 
@@ -500,7 +500,7 @@ test('OpenTimestamps.emptyTimestamp()', assert => {
   // serialize & deserialize
   const ctx = new Context.StreamSerialization()
   detached.serialize(ctx)
-  const buffer = new Buffer(ctx.getOutput())
+  const buffer = Buffer.from(ctx.getOutput())
 
   // error to deserialize an ots with empty timestamp
   try {

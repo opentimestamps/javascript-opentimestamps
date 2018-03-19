@@ -66,7 +66,7 @@ class Insight {
           // console.log('body ', body);
           if (body.size === 0) {
             console.error('Insight response error body ')
-            reject()
+            reject(new Error('Insight response error body '))
             return
           }
 
@@ -74,7 +74,7 @@ class Insight {
         })
         .catch(err => {
           console.error('Insight response error: ' + err)
-          reject()
+          reject(err)
         })
     })
   }
@@ -104,14 +104,14 @@ class Insight {
           // console.log('body ', body);
           if (body.size === 0) {
             console.error('Insight response error body ')
-            reject()
+            reject(new Error('Insight response error body '))
             return
           }
           resolve({merkleroot: body.merkleroot, time: body.time})
         })
         .catch(err => {
           console.error('Insight response error: ' + err)
-          reject()
+          reject(err)
         })
     })
   }
@@ -176,7 +176,7 @@ class MultiInsight {
           }
         })
         if (!found) {
-          reject()
+          reject(new Error('No block height ' + height + 'found'))
         }
       })
     })
@@ -203,7 +203,7 @@ class MultiInsight {
           }
         })
         if (!found) {
-          reject()
+          reject(new Error('No block hash ' + hash + 'found'))
         }
       })
     })

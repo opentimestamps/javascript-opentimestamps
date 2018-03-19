@@ -169,7 +169,7 @@ class PendingAttestation extends TimeAttestation {
       console.error('Invalid URI: ')
       return
     }
-    const decode = new Buffer(utf8Uri).toString('ascii')
+    const decode = Buffer.from(utf8Uri).toString('ascii')
     return new PendingAttestation(decode)
   }
 

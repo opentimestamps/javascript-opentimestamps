@@ -79,7 +79,7 @@ class BitcoinNode {
     return new Promise((resolve, reject) => {
       Promise.all(promises.map(Utils.softFail)).then(results => {
         if (results === undefined || results.length === 0) {
-          return reject()
+          return reject(new Error('Invalid bitcoin.conf file'))
         }
 
         results.forEach(prop => {
@@ -87,7 +87,7 @@ class BitcoinNode {
             return resolve(prop)
           }
         })
-        reject()
+        reject(new Error('Invalid bitcoin.conf file'))
       })
     })
   }
@@ -151,7 +151,7 @@ class BitcoinNode {
           // console.log('body ', body);
           if (body.length === 0) {
             console.error('RPC response error body ')
-            reject()
+            reject(new Error('RPC response error body '))
             return
           }
           resolve(body.result)

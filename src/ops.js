@@ -279,9 +279,9 @@ class CryptOp extends OpUnary {
   call (cls, msg) {
     let shasum
     if (cls._HASHLIB_NAME() === 'keccak256') {
-      shasum = keccak(cls._HASHLIB_NAME()).update(new Buffer(msg))
+      shasum = keccak(cls._HASHLIB_NAME()).update(Buffer.from(msg))
     } else {
-      shasum = crypto.createHash(cls._HASHLIB_NAME()).update(new Buffer(msg))
+      shasum = crypto.createHash(cls._HASHLIB_NAME()).update(Buffer.from(msg))
     }
     const hashDigest = shasum.digest()
     const output = [hashDigest.length]
