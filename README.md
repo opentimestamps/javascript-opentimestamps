@@ -9,6 +9,9 @@
 
 [![Build Status](https://travis-ci.org/opentimestamps/javascript-opentimestamps.svg?branch=master)](https://travis-ci.org/opentimestamps/javascript-opentimestamps)
 
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
+
 This repository hosts the javascript implementation of OpenTimestamps.
 
 It is based on the python implementation at [Opentimestamps-Python](https://github.com/opentimestamps/python-opentimestamps) and [Opentimestamps-Client](https://github.com/opentimestamps/opentimestamps-client)
@@ -298,7 +301,7 @@ OpenTimestamps.upgrade(detached).then((changed) => {
 PRs are welcome, before reviewing them we wait the travis build concludes successfully, so please check:
 
 *  All tests must pass. (Rarely test fails for networking issue, if you think it's your case ask the maintainers in the comments to relaunch the travis build)
-*  [xo linter](https://github.com/xojs/xo) is launched in the build process, any warning found by the linker break the build, so be sure to check warnings by launching `xo` before the commit, most simple errors could be automatically fixed with `xo --fix`
+*  [standard linter](https://github.com/standard/standard) is launched in the build process, any warning found by the linker break the build, so be sure to check warnings by launching `standard` before the commit, most simple errors could be automatically fixed with `standard --fix`
 
 
 ## License
