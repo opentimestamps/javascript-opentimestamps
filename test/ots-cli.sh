@@ -60,6 +60,6 @@ rm examples/incomplete.txt.ots.old && \
 echo ">> node ots-cli.js info examples/hello-world.txt.ltc.ots" && \
 node ots-cli.js info examples/hello-world.txt.ltc.ots | grep "verify LitecoinBlockHeaderAttestation(1386291)" && \
 echo ">> node ots-cli.js verify examples/hello-world.txt.ltc.ots" && \
-node ots-cli.js verify examples/hello-world.txt.ltc.ots | grep "Success! Litecoin attests data existed as of Fri Mar 16 2018 15:43:41" && \
+node ots-cli.js verify examples/hello-world.txt.ltc.ots | grep "Success! Litecoin attests data existed as of Fri Mar 16 2018" && \
 
 echo --- END TESTING ots-cli.js
