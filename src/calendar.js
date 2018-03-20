@@ -9,7 +9,7 @@
 
 const requestPromise = require('request-promise')
 const Promise = require('promise')
-const url = require('url');
+const url = require('url')
 /*
 const bitcoin = require('bitcoinjs-lib') // v2.x.x
 const bitcoinMessage = require('bitcoinjs-message');
@@ -74,7 +74,6 @@ class RemoteCalendar {
    * and {@link reject} if rejected.
    */
   submit (digest) {
-
     const options = {
       url: url.resolve(this.url, 'digest'),
       method: 'POST',
@@ -126,7 +125,6 @@ class RemoteCalendar {
    * and {@link reject} if rejected.
    */
   getTimestamp (commitment) {
-
     const options = {
       url: url.resolve(this.url, 'timestamp/') + Utils.bytesToHex(commitment),
       method: 'GET',
