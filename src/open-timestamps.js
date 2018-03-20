@@ -275,18 +275,17 @@ module.exports = {
     const self = this
 
     // check all completed attestations
-    const completedAttestations = timestamp.allAttestations();
-    completedAttestations.forEach((attestation, msg) => {
+    timestamp.allAttestations().forEach((attestation, msg) => {
       res.push(self.verifyAttestation(attestation, msg, options))
     })
 
-      function min(a,b) { return a.attestedTime < b.attestedTime ? a : b; }
-      function groupBy(xs, key) {
-          return xs.reduce(function(rv, x) {
-              (rv[x[key]] = rv[x[key]] || []).push(x);
-              return rv;
-          }, {});
-      };
+    function min(a,b) { return a.attestedTime < b.attestedTime ? a : b; }
+    function groupBy(xs, key) {
+      return xs.reduce(function(rv, x) {
+          (rv[x[key]] = rv[x[key]] || []).push(x);
+          return rv;
+      }, {});
+    };
 
     // verify all completed attestations
     return new Promise((resolve, reject) => {
