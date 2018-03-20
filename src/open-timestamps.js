@@ -362,9 +362,8 @@ module.exports = {
                 attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
                 chain: 'bitcoin'
               })
-            }).catch(() => {
-              console.error('Bitcoin block height ' + attestation.height + ' not found')
-              liteVerify()
+            }).catch((err) => {
+              reject(new Notary.VerificationError(Bitcoin  verification failed: ' + err.message))
             })
           }).catch(() => {
             console.error('Could not connect to local Bitcoin node')
