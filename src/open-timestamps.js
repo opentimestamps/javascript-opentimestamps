@@ -363,7 +363,7 @@ module.exports = {
                 chain: 'bitcoin'
               })
             }).catch((err) => {
-              reject(new Notary.VerificationError(Bitcoin  verification failed: ' + err.message))
+              reject(new Notary.VerificationError('Bitcoin verification failed: ' + err.message))
             })
           }).catch(() => {
             console.error('Could not connect to local Bitcoin node')
