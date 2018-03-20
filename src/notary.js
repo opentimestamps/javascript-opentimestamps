@@ -10,6 +10,9 @@
 const Context = require('./context.js')
 const Utils = require('./utils.js')
 
+class VerificationError extends Error {
+}
+
 /** Class representing Timestamp signature verification */
 class TimeAttestation {
   _TAG_SIZE () {
@@ -261,9 +264,9 @@ class BitcoinBlockHeaderAttestation extends TimeAttestation {
    */
   verifyAgainstBlockheader (digest, block) {
     if (digest.length !== 32) {
-      throw new Context.ValueError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes')
+      throw new VerificationError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes')
     } else if (!Utils.arrEq(digest, Utils.hexToBytes(block.merkleroot))) {
-      throw new Context.ValueError('Digest does not match merkleroot')
+      throw new VerificationError('Digest does not match merkleroot')
     }
     return block.time
   }
@@ -306,9 +309,9 @@ class LitecoinBlockHeaderAttestation extends TimeAttestation {
 
   verifyAgainstBlockheader (digest, block) {
     if (digest.length !== 32) {
-      throw new Context.ValueError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes')
+      throw new VerificationError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes')
     } else if (!Utils.arrEq(digest, Utils.hexToBytes(block.merkleroot))) {
-      throw new Context.ValueError('Digest does not match merkleroot')
+      throw new VerificationError('Digest does not match merkleroot')
     }
     return block.time
   }
@@ -343,9 +346,9 @@ class EthereumBlockHeaderAttestation extends TimeAttestation {
     */
   verifyAgainstBlockheader (digest, block) {
     if (digest.length !== 32) {
-      throw new Context.ValueError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes')
+      throw new VerificationError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes')
     } else if (digest !== Utils.hexToBytes(block.transactionsRoot)) {
-      throw new Context.ValueError('Digest does not match merkleroot')
+      throw new VerificationError('Digest does not match merkleroot')
     }
     return block.timestamp
   }
@@ -365,6 +368,7 @@ class EthereumBlockHeaderAttestation extends TimeAttestation {
 }
 
 module.exports = {
+  VerificationError,
   TimeAttestation,
   UnknownAttestation,
   PendingAttestation,

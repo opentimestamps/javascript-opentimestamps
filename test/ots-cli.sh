@@ -56,6 +56,10 @@ diff examples/incomplete.txt.ots examples/incomplete.txt.ots.old && \
 cp examples/incomplete.txt.ots.old examples/incomplete.txt.ots && \
 rm examples/incomplete.txt.ots.old && \
 
+# Test: bad attestation
+echo ">> node ots-cli.js verify examples/bad-stamp.txt.ots" && \
+node ots-cli.js verify examples/bad-stamp.txt.ots | grep "Digest does not match merkleroot" && \
+
 # Test : litecoin
 echo ">> node ots-cli.js info examples/hello-world.txt.ltc.ots" && \
 node ots-cli.js info examples/hello-world.txt.ltc.ots | grep "verify LitecoinBlockHeaderAttestation(1386291)" && \

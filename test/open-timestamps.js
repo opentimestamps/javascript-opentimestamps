@@ -273,10 +273,10 @@ test('OpenTimestamps.verify()', assert => {
   const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(badStamp))
   const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(badStampOts))
   OpenTimestamps.verify(detachedOts, detached).then(result => {
-    assert.deepEqual(result, {})
+    assert.fail(result)
     assert.end()
   }).catch(err => {
-    assert.fail('err=' + err)
+    assert.true(err !== undefined)
     assert.end()
   })
 })
@@ -337,11 +337,10 @@ test('OpenTimestamps.verify()', assert => {
     }
   }
   OpenTimestamps.verify(detachedOts, detached, options).then((result) => {
-    // assert.fail('Unable to reach the server (bad insight url)')
-    assert.deepEqual(result, {})
+    assert.fail('Unable to reach the server (bad insight url)')
     assert.end()
   }).catch((err) => {
-    assert.fail(err)
+    assert.true(err !== undefined)
     assert.end()
   })
 })

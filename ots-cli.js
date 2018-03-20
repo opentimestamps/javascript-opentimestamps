@@ -298,7 +298,7 @@ function verify (argsFileOts, options) {
     verifyPromise.then(results => {
       if (results) {
         Object.keys(results).map(chain => {
-            console.log('Success! ' + chain[0].toUpperCase() + chain.slice(1) + ' attests data existed as of ' + (new Date(results[chain] * 1000)))
+          console.log('Success! ' + chain[0].toUpperCase() + chain.slice(1) + ' attests data existed as of ' + (new Date(results[chain] * 1000)))
         })
       }
     }).catch(err => {

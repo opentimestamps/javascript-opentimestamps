@@ -279,24 +279,30 @@ module.exports = {
       res.push(self.verifyAttestation(attestation, msg, options))
     })
 
-    function min(a,b) { return a.attestedTime < b.attestedTime ? a : b; }
-    function groupBy(xs, key) {
-      return xs.reduce(function(rv, x) {
-          (rv[x[key]] = rv[x[key]] || []).push(x);
-          return rv;
-      }, {});
+    function min (a, b) { return a.attestedTime < b.attestedTime ? a : b }
+    function groupBy (xs, key) {
+      return xs.reduce(function (rv, x) {
+        (rv[x[key]] = rv[x[key]] || []).push(x)
+        return rv
+      }, {})
     };
 
     // verify all completed attestations
     return new Promise((resolve, reject) => {
       Promise.all(res.map(Utils.softFail)).then(results => {
-        var outputs = {};
-        const filtered = results.filter(i => {if(i instanceof Error) return undefined; else return i;})
-        const groupByChain = groupBy(filtered, 'chain');
+        // check bad attestations
+        const errors = results.filter(i => { if (i instanceof Notary.VerificationError) return i; else return undefined })
+        if (errors.length > 0) {
+          return reject(errors[0])
+        }
 
-        Object.keys(groupByChain).map(key => groupByChain[key]).forEach((items)=>{
-            var item = items.sort(min)[0];
-            outputs[item.chain] = item.attestedTime;
+        var outputs = {}
+        const filtered = results.filter(i => { if (i instanceof Error) return undefined; else return i })
+        const groupByChain = groupBy(filtered, 'chain')
+
+        Object.keys(groupByChain).map(key => groupByChain[key]).forEach((items) => {
+          var item = items.sort(min)[0]
+          outputs[item.chain] = item.attestedTime
         })
 
         return resolve(outputs)
@@ -321,17 +327,17 @@ module.exports = {
             // One Bitcoin attestation is enough
             resolve({ attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader), chain})
           }).catch(err => {
-            reject(new Error('Bitcoin verification failed: ' + err.message))
+            reject(new Notary.VerificationError(chain + ' verification failed: ' + err.message))
           })
         }).catch(() => {
-          reject(new Error('Bitcoin block height ' + attestation.height + ' not found'))
+          reject(new Notary.VerificationError(chain + ' block height ' + attestation.height + ' not found'))
         })
       }
 
       if (attestation instanceof Notary.PendingAttestation) {
         return reject(new Error('PendingAttestation'))
       } else if (attestation instanceof Notary.UnknownAttestation) {
-          return reject(new Error('UnknownAttestation'))
+        return reject(new Error('UnknownAttestation'))
       } else if (attestation instanceof Notary.EthereumBlockHeaderAttestation) {
         try {
           const web3 = new Web3()
@@ -411,32 +417,32 @@ module.exports = {
     const promises = []
     const self = this
 
-    function isPending(stamp){
-        if(stamp.isTimestampComplete()){
-          return undefined
-        }else{
-          return stamp
-        }
+    function isPending (stamp) {
+      if (stamp.isTimestampComplete()) {
+        return undefined
+      } else {
+        return stamp
+      }
     }
 
     timestamp.directlyVerified().filter(stamp => isPending(stamp)).forEach(subStamp => {
       subStamp.attestations.forEach(attestation => {
-        if (attestation instanceof Notary.PendingAttestation){
-            const commitment = subStamp.msg
-            // check to force override calendars
-            const calendars = []
-            if (calendarUrls && calendarUrls.length > 0) {
-                calendarUrls.forEach(calendar => {
-                    calendars.push(new Calendar.RemoteCalendar(calendar))
-                })
-            } else {
-                calendars.push(new Calendar.RemoteCalendar(attestation.uri))
-            }
-
-            calendars.forEach(calendar => {
-                // console.log('Checking calendar ' + attestation.uri + ' for ' + Utils.bytesToHex(subStamp.msg));
-                promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations))
+        if (attestation instanceof Notary.PendingAttestation) {
+          const commitment = subStamp.msg
+          // check to force override calendars
+          const calendars = []
+          if (calendarUrls && calendarUrls.length > 0) {
+            calendarUrls.forEach(calendar => {
+              calendars.push(new Calendar.RemoteCalendar(calendar))
             })
+          } else {
+            calendars.push(new Calendar.RemoteCalendar(attestation.uri))
+          }
+
+          calendars.forEach(calendar => {
+            // console.log('Checking calendar ' + attestation.uri + ' for ' + Utils.bytesToHex(subStamp.msg));
+            promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations))
+          })
         }
       })
     })
