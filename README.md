@@ -89,6 +89,9 @@ Create timestamp `README.md.ots` from this `README.md` with the aid of a remote 
 
 ```shell
 $ ots-cli.js stamp README.md
+Submitting to remote calendar https://alice.btc.calendar.opentimestamps.org
+Submitting to remote calendar https://bob.btc.calendar.opentimestamps.org
+Submitting to remote calendar https://finney.calendar.eternitywall.com
 The timestamp proof 'README.md.ots' has been created!
 ```
 
@@ -96,6 +99,9 @@ If you already have the hash of some file, you don't need to rehash it:
 
 ```shell
 $ ots-cli.js stamp -d 05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9
+Submitting to remote calendar https://alice.btc.calendar.opentimestamps.org
+Submitting to remote calendar https://bob.btc.calendar.opentimestamps.org
+Submitting to remote calendar https://finney.calendar.eternitywall.com
 The timestamp proof '05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9.ots' has been created!
 ```
 Note that verify implicity requires the file must be called like the .ots receipt but without the ots, if you timestamp hashes and want to verify you need to rename files accordingly.
@@ -107,6 +113,9 @@ The stamp command supports multiple files or hashes as arguments.
 
 ```shell
 $ ots-cli.js stamp README.md ots-cli.js
+Submitting to remote calendar https://alice.btc.calendar.opentimestamps.org
+Submitting to remote calendar https://bob.btc.calendar.opentimestamps.org
+Submitting to remote calendar https://finney.calendar.eternitywall.com
 The timestamp proof 'ots-cli.js.ots' has been created!
 The timestamp proof 'README.md.ots' has been created!
 ```
@@ -170,6 +179,8 @@ Upgrade incomplete remote calendar timestamps to be independently verifiable. Th
 ```shell
 $ ots-cli.js upgrade examples/incomplete.txt.ots
 Timestamp has been successfully upgraded!
+The file .bak was saved!
+The file .ots was upgraded
 ```
 
 ## From code
@@ -269,7 +280,7 @@ const fileOts = Buffer.from('004f70656e54696d657374616d7073000050726f6f6600bf89e
 const detached = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), file);
 const detachedOts = OpenTimestamps.DetachedTimestampFile.deserialize(fileOts);
 OpenTimestamps.verify(detachedOts,detached).then(verifyResult => {
-  // return a timestamp if verified, undefined otherwise.
+  // return a timestamp for every attestation if verified, undefined otherwise.
   console.log(verifyResult);
 });
 ```
