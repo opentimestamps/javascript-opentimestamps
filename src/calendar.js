@@ -9,6 +9,7 @@
 
 const requestPromise = require('request-promise')
 const Promise = require('promise')
+const url = require('url');
 /*
 const bitcoin = require('bitcoinjs-lib') // v2.x.x
 const bitcoinMessage = require('bitcoinjs-message');
@@ -73,10 +74,9 @@ class RemoteCalendar {
    * and {@link reject} if rejected.
    */
   submit (digest) {
-    // console.log('digest ', Utils.bytesToHex(digest));
 
     const options = {
-      url: this.url + '/digest',
+      url: url.resolve(this.url, 'digest'),
       method: 'POST',
       headers: {
         Accept: 'application/vnd.opentimestamps.v1',
@@ -126,10 +126,9 @@ class RemoteCalendar {
    * and {@link reject} if rejected.
    */
   getTimestamp (commitment) {
-    // console.error('commitment ', Utils.bytesToHex(commitment));
 
     const options = {
-      url: this.url + '/timestamp/' + Utils.bytesToHex(commitment),
+      url: url.resolve(this.url, 'timestamp/') + Utils.bytesToHex(commitment),
       method: 'GET',
       headers: {
         Accept: 'application/vnd.opentimestamps.v1',
