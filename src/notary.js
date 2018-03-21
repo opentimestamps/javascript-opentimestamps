@@ -7,11 +7,12 @@
  * @license LPGL3
  */
 
+require('extend-error')
 const Context = require('./context.js')
 const Utils = require('./utils.js')
 
-class VerificationError extends Error {
-}
+/* Errors */
+const VerificationError = Error.extend('VerificationError')
 
 /** Class representing Timestamp signature verification */
 class TimeAttestation {

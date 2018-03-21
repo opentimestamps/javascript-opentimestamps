@@ -8,6 +8,7 @@
     "bitcore-message": "^1.0.4",
     "bytebuffer": "^5.0.1",
     "commander": "^2.15.0",
+    "extend-error": "0.0.2",
     "fs": "0.0.1-security",
     "keccak": "^1.4.0",
     "promise": "^7.3.1",

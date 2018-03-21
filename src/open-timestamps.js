@@ -291,7 +291,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       Promise.all(res.map(Utils.softFail)).then(results => {
         // check bad attestations
-        const errors = results.filter(i => { if (i instanceof Notary.VerificationError) return i; else return undefined })
+        const errors = results.filter(i => { if (i.constructor === Notary.VerificationError) return i; else return undefined })
         if (errors.length > 0) {
           return reject(errors[0])
         }
@@ -325,7 +325,7 @@ module.exports = {
           console.log('Lite-client verification, assuming block ' + blockHash + ' is valid')
           insight.block(blockHash).then(blockHeader => {
             // One Bitcoin attestation is enough
-            resolve({ attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader), chain})
+            resolve({attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader), chain})
           }).catch(err => {
             reject(new Notary.VerificationError(chain + ' verification failed: ' + err.message))
           })

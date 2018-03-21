@@ -6,40 +6,32 @@
  * @author EternityWall
  * @license LPGL3
  */
+require('extend-error')
 const Utils = require('./utils.js')
 
-class ValueError extends Error {
-}
-class TypeError extends Error {
-}
+/* Errors */
+const ValueError = Error.extend('ValueError')
+const TypeError = Error.extend('TypeError')
 // Base class for all errors encountered during deserialization
-class DeserializationError extends Error {
-}
+const DeserializationError = Error.extend('DeserializationError')
 // Raise this when the file format magic number is incorrect.
-class BadMagicError extends DeserializationError {
-}
+const BadMagicError = DeserializationError.extend('BadMagicError')
 //  Raise this a major version is unsupported
-class UnsupportedMajorVersion extends DeserializationError {
-}
+const UnsupportedMajorVersion = Error.extend('UnsupportedMajorVersion')
 // Truncated data encountered while deserializing
-class TruncationError extends DeserializationError {
-}
+const TruncationError = DeserializationError.extend('TruncationError')
 // Trailing garbage found after deserialization finished
 // Raised when deserialization otherwise succeeds without errors, but excess
 // data is present after the data we expected to get.
-class TrailingGarbageError extends DeserializationError {
-}
+const TrailingGarbageError = DeserializationError.extend('TrailingGarbageError')
 // Data is too deeply nested to be deserialized
 // Raised when deserializing recursively defined data structures that exceed
 // the recursion limit for that particular data structure.
-class RecursionLimitError extends DeserializationError {
-}
+const RecursionLimitError = DeserializationError.extend('RecursionLimitError')
 // Wrong type for specified serializer
-class SerializerTypeError extends TypeError {
-}
+const SerializerTypeError = TypeError.extend('SerializerTypeError')
 // Inappropriate value to be serialized (of correct type)
-class SerializerValueError extends ValueError {
-}
+const SerializerValueError = ValueError.extend('SerializerValueError')
 
 /** Class representing Stream Deserialization Context for input buffer. */
 class StreamDeserializationContext {

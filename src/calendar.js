@@ -10,6 +10,7 @@
 const requestPromise = require('request-promise')
 const Promise = require('promise')
 const url = require('url')
+require('extend-error')
 /*
 const bitcoin = require('bitcoinjs-lib') // v2.x.x
 const bitcoinMessage = require('bitcoinjs-message');
@@ -21,13 +22,10 @@ const Utils = require('./utils.js')
 const Context = require('./context.js')
 const Timestamp = require('./timestamp.js')
 
-/* Exceptions */
-class CommitmentNotFoundError extends Error {
-}
-class URLError extends Error {
-}
-class ExceededSizeError extends Error {
-}
+/* Errors */
+const CommitmentNotFoundError = Error.extend('CommitmentNotFoundError')
+const URLError = Error.extend('URLError')
+const ExceededSizeError = Error.extend('ExceededSizeError')
 
 /** Class representing Remote Calendar server interface */
 class RemoteCalendar {
