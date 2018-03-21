@@ -416,17 +416,14 @@ module.exports = {
     const promises = []
     const self = this
 
-    function isPending (stamp) {
-      if (stamp.isTimestampComplete()) {
-        return undefined
-      } else {
-        return stamp
-      }
-    }
-
-    timestamp.directlyVerified().filter(stamp => isPending(stamp)).forEach(subStamp => {
+    timestamp.directlyVerified().forEach(subStamp => {
       subStamp.attestations.forEach(attestation => {
         if (attestation instanceof Notary.PendingAttestation) {
+          // check if already resolved
+          if (subStamp.isTimestampComplete()) {
+            return
+          }
+
           const commitment = subStamp.msg
           // check to force override calendars
           const calendars = []

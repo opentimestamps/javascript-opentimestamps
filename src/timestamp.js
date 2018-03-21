@@ -426,7 +426,7 @@ class Timestamp {
   isTimestampComplete () {
     let found = false
     this.allAttestations().forEach(attestation => {
-      if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
+      if (attestation instanceof Notary.PendingAttestation) {
         found = true
       }
     })
