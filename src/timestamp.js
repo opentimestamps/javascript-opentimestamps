@@ -350,7 +350,6 @@ class Timestamp {
     let r = ''
     if (this.attestations.length > 0) {
       this.attestations.forEach(attestation => {
-        console.log(attestation)
         r += Timestamp.indention(indent) + 'verify ' + attestation.toString() + strResult(verbosity, this.msg) + '\n'
         if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
           const tx = Utils.bytesToHex(new Ops.OpReverse().call(this.msg))
