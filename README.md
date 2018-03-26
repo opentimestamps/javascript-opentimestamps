@@ -33,10 +33,7 @@ $ npm install -g javascript-opentimestamps
 
 ##### Get the "binaries"
 
-Choose one of the following options:
- 
- * Take the [js](https://opentimestamps.org/bower_components/bower-opentimestamps/bower-opentimestamps.js) used by opentimestamps.org
- * Install the lib from bower `bower install bower-opentimestamps`
+Take the [js](https://opentimestamps.org/assets/javascripts/vendor/opentimestamps.js) used by opentimestamps.org 
 
 ##### Build from source
 
