@@ -177,12 +177,11 @@ class StreamSerializationContext {
     }
   }
   writeByte (value) {
-    if (this.counter >= this.length) {
+    if (this.length >= this.buffer.length) {
       const newLenght = this.length * 2
       const swapBuffer = new Uint8Array(newLenght)
       swapBuffer.set(this.buffer, 0)
       this.buffer = swapBuffer
-      this.length = newLenght
     }
 
     if (isNaN(value)) {
