@@ -431,6 +431,8 @@ class Timestamp {
           found = true
       } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
           found = true
+      } else if (attestation instanceof Notary.UnknownAttestation) {
+          found = true
       }
     })
     return found
