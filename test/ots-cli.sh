@@ -41,7 +41,7 @@ diff examples/incomplete.txt.ots examples/incomplete.txt.ots.upgraded && \
 cp examples/incomplete.txt.ots.old examples/incomplete.txt.ots && rm examples/incomplete.txt.ots.bak examples/incomplete.txt.ots.old examples/incomplete.txt.ots.upgraded && \
 
 # Test: verify ots
-HELLOWORLD="Success! Bitcoin attests data existed as of" && \
+HELLOWORLD="Success! Bitcoin block 358391 attests data existed as of" && \
 HELLOWORLD_HASH="03ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab340" && \
 echo ">> node ots-cli.js verify examples/hello-world.txt.ots" && node ots-cli.js verify examples/hello-world.txt.ots | grep "${HELLOWORLD}" && \
 echo ">> node ots-cli.js verify -f examples/hello-world.txt examples/hello-world.txt.ots" && node ots-cli.js verify -f examples/hello-world.txt examples/hello-world.txt.ots | grep "${HELLOWORLD}" && \
@@ -66,12 +66,12 @@ node ots-cli.js info examples/hello-world.txt.ltc.ots | grep "verify PendingAtte
 
 # Test : litecoin verify
 echo ">> node ots-cli.js verify examples/hello-world.txt.ltc.ots" && \
-node ots-cli.js verify examples/hello-world.txt.ltc.ots | grep "Success! Litecoin attests data existed as of Wed Mar 21 2018" && \
+node ots-cli.js verify examples/hello-world.txt.ltc.ots | grep "Success! Litecoin block 358391 attests data existed as of" && \
 
 # Test : litecoin upgrade
 echo ">> node ots-cli.js upgrade examples/hello-world.txt.ltc.ots" && \
 cp examples/hello-world.txt.ltc.ots examples/hello-world.txt.ltc.ots.old && \
-node ots-cli.js upgrade examples/hello-world.txt.ltc.ots | grep "Got 1 attestation(s) from https://ltc.calendar.catallaxy.com/" && \
+node ots-cli.js upgrade examples/hello-world.txt.ltc.ots | grep "Got 1 attestation(s) from https://ltc.calendar.catallaxy.com" && \
 node ots-cli.js info examples/hello-world.txt.ltc.ots | grep "# Litecoin block merkle root 0cb6709c452f0eefebcc093c54d5cc77356f0c0dc16df6790c7b33f3e02070b1" && \
 cp examples/hello-world.txt.ltc.ots.old examples/hello-world.txt.ltc.ots && \
 rm examples/hello-world.txt.ltc.ots.old examples/hello-world.txt.ltc.ots.bak && \

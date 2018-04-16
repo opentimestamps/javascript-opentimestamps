@@ -221,7 +221,7 @@ test('OpenTimestamps.verify()', assert => {
     return
   }
   OpenTimestamps.verify(detachedOts, detached).then(result => {
-    assert.deepEqual(result, {'bitcoin': 1473227803}) // verify on python call upgrade, in this case result should be 1473227803
+    assert.deepEqual(result, {'bitcoin': {'timestamp': 1473227803, 'height': 428648}})
     assert.end()
   }).catch(err => {
     assert.fail('err=' + err)
@@ -234,7 +234,7 @@ test('OpenTimestamps.verify()', assert => {
   const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts))
   OpenTimestamps.verify(detachedOts, detached).then(result => {
     assert.true(result !== undefined)
-    assert.deepEqual(result, {'bitcoin': 1432827678})
+    assert.deepEqual(result, {'bitcoin': {'timestamp': 1432827678, 'height': 358391}})
     assert.end()
   }).catch(err => {
     assert.fail('err=' + err)
@@ -259,7 +259,7 @@ test('OpenTimestamps.verify()', assert => {
   const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(knownUnknownOts))
   OpenTimestamps.verify(detachedOts, detached).then(result => {
     assert.true(result !== undefined)
-    assert.deepEqual(result, {'bitcoin': 1474865937})
+    assert.deepEqual(result, {'bitcoin': {'timestamp': 1474865937, 'height': 431564}})
     assert.true(detached !== undefined)
     assert.true(detachedOts !== undefined)
     assert.end()
@@ -309,7 +309,7 @@ test('OpenTimestamps.verify()', assert => {
   }
   OpenTimestamps.verify(detachedOts, detached, options).then(result => {
     assert.true(result !== undefined)
-    assert.deepEqual(result, {'bitcoin': 1432827678})
+    assert.deepEqual(result, {'bitcoin': {'timestamp': 1432827678, 'height': 358391}})
     assert.end()
   }).catch(err => {
     assert.fail('err=' + err)
@@ -358,7 +358,7 @@ test('OpenTimestamps.verify()', assert => {
   }
   OpenTimestamps.verify(detachedOts, detached, options).then(result => {
     assert.true(result !== undefined)
-    assert.deepEqual(result, {'bitcoin': 1432827678})
+    assert.deepEqual(result, {'bitcoin': {'timestamp': 1432827678, 'height': 358391}})
     assert.end()
   }).catch(err => {
     assert.fail('err=' + err)
@@ -375,7 +375,7 @@ test('OpenTimestamps.verify()', assert => {
   }
   OpenTimestamps.verify(detachedOts, detached, options).then(result => {
     assert.true(result !== undefined)
-    assert.deepEqual(result, {'bitcoin': 1432827678})
+    assert.deepEqual(result, {'bitcoin': {'timestamp': 1432827678, 'height': 358391}})
     assert.end()
   }).catch(err => {
     assert.fail('err=' + err)

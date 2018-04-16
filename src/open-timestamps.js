@@ -302,7 +302,7 @@ module.exports = {
 
         Object.keys(groupByChain).map(key => groupByChain[key]).forEach((items) => {
           var item = items.sort(min)[0]
-          outputs[item.chain] = item.attestedTime
+          outputs[item.chain] = { 'timestamp': item.attestedTime, 'height': item.height }
         })
 
         return resolve(outputs)
@@ -325,7 +325,7 @@ module.exports = {
           console.log('Lite-client verification, assuming block ' + blockHash + ' is valid')
           insight.block(blockHash).then(blockHeader => {
             // One Bitcoin attestation is enough
-            resolve({attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader), chain})
+            resolve({attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader), 'chain': chain, 'height': attestation.height})
           }).catch(err => {
             reject(new Notary.VerificationError(chain + ' verification failed: ' + err.message))
           })
@@ -360,7 +360,8 @@ module.exports = {
               // One Bitcoin attestation is enought
               resolve({
                 attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
-                chain: 'bitcoin'
+                chain: 'bitcoin',
+                height: attestation.height
               })
             }).catch((err) => {
               reject(new Notary.VerificationError('Bitcoin verification failed: ' + err.message))
