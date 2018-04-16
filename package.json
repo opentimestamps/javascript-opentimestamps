@@ -11,6 +11,7 @@
     "extend-error": "0.0.2",
     "fs": "0.0.1-security",
     "keccak": "^1.4.0",
+    "moment-timezone": "^0.5.14",
     "promise": "^7.3.1",
     "properties": "^1.2.1",
     "randomstring": "^1.1.5",

@@ -3,6 +3,7 @@
 // Dependencies
 const fs = require('fs')
 const program = require('commander')
+const moment = require('moment-timezone')
 const OpenTimestamps = require('./src/open-timestamps.js')
 const Utils = require('./src/utils.js')
 const DetachedTimestampFile = require('./src/detached-timestamp-file.js')
@@ -298,7 +299,8 @@ function verify (argsFileOts, options) {
     verifyPromise.then(results => {
       if (results) {
         Object.keys(results).map(chain => {
-          console.log('Success! ' + chain[0].toUpperCase() + chain.slice(1) + ' block ' + results[chain].height + ' attests data existed as of ' + (new Date(results[chain].timestamp * 1000)))
+          var date = moment(results[chain].timestamp * 1000).tz(moment.tz.guess()).format('YYYY-MM-DD z')
+          console.log('Success! ' + chain[0].toUpperCase() + chain.slice(1) + ' block ' + results[chain].height + ' attests existence as of ' + date)
         })
       }
     }).catch(err => {
