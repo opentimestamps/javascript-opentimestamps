@@ -66,7 +66,7 @@ node ots-cli.js info examples/hello-world.txt.ltc.ots | grep "verify PendingAtte
 
 # Test : litecoin verify
 echo ">> node ots-cli.js verify examples/hello-world.txt.ltc.ots" && \
-node ots-cli.js verify examples/hello-world.txt.ltc.ots | grep "Success! Litecoin block 358391 attests existence as of" && \
+node ots-cli.js verify examples/hello-world.txt.ltc.ots | grep "Success! Litecoin block 1389221 attests existence as of" && \
 
 # Test : litecoin upgrade
 echo ">> node ots-cli.js upgrade examples/hello-world.txt.ltc.ots" && \
