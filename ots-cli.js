@@ -9,6 +9,7 @@ const Utils = require('./src/utils.js')
 const DetachedTimestampFile = require('./src/detached-timestamp-file.js')
 const Ops = require('./src/ops.js')
 const Context = require('./src/context.js')
+const Calendar = require('./src/calendar.js')
 
 // Constants
 const path = process.argv[1].split('/')
@@ -24,11 +25,14 @@ function collect (val, memo) {
 
 program
   .version(require('./package.json').version)
+  .option('-v, --verbose', 'Be more verbose.')
+  .option('-l, --whitelist', 'Add a calendar to the whitelist.')
+  .option('--no-default-whitelist', 'Do not load the default remote calendar whitelist; ' +
+        'contact only calendars that have been manually added with --whitelist')
 
 const infoCommand = program
   .command('info [FILE_OTS]')
   .alias('i')
-  .option('-v, --verbose', 'Be more verbose.')
   .description('Show information on a timestamp.')
   .action((file, options) => {
     isExecuted = true
@@ -79,7 +83,7 @@ const stampCommand = program
       return
     }
 
-    stamp(files, parameters)
+    stamp(files, options)
   })
 
 const verifyCommand = program
@@ -104,7 +108,7 @@ const verifyCommand = program
       console.log(title + ' stamp: ' + options.algorithm + ' unsupported ')
       return
     }
-
+    options = parseCommon(options)
     verify(file, options)
   })
 
@@ -119,6 +123,8 @@ const upgradeCommand = program
       console.log(upgradeCommand.helpInformation())
       return
     }
+    options = parseCommon(options)
+    options.calendars = options.calendar
     upgrade(file, options)
   })
 
@@ -129,6 +135,18 @@ if (!isExecuted) {
 }
 
 // FUNCTIONS
+function parseCommon (options) {
+  var whitelist = new Calendar.UrlWhitelist()
+  if (!options.no_default_whitelist) {
+    whitelist = Calendar.DEFAULT_CALENDAR_WHITELIST
+  }
+  whitelist.urls.forEach(url => {
+    whitelist.add(url)
+  })
+  options.whitelist = whitelist
+  return options
+}
+
 function info (argsFileOts, options) {
   const otsPromise = Utils.readFilePromise(argsFileOts, null)
 
@@ -294,7 +312,7 @@ function verify (argsFileOts, options) {
     }
 
     // Opentimestamps verify
-    const verifyPromise = OpenTimestamps.verify(detachedOts, detached)
+    const verifyPromise = OpenTimestamps.verify(detachedOts, detached, options)
 
     verifyPromise.then(results => {
       if (results) {
@@ -333,8 +351,7 @@ function upgrade (argsFileOts, options) {
         throw err
       }
     }
-
-    const upgradePromise = OpenTimestamps.upgrade(detachedOts, options.calendar)
+    const upgradePromise = OpenTimestamps.upgrade(detachedOts, options)
     upgradePromise.then(changed => {
       // check timestamp
       if (changed) {

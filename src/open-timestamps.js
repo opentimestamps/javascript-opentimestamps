@@ -122,6 +122,7 @@ module.exports = {
         options = {}
       }
       if (options.privateCalendars && options.privateCalendars.length > 0) {
+        // Parse options : private calendars
         options.publicCalendars = []
         if (!options.m || options.m === 0) {
           options.m = options.privateCalendars.length
@@ -133,10 +134,11 @@ module.exports = {
         // Parse options : public calendars
         options.privateCalendars = []
         if (!options.publicCalendars || options.publicCalendars.length === 0) {
-          options.publicCalendars = []
-          options.publicCalendars.push('https://alice.btc.calendar.opentimestamps.org')
-          options.publicCalendars.push('https://bob.btc.calendar.opentimestamps.org')
-          options.publicCalendars.push('https://finney.calendar.eternitywall.com')
+          options.publicCalendars = [
+            'https://a.pool.opentimestamps.org',
+            'https://b.pool.opentimestamps.org',
+            'https://a.pool.eternitywall.com',
+            'https://ots.btc.catallaxy.com']
         }
         if (!options.m || options.m === 0) {
           options.m = 1
@@ -240,6 +242,7 @@ module.exports = {
    * @param {Object} options -
    *    insight.urls: array of insight server urls
    *    insight.timeout: timeout (in seconds) used for calls to insight servers
+   *    whitelist - Remote calendar whitelist
    */
   verify (detachedStamped, detachedOriginal, options) {
     // Compare stamped vs original detached file
@@ -253,7 +256,7 @@ module.exports = {
 
     const self = this
     return new Promise((resolve, reject) => {
-      self.upgradeTimestamp(detachedStamped.timestamp).then(() => {
+      self.upgradeTimestamp(detachedStamped.timestamp, options).then(() => {
         self.verifyTimestamp(detachedStamped.timestamp, options).then(results => {
           return resolve(results)
         }).catch(err => {
@@ -268,6 +271,7 @@ module.exports = {
    * @param {Object} options -
    *    insight.urls: array of insight server urls
    *    insight.timeout: timeout (in seconds) used for calls to insight servers
+   *    whitelist - Remote calendar whitelist
    * @return {int} unix timestamp if verified, undefined otherwise.
    */
   verifyTimestamp (timestamp, options) {
@@ -382,13 +386,15 @@ module.exports = {
 
   /** Upgrade a timestamp.
    * @param {DetachedTimestampFile} detached - The DetachedTimestampFile object.
-   * @param {string[]} calendarUrls - Override calendars in timestamp.
+   * @param {Object} options -
+   *    calendars - Remote calendar whitelist
+   *    whitelist - Remote calendar whitelist
    * @return {Promise} resolve(changed) : changed = True if the timestamp has changed, False otherwise.
    */
-  upgrade (detached, calendarUrls) {
+  upgrade (detached, options) {
     return new Promise((resolve, reject) => {
       // Upgrade timestamp
-      this.upgradeTimestamp(detached.timestamp, calendarUrls).then(changed => {
+      this.upgradeTimestamp(detached.timestamp, options).then(changed => {
         if (changed) {
           // console.log('Timestamp upgraded');
         }
@@ -409,13 +415,22 @@ module.exports = {
   /** Attempt to upgrade an incomplete timestamp to make it verifiable.
    * Note that this means if the timestamp that is already complete, False will be returned as nothing has changed.
    * @param {Timestamp} timestamp - The timestamp.
-   * @param {string[]} calendarUrls - Override calendars in timestamp.
+   * @param {Object} options -
+   *    calendars - Remote calendar whitelist
+   *    whitelist - Remote calendar whitelist
    * @return {Promise} True if the timestamp has changed, False otherwise.
    */
-  upgradeTimestamp (timestamp, calendarUrls) {
+  upgradeTimestamp (timestamp, options) {
     const existingAttestations = timestamp.getAttestations()
     const promises = []
     const self = this
+
+    if (!options){
+        options = {}
+    }
+    if (!options.whitelist) {
+      options.whitelist = Calendar.DEFAULT_CALENDAR_WHITELIST
+    }
 
     timestamp.directlyVerified().forEach(subStamp => {
       subStamp.attestations.forEach(attestation => {
@@ -424,20 +439,22 @@ module.exports = {
           if (subStamp.isTimestampComplete()) {
             return
           }
-
-          const commitment = subStamp.msg
-          // check to force override calendars
-          const calendars = []
-          if (calendarUrls && calendarUrls.length > 0) {
-            calendarUrls.forEach(calendar => {
-              calendars.push(new Calendar.RemoteCalendar(calendar))
-            })
+          var calendars = []
+          if (options.calendars && options.calendars.length > 0) {
+            calendars = options.calendars.slice()
+            console.log('Attestation URI ' + attestation.uri + ' overridden by user-specified remote calendar(s)')
           } else {
-            calendars.push(new Calendar.RemoteCalendar(attestation.uri))
+            if (options.whitelist.contains(attestation.uri)) {
+              calendars.push(attestation.uri)
+            } else {
+              console.log('Ignoring attestation from calendar ' + attestation.uri + ': Calendar not in whitelist')
+            }
           }
 
-          calendars.forEach(calendar => {
-            // console.log('Checking calendar ' + attestation.uri + ' for ' + Utils.bytesToHex(subStamp.msg));
+          const commitment = subStamp.msg
+          calendars.forEach(calendarUrl => {
+            const calendar = new Calendar.RemoteCalendar(calendarUrl)
+            // console.log('Checking calendar ' + attestation.uri + ' for ' + Utils.bytesToHex(subStamp.msg))
             promises.push(self.upgradeStamp(subStamp, calendar, commitment, existingAttestations))
           })
         }
