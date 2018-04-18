@@ -10,6 +10,7 @@
 const requestPromise = require('request-promise')
 const Promise = require('promise')
 const url = require('url')
+const minimatch = require('minimatch')
 require('extend-error')
 /*
 const bitcoin = require('bitcoinjs-lib') // v2.x.x
@@ -35,6 +36,11 @@ class RemoteCalendar {
    */
   constructor (url) {
     this.url = url
+    this.headers = {
+      Accept: 'application/vnd.opentimestamps.v1',
+      'User-Agent': 'javascript-opentimestamps',
+      'Content-Type': 'application/x-www-form-urlencoded'
+    }
   }
 
   /**
@@ -75,11 +81,7 @@ class RemoteCalendar {
     const options = {
       url: url.resolve(this.url, 'digest'),
       method: 'POST',
-      headers: {
-        Accept: 'application/vnd.opentimestamps.v1',
-        'User-Agent': 'javascript-opentimestamps',
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
+      headers: this.headers,
       encoding: null,
       body: Buffer.from(digest)
     }
@@ -126,11 +128,7 @@ class RemoteCalendar {
     const options = {
       url: url.resolve(this.url, 'timestamp/') + Utils.bytesToHex(commitment),
       method: 'GET',
-      headers: {
-        Accept: 'application/vnd.opentimestamps.v1',
-        'User-Agent': 'javascript-opentimestamps',
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
+      headers: this.headers,
       encoding: null
     }
 
@@ -156,8 +154,61 @@ class RemoteCalendar {
   }
 }
 
+class UrlWhitelist {
+  constructor (urls) {
+    this.urls = new Set()
+    if (!urls) {
+      return
+    }
+    urls.forEach(u => {
+      this.add(u)
+    })
+  }
+
+  add (url) {
+    if (typeof (url) !== 'string') {
+      throw new TypeError('URL must be a string')
+    }
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      this.urls.add(url)
+    } else {
+      this.urls.add('http://' + url)
+      this.urls.add('https://' + url)
+    }
+  }
+
+  contains (url) {
+    var found = false
+    this.urls.forEach(u => {
+      if (minimatch(url, u)) {
+        found = true
+      }
+    })
+    return found
+  }
+
+  toString () {
+    return 'UrlWhitelist([' + this.urls.join(',') + '])'
+  }
+}
+
+const DEFAULT_CALENDAR_WHITELIST =
+    new UrlWhitelist(['https://*.calendar.opentimestamps.org', // Run by Peter Todd
+    'https://*.calendar.eternitywall.com', // Run by Riccardo Casatta of Eternity Wall
+    'https://*.calendar.catallaxy.com' // Run by Vincent Cloutier of Catallaxy
+  ])
+
+const DEFAULT_AGGREGATORS =
+    ['https://a.pool.opentimestamps.org',
+      'https://b.pool.opentimestamps.org',
+      'https://a.pool.eternitywall.com',
+      'https://ots.btc.catallaxy.com']
+
 module.exports = {
   RemoteCalendar,
+  UrlWhitelist,
+  DEFAULT_CALENDAR_WHITELIST,
+  DEFAULT_AGGREGATORS,
   CommitmentNotFoundError,
   URLError,
   ExceededSizeError
