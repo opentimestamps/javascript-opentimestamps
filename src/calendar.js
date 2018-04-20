@@ -86,17 +86,9 @@ class RemoteCalendar {
       body: Buffer.from(digest)
     }
     if (this.key !== undefined) {
-      /* var privateKey = this.key.d.toBuffer(32);
-      var message = String(digest);
-      var messagePrefix = bitcoin.networks.bitcoin.messagePrefix;
-      var signature = bitcoinMessage.sign(message, messagePrefix, privateKey, this.key.compressed).toString('base64');
-      console.log(signature);
-*/
       const privateKey = bitcore.PrivateKey.fromWIF(this.key)
-      const message = digest.toString('hex')
+      const message = Utils.bytesToHex(digest)
       const signature = Message(message).sign(privateKey)
-      console.log(signature)
-
       options.headers['x-signature'] = signature
     }
 
@@ -176,7 +168,7 @@ class UrlWhitelist {
   }
 
   contains (url) {
-    return [... this.urls].filter(u => minimatch(url, u)).length > 0
+    return [...this.urls].filter(u => minimatch(url, u)).length > 0
   }
 
   toString () {

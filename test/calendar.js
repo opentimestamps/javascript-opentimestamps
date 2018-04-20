@@ -41,8 +41,8 @@ test('Calendar.submit()', assert => {
 }); */
 
 test('Calendar.privateSubmit()', assert => {
-  const digest = Utils.randBytes(32)
-  Utils.readSignatureFile('./signature.wif')
+  const digest = Array.from(Utils.randBytes(32))
+  Utils.readSignatureFile('../signature.wif')
     .then(hashmap => {
       let calendarUrl = ''
       let signature = ''
