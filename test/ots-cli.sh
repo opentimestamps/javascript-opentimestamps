@@ -51,7 +51,7 @@ echo ">> node ots-cli.js verify -d ${HELLOWORLD_HASH} -a sha256 examples/hello-w
 # Test: upgrade pending attestation with different calendar url
 echo ">> node ots-cli.js upgrade -c https://finney.calendar.eternitywall.com examples/incomplete.txt.ots" && \
 cp examples/incomplete.txt.ots examples/incomplete.txt.ots.old && \
-node ots-cli.js upgrade -c https://finney.calendar.eternitywall.com examples/incomplete.txt.ots || \
+node ots-cli.js upgrade -c https://finney.calendar.eternitywall.com examples/incomplete.txt.ots && \
 diff examples/incomplete.txt.ots examples/incomplete.txt.ots.old && \
 cp examples/incomplete.txt.ots.old examples/incomplete.txt.ots && \
 rm examples/incomplete.txt.ots.old && \
