@@ -134,11 +134,7 @@ module.exports = {
         // Parse options : public calendars
         options.privateCalendars = []
         if (!options.publicCalendars || options.publicCalendars.length === 0) {
-          options.publicCalendars = [
-            'https://a.pool.opentimestamps.org',
-            'https://b.pool.opentimestamps.org',
-            'https://a.pool.eternitywall.com',
-            'https://ots.btc.catallaxy.com']
+          options.publicCalendars = Calendar.DEFAULT_AGGREGATORS
         }
         if (!options.m || options.m === 0) {
           options.m = 1
