@@ -25,6 +25,8 @@ module.exports = {
    * Show information on a timestamp.
    * @exports OpenTimestamps/info
    * @param {DetachedTimestampFile} detached - The array of detached file to stamp.
+   * @param {Object} options - The option arguments.
+   * @param {boolean} options.verbose - True if verbose output.
    * @return {String} The message to print.
    */
   info (detached, options) {
@@ -52,6 +54,7 @@ module.exports = {
    * Show information on a timestamp.
    * @exports OpenTimestamps/json
    * @param {ArrayBuffer} ots - The ots array buffer.
+   * @return {String} The message to print in Json string format.
    */
   json (ots) {
     const json = {}
@@ -96,8 +99,12 @@ module.exports = {
   /**
    * Create timestamp with the aid of a remote calendar for one or multiple files.
    * @exports OpenTimestamps/stamp
-   * @param {DetachedTimestampFile[]} detaches - The array of detached file to stamp.
-   * @param {Object} options - publicCalendars, Public calendar url list; m, At least M calendars replied; privateCalendars, Private calendar url list with secret key.
+   * @param {DetachedTimestampFile[]} detaches - The array of detached file to stamp; input/output parameter.
+   * @param {Object} options - The option arguments.
+   * @param {String[]} options.publicCalendars - public calendar url list.
+   * @param {number} options.m - at least M calendars replied.
+   * @param {String[]} options.privateCalendars - private calendar url list with secret key.
+   * @return {Promise<void,Error>} if resolve modified detaches parameter.
    */
   stamp (detaches, options) {
     return new Promise((resolve, reject) => {
@@ -162,12 +169,15 @@ module.exports = {
   /**
    * Create a timestamp
    * @param {timestamp} timestamp - The timestamp.
-   * @param {string[]} calendarUrls - List of calendar's to use.
+   * @param {String[]} calendars - Public calendar url list.
+   * @param {number} m - At least M calendars replied.
+   * @param {String[]} privateCalendars - Private calendar url list with secret key.
+   * @return {Promise<Timestamp,Error>} if resolve return new timestamp.
    */
-  createTimestamp (timestamp, publicCalendars, m, privateCalendars) {
+  createTimestamp (timestamp, calendars, m, privateCalendars) {
     const res = []
-    if (publicCalendars) {
-      publicCalendars.forEach(calendar => {
+    if (calendars) {
+        calendars.forEach(calendar => {
         const remote = new Calendar.RemoteCalendar(calendar)
         res.push(remote.submit(timestamp.msg))
         console.log('Submitting to remote calendar ' + calendar)
@@ -235,10 +245,12 @@ module.exports = {
    * @exports OpenTimestamps/verify
    * @param {DetachedTimestampFile} detachedStamped - The detached of stamped file.
    * @param {DetachedTimestampFile} detachedOriginal - The detached of original file.
-   * @param {Object} options -
-   *    insight.urls: array of insight server urls
-   *    insight.timeout: timeout (in seconds) used for calls to insight servers
-   *    whitelist - Remote calendar whitelist
+   * @param {Object} options - The option arguments.
+   * @param {String[]} options.insight.urls - array of insight server urls.
+   * @param {number} options.insight.timeout - timeout (in seconds) used for calls to insight servers.
+   * @param {String[]} options.calendars - Override calendars in timestamp.
+   * @param {UrlWhitelist} options.whitelist - Remote calendar whitelist.
+   * @return {Promise<HashMap<String,Object>,Error>} if resolve return list of verified attestations indexed by chain.
    */
   verify (detachedStamped, detachedOriginal, options) {
     // Compare stamped vs original detached file
@@ -264,11 +276,12 @@ module.exports = {
 
   /** Verify a timestamp.
    * @param {Timestamp} timestamp - The timestamp.
-   * @param {Object} options -
-   *    insight.urls: array of insight server urls
-   *    insight.timeout: timeout (in seconds) used for calls to insight servers
-   *    whitelist - Remote calendar whitelist
-   * @return {int} unix timestamp if verified, undefined otherwise.
+   * @param {Object} options - The option arguments.
+   * @param {String[]} options.insight.urls - array of insight server urls
+   * @param {number} options.insight.timeout - timeout (in seconds) used for calls to insight servers
+   * @return {Promise<HashMap<String,Object>,Error>} if resolve return list of verified attestations indexed by chain.
+   *    timestamp: unix timestamp
+   *    height: block height of the min attestation
    */
   verifyTimestamp (timestamp, options) {
     const res = []
@@ -312,6 +325,17 @@ module.exports = {
     })
   },
 
+  /** Verify an attestation.
+   * @param {TimeAttestation} attestation - The attestation to verify.
+   * @param {byte[]} msg - The digest to verify.
+   * @param {Object} options - The option arguments.
+   * @param {String[]} options.insight.urls - array of insight server urls
+   * @param {number} options.insight.timeout - timeout (in seconds) used for calls to insight servers
+   * @return {Promise<Object,Error>} if resolve return verified attestations parameters
+   *    chain: the chain type
+   *    attestedTime: unix timestamp fo the block
+   *    height: block height of the attestation
+   */
   verifyAttestation (attestation, msg, options) {
     return new Promise((resolve, reject) => {
       function liteVerify (options) {
@@ -381,11 +405,12 @@ module.exports = {
   },
 
   /** Upgrade a timestamp.
+   * @exports OpenTimestamps/upgrade
    * @param {DetachedTimestampFile} detached - The DetachedTimestampFile object.
-   * @param {Object} options -
-   *    calendars - Remote calendar whitelist
-   *    whitelist - Remote calendar whitelist
-   * @return {Promise} resolve(changed) : changed = True if the timestamp has changed, False otherwise.
+   * @param {Object} options - The option arguments.
+   * @param {String[]} options.calendars - Override calendars in timestamp.
+   * @param {UrlWhitelist} options.whitelist - Remote calendar whitelist.
+   * @return {Promise<boolean,Error>} if resolve return True if the timestamp has changed, False otherwise.
    */
   upgrade (detached, options) {
     return new Promise((resolve, reject) => {
@@ -411,18 +436,18 @@ module.exports = {
   /** Attempt to upgrade an incomplete timestamp to make it verifiable.
    * Note that this means if the timestamp that is already complete, False will be returned as nothing has changed.
    * @param {Timestamp} timestamp - The timestamp.
-   * @param {Object} options -
-   *    calendars - Remote calendar whitelist
-   *    whitelist - Remote calendar whitelist
-   * @return {Promise} True if the timestamp has changed, False otherwise.
+   * @param {Object} options - The option arguments.
+   * @param {String[]} options.calendars - Override calendars in timestamp.
+   * @param {UrlWhitelist} options.whitelist - Remote calendar whitelist.
+   * @return {Promise<boolean,Error>} if resolve return True if the timestamp has changed, False otherwise.
    */
   upgradeTimestamp (timestamp, options) {
     const existingAttestations = timestamp.getAttestations()
     const promises = []
     const self = this
 
-    if (!options){
-        options = {}
+    if (!options) {
+      options = {}
     }
     if (!options.whitelist) {
       options.whitelist = Calendar.DEFAULT_CALENDAR_WHITELIST
@@ -474,6 +499,13 @@ module.exports = {
     })
   },
 
+  /** Merge attestations of a timestamp
+     * @param {Timestamp} subStamp - The current timestamp to upgrade.
+     * @param {Calendar} calendar - The calender to check the attestation.
+     * @param {byte[]} commitment - The commitment to upgrade.
+     * @param {TimeAttestation[]} existingAttestations - The timestamp.
+     * @return {Promise<boolean,Error>} if resolve return original and upgraded timestamp.
+     */
   upgradeStamp (subStamp, calendar, commitment, existingAttestations) {
     return new Promise((resolve, reject) => {
       calendar.getTimestamp(commitment).then(upgradedStamp => {
