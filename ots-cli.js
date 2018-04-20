@@ -61,7 +61,7 @@ const stampCommand = program
 
     const parameters = {}
     if (options.calendar) {
-      parameters.publicCalendars = options.calendar
+      parameters.calendars = options.calendar
     }
     if (options.key) {
       parameters.privateCalendars = Utils.readSignatureFile(options.key)
