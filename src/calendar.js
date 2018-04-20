@@ -160,9 +160,7 @@ class UrlWhitelist {
     if (!urls) {
       return
     }
-    urls.forEach(u => {
-      this.add(u)
-    })
+    urls.forEach(u => this.add(u))
   }
 
   add (url) {
@@ -178,13 +176,7 @@ class UrlWhitelist {
   }
 
   contains (url) {
-    var found = false
-    this.urls.forEach(u => {
-      if (minimatch(url, u)) {
-        found = true
-      }
-    })
-    return found
+    return [... this.urls].filter(u => minimatch(url, u)).length > 0
   }
 
   toString () {
