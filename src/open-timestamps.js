@@ -128,7 +128,7 @@ module.exports = {
       if (!options) {
         options = {}
       }
-      if (options.privateCalendars && options.privateCalendars.length > 0) {
+      if (options.privateCalendars && options.privateCalendars.size > 0) {
         // Parse options : private calendars
         options.calendars = []
         if (!options.m || options.m === 0) {
@@ -184,8 +184,9 @@ module.exports = {
       })
     }
     if (privateCalendars) {
-      privateCalendars.forEach(calendar => {
+      privateCalendars.forEach((key, calendar) => {
         const remote = new Calendar.RemoteCalendar(calendar)
+        remote.setKey(key)
         res.push(remote.submit(timestamp.msg))
         console.log('Submitting to remote calendar ' + calendar)
       })

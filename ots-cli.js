@@ -59,31 +59,28 @@ const stampCommand = program
       return
     }
 
-    const parameters = {}
     if (options.calendar) {
-      parameters.calendars = options.calendar
-    }
-    if (options.key) {
-      parameters.privateCalendars = Utils.readSignatureFile(options.key)
-    }
-    if (options.m) {
-      parameters.m = options.m
-    }
-    if (options.digest) {
-      parameters.digest = options.digest
+      options.calendars = options.calendar
     }
 
     if (options.algorithm === undefined) {
-      parameters.algorithm = 'sha256'
+      options.algorithm = 'sha256'
     } else if (['sha1', 'sha256', 'ripemd160'].indexOf(options.algorithm.toLowerCase()) > -1) {
-      parameters.algorithm = options.algorithm.toLowerCase()
+      options.algorithm = options.algorithm.toLowerCase()
     } else {
       console.log('Create timestamp with the aid of a remote calendar.')
       console.log(title + ' stamp: ' + options.algorithm + ' unsupported ')
       return
     }
 
-    stamp(files, options)
+    if (options.key) {
+      Utils.readSignatureFile(options.key).then(hashmap => {
+        options.privateCalendars = hashmap
+        stamp(files, options)
+      })
+    } else {
+      stamp(files, options)
+    }
   })
 
 const verifyCommand = program
