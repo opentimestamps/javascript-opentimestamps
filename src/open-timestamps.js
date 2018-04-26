@@ -137,6 +137,7 @@ module.exports = {
           options.publicCalendars.push('https://alice.btc.calendar.opentimestamps.org')
           options.publicCalendars.push('https://bob.btc.calendar.opentimestamps.org')
           options.publicCalendars.push('https://finney.calendar.eternitywall.com')
+          options.publicCalendars.push('https://ots.btc.catallaxy.com')
         }
         if (!options.m || options.m === 0) {
           options.m = 1
