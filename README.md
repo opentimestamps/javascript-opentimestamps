@@ -163,7 +163,7 @@ Verify the timestamp attestations with the aid of remote block explorers.
 ```shell
 $ ots-cli.js verify examples/hello-world.txt.ots
 Assuming target filename is 'examples/hello-world.txt'
-Success! Bitcoin attests data existed as of Thu May 28 2015 17:41:18 GMT+0200 (CEST)
+Success! Bitcoin block 358391 attests existence as of 2015-05-28 CEST
 ```
 
 Note: This verification using block explorers is convenient but not as secure as asking a local node.
@@ -271,18 +271,22 @@ Const `fileOts` created from the hex representation of the file `examples/incomp
 Verify the timestamp attestations.
 
 ```js
-const OpenTimestamps = require('javascript-opentimestamps');
-const file = Buffer.from('48656c6c6f20576f726c64210a','hex');
-const fileOts = Buffer.from('004f70656e54696d657374616d7073000050726f6f6600bf89e2e884e89294010803ba204e50d126e4674c005e04d82e84c21366780af1f43bd54a37816b6ab34003f1c8010100000001e482f9d32ecc3ba657b69d898010857b54457a90497982ff56f97c4ec58e6f98010000006b483045022100b253add1d1cf90844338a475a04ff13fc9e7bd242b07762dea07f5608b2de367022000b268ca9c3342b3769cdd062891317cdcef87aac310b6855e9d93898ebbe8ec0121020d8e4d107d2b339b0050efdd4b4a09245aa056048f125396374ea6a2ab0709c6ffffffff026533e605000000001976a9140bf057d40fbba6744862515f5b55a2310de5772f88aca0860100000000001976a914f00688ac000000000808f120a987f716c533913c314c78e35d35884cac943fa42cac49d2b2c69f4003f85f880808f120dec55b3487e1e3f722a49b55a7783215862785f4a3acb392846019f71dc64a9d0808f120b2ca18f485e080478e025dab3d464b416c0e1ecb6629c9aefce8c8214d0424320808f02011b0e90661196ff4b0813c3eda141bab5e91604837bdf7a0c9df37db0e3a11980808f020c34bc1a4a1093ffd148c016b1e664742914e939efabe4d3d356515914b26d9e20808f020c3e6e7c38c69f6af24c2be34ebac48257ede61ec0a21b9535e4443277be306460808f1200798bf8606e00024e5d5d54bf0c960f629dfb9dad69157455b6f2652c0e8de810808f0203f9ada6d60baa244006bb0aad51448ad2fafb9d4b6487a0999cff26b91f0f5360808f120c703019e959a8dd3faef7489bb328ba485574758e7091f01464eb65872c975c80808f020cbfefff513ff84b915e3fed6f9d799676630f8364ea2a6c7557fad94a5b5d7880808f1200be23709859913babd4460bbddf8ed213e7c8773a4b1face30f8acfdf093b7050808000588960d73d7190103f7ef15','hex');
+const OpenTimestamps = require('./index.js');
+const file = Buffer.from('5468697320646f63756d656e742069732074696d657374616d706564206f6e20626f7468204c697465636f696e20616e6420426974636f696e20626c6f636b636861696e73','hex');
+const fileOts = Buffer.from('004f70656e54696d657374616d7073000050726f6f6600bf89e2e884e89294010832bb24ab386bef01c0656944ecafa2dbb1e4162ced385754419467f9fb6f4d97f010c7c118043ce37d45f1ab81d3cd9dc9aa08fff0109b01031328e457c754a860bc5bc567ab08f02012dbcf25d46d7f01c4bd7c7ebdcd2080974b83a9198bc63cdb23f69c817f110508f0203c6274f7a67007de279fb68938e5549f462043570ccdbc17ba43e632a772d43208f1045ab0daf9f008ad9722b721af69e80083dfe30d2ef90c8e292868747470733a2f2f66696e6e65792e63616c656e6461722e657465726e69747977616c6c2e636f6df010dfd289ba718b4f30bb78191936c762a508f02026503e60c641473ec6f833953d04f7c8a65c5059a44a7e8c01c8cb9fed2ac2b308f1045ab0dafaf008c0c7948d8d5b64cf0083dfe30d2ef90c8e232268747470733a2f2f6c74632e63616c656e6461722e636174616c6c6178792e636f6d','hex');
 const detached = OpenTimestamps.DetachedTimestampFile.fromBytes(new OpenTimestamps.Ops.OpSHA256(), file);
 const detachedOts = OpenTimestamps.DetachedTimestampFile.deserialize(fileOts);
 OpenTimestamps.verify(detachedOts,detached).then(verifyResult => {
-  // return a timestamp for every attestation if verified, undefined otherwise.
+  // return an object containing timestamp and height for every attestation if verified, undefined otherwise.
   console.log(verifyResult);
+  // prints:
+  // { bitcoin: { timestamp: 1521545768, height: 514371 },
+  //   litecoin: { timestamp: 1521540398, height: 1388467 } }
+
 });
 ```
 
-Const `file` created from the hex representation of the file `examples/hello-world.txt` while `fileOts` contains `examples/hello-world.txt.ots`. 
+Const `file` created from the hex representation of the file `examples/ltc-and-btc.txt` while `fileOts` contains `examples/ltc-and-btc.txt.ots`.
 
 #### Upgrade
 
