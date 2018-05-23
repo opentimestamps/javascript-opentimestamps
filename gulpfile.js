@@ -8,6 +8,8 @@ const runSequence = require('run-sequence')
 const uglify = require('gulp-uglify')
 const rename = require('gulp-rename')
 const pump = require('pump')
+const gap = require('gulp-append-prepend')
+const packagejson = require('./package.json')
 
 gulp.task('clean', () => {
   if (!fs.existsSync('./dist')) {
@@ -21,6 +23,7 @@ gulp.task('compress', cb => {
   pump([
     gulp.src('./dist/opentimestamps.js'),
     uglify(),
+    gap.prependText('// ' + packagejson.name + ' v.' + packagejson.version + '\n'),
     rename('opentimestamps.min.js'),
     gulp.dest('./dist/')
   ],
