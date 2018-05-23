@@ -293,7 +293,7 @@ module.exports = {
       res.push(self.verifyAttestation(attestation, msg, options))
     })
 
-    function min (a, b) { return a.attestedTime < b.attestedTime ? a : b }
+    function min (a, b) { return (a.attestedTime < b.attestedTime) ? -1 : ((a.attestedTime > b.attestedTime) ? 1 : 0) }
     function groupBy (xs, key) {
       return xs.reduce(function (rv, x) {
         (rv[x[key]] = rv[x[key]] || []).push(x)
