@@ -293,13 +293,14 @@ module.exports = {
       res.push(self.verifyAttestation(attestation, msg, options))
     })
 
-    function min (a, b) { return (a.attestedTime < b.attestedTime) ? -1 : ((a.attestedTime > b.attestedTime) ? 1 : 0) }
+    // sub-common functions
+    function compare (a, b) { return (a.attestedTime < b.attestedTime) ? -1 : ((a.attestedTime > b.attestedTime) ? 1 : 0) }
     function groupBy (xs, key) {
       return xs.reduce(function (rv, x) {
         (rv[x[key]] = rv[x[key]] || []).push(x)
         return rv
       }, {})
-    };
+    }
 
     // verify all completed attestations
     return new Promise((resolve, reject) => {
@@ -310,12 +311,12 @@ module.exports = {
           return reject(errors[0])
         }
 
+        // attestations grouped by chain and sorted to get the min height for each chain
         var outputs = {}
         const filtered = results.filter(i => { if (i instanceof Error) return undefined; else return i })
         const groupByChain = groupBy(filtered, 'chain')
-
         Object.keys(groupByChain).map(key => groupByChain[key]).forEach((items) => {
-          var item = items.sort(min)[0]
+          var item = items.sort(compare)[0]
           outputs[item.chain] = { 'timestamp': item.attestedTime, 'height': item.height }
         })
 

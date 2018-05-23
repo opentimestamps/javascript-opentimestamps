@@ -609,10 +609,12 @@ test('OpenTimestamps.multipleBitcoinAttestations()', assert => {
     assert.equals(bitcoins523364.length, 1)
     assert.equals(bitcoins523367.length, 3)
 
+    // verify upgreaded ots to obtain the min bitcoin attestation
     return OpenTimestamps.verify(ots, detached)
   }).then(result => {
     assert.true(ots !== null)
     assert.true(result !== null)
+    // check min bitcoin attestation
     assert.deepEqual(result, {'bitcoin': {'timestamp': 1526719849, 'height': 523364}})
     assert.end()
   }).catch(err => {
