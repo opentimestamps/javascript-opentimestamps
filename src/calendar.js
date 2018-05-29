@@ -105,7 +105,7 @@ class RemoteCalendar {
           resolve(timestamp)
         })
         .catch(err => {
-          return reject(new URLError(err.error.toString()))
+          return reject(new Error(err.error.toString()))
         })
     })
   }
@@ -140,7 +140,7 @@ class RemoteCalendar {
           if (err.statusCode === 404) {
             return reject(new CommitmentNotFoundError(err.error.toString()))
           }
-          return reject(new URLError(err.error.toString()))
+          return reject(new Error(err.error.toString()))
         })
     })
   }
