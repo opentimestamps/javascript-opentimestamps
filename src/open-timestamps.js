@@ -196,11 +196,9 @@ module.exports = {
       Promise.all(res.map(Utils.softFail)).then(results => {
         // console.log('results=' + results);
         results
-            .filter(r => { return (r instanceof Error) ? undefined : r })
+            .filter(r => !(r instanceof Error) && r !== undefined)
             .forEach(resultTimestamp => {
-          if (resultTimestamp !== undefined) {
-            timestamp.merge(resultTimestamp)
-          }
+              timestamp.merge(resultTimestamp)
         })
         // console.log(timestamp.strTree());
         return resolve(timestamp)
