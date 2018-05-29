@@ -105,7 +105,7 @@ class RemoteCalendar {
           resolve(timestamp)
         })
         .catch(err => {
-          return reject(new Error(err.error.toString()))
+          return reject(new URLError(err.error.toString()))
         })
     })
   }

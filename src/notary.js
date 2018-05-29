@@ -7,7 +7,7 @@
  * @license LPGL3
  */
 
-require('extend-error')
+require('./extend-error.js')
 const Context = require('./context.js')
 const Utils = require('./utils.js')
 

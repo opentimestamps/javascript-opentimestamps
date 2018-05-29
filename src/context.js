@@ -6,7 +6,7 @@
  * @author EternityWall
  * @license LPGL3
  */
-require('extend-error')
+require('./extend-error.js')
 const Utils = require('./utils.js')
 
 /* Errors */
