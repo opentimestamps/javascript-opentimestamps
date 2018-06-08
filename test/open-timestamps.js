@@ -148,8 +148,12 @@ test('OpenTimestamps.DetachedTimestampFile()', assert => {
   const fdHash = new Ops.OpSHA256().hashFd(ctx1)
   const detached3 = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), fdHash)
 
+  const bufferHash = Buffer.from(fdHash)
+  const detached4 = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), bufferHash)
+
   assert.true(detached1.equals(detached2))
   assert.true(detached2.equals(detached3))
+  assert.true(detached3.equals(detached4))
   assert.end()
 })
 
