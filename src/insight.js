@@ -102,10 +102,12 @@ class Insight {
       requestPromise(options)
         .then(body => {
           // console.log('body ', body);
-          if (body.size === 0) {
+          if (!body) {
             console.error('Insight response error body ')
-            reject(new Error('Insight response error body '))
-            return
+            return reject(new Error('Insight response error body '))
+          }
+          if (!body.merkleroot || !body.time){
+            return reject(new Error('Insight response error body '))
           }
           resolve({merkleroot: body.merkleroot, time: body.time})
         })
@@ -163,20 +165,14 @@ class MultiInsight {
     return new Promise((resolve, reject) => {
       Promise.all(res.map(Utils.softFail)).then(results => {
         // console.log('results=' + results);
-        const set = new Set()
-        let found = false
-        results.forEach(result => {
-          if (result !== undefined && !found) {
-            if (set.has(result)) {
-              // return if two results are equal
-              resolve(result)
-              found = true
-            }
-            set.add(result)
-          }
-        })
-        if (!found) {
-          reject(new Error('No block height ' + height + 'found'))
+        const set = new Set();
+        results.filter(result=> {if (result && !(result instanceof Error)){ set.add(JSON.stringify(result))}});
+        if (set.size == 0) {
+            reject(new Error('No block height ' + height + 'found'))
+        } else if (set.size == 1) {
+            resolve(JSON.parse(set.values().next().value))
+        } else {
+            reject(new Error('Different block height ' + height + 'found'))
         }
       })
     })
@@ -190,21 +186,15 @@ class MultiInsight {
     return new Promise((resolve, reject) => {
       Promise.all(res.map(Utils.softFail)).then(results => {
         // console.log('results=' + results);
-        const resultSet = new Set()
-        let found = false
-        results.forEach(result => {
-          if (result !== undefined && !found) {
-            if (resultSet.has(JSON.stringify(result))) {
-              // return if two results are equal
-              resolve(result)
-              found = true
-            }
-            resultSet.add(JSON.stringify(result))
+          const set = new Set();
+          results.filter(result=> {if (result && !(result instanceof Error)){ set.add(JSON.stringify(result))}});
+          if (set.size == 0) {
+              reject(new Error('No block hash ' + hash + 'found'))
+          } else if (set.size == 1) {
+              resolve(JSON.parse(set.values().next().value))
+          } else {
+              reject(new Error('Different block hash ' + hash + 'found'))
           }
-        })
-        if (!found) {
-          reject(new Error('No block hash ' + hash + 'found'))
-        }
       })
     })
   }
