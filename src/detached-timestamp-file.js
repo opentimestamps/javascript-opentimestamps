@@ -154,7 +154,7 @@ class DetachedTimestampFile {
     }
     if (fdHash instanceof Array) {
       return new DetachedTimestampFile(fileHashOp, new Timestamp(fdHash))
-    } else  if ((fdHash instanceof ArrayBuffer) || (fdHash instanceof Uint8Array)) {
+    } else if ((fdHash instanceof ArrayBuffer) || (fdHash instanceof Uint8Array)) {
       return new DetachedTimestampFile(fileHashOp, new Timestamp(Array.from(fdHash)))
     } else {
       throw new Error('DetachedTimestampFile: Invalid fdHash param')
