@@ -11,7 +11,7 @@ const requestPromise = require('request-promise')
 const Promise = require('promise')
 const url = require('url')
 const minimatch = require('minimatch')
-require('extend-error')
+require('./extend-error.js')
 /*
 const bitcoin = require('bitcoinjs-lib') // v2.x.x
 const bitcoinMessage = require('bitcoinjs-message');
