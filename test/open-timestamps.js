@@ -315,7 +315,8 @@ test('OpenTimestamps.verify()', assert => {
     insight: {
       urls: [
         'https://insight.bitpay.com/api',
-        'https://btc-bitcore1.trezor.io/api'
+        'https://btc-bitcore1.trezor.io/api',
+        'https://blockexplorer.com/api'
       ]
     }
   }
