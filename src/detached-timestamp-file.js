@@ -152,10 +152,13 @@ class DetachedTimestampFile {
     if (!(fileHashOp instanceof Ops.Op)) {
       throw new Error('DetachedTimestampFile: Invalid fileHashOpss param')
     }
-    if (!(fdHash instanceof Array)) {
+    if (fdHash instanceof Array) {
+      return new DetachedTimestampFile(fileHashOp, new Timestamp(fdHash))
+    } else if ((fdHash instanceof ArrayBuffer) || (fdHash instanceof Uint8Array)) {
+      return new DetachedTimestampFile(fileHashOp, new Timestamp(Array.from(fdHash)))
+    } else {
       throw new Error('DetachedTimestampFile: Invalid fdHash param')
     }
-    return new DetachedTimestampFile(fileHashOp, new Timestamp(fdHash))
   }
 
   /**
