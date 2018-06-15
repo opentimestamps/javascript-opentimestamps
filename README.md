@@ -166,8 +166,8 @@ Assuming target filename is 'examples/hello-world.txt'
 Success! Bitcoin block 358391 attests existence as of 2015-05-28 CEST
 ```
 
-Note: This verification using block explorers is convenient but not as secure as asking a local node.
-To mitigate the risks, an answer from block explorers is considered only if two different endpoint return the same result. Even by doing so this is not as secure as asking a local node.   
+Note: The verification will always try to use the local bitcoin node first and fallback to asking block explorers if it isn't possible. The connection to the node is made by looking for the `bitcoin.conf` file in the default places according to your OS.
+When there is no running local node, or the verification happen in the browser (which cannot access to your file system looking for the `bitcoin.conf` file) the verify ask information to the block explores. Verification using block explorers is convenient but not as secure as askinkg a local node. 
 
 #### Upgrade
 
