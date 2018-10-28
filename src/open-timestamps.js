@@ -30,7 +30,7 @@ module.exports = {
    * @return {String} The message to print.
    */
   info (detached, options) {
-    if ((detached === undefined) && !(detached instanceof DetachedTimestampFile)) {
+    if ((detached === undefined) || !(detached instanceof DetachedTimestampFile)) {
       console.error('Invalid input')
       return 'Invalid input'
     }
