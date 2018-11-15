@@ -171,7 +171,7 @@ When there is no running local node, or the verification happen in the browser (
 
 #### Upgrade
 
-Upgrade incomplete remote calendar timestamps to be independently verifiable. This command overwrites the file `examples/incomplete.txt.ots` if needed and makes a backup of the old content at `examples/incomplete.txt.ots`. 
+Upgrade incomplete remote calendar timestamps to be independently verifiable. This command overwrites the file `examples/incomplete.txt.ots` if needed and makes a backup of the old content at `examples/incomplete.txt.ots.bak`. 
 
 ```shell
 $ ots-cli.js upgrade examples/incomplete.txt.ots
