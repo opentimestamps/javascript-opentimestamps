@@ -73,7 +73,7 @@ class Insight {
           resolve(body.blockHash)
         })
         .catch(err => {
-          console.error('Insight response error: ' + err)
+          console.error('Insight response error: ' + err.toString().substr(0, 100))
           reject(err)
         })
     })
@@ -112,7 +112,7 @@ class Insight {
           resolve({merkleroot: body.merkleroot, time: body.time})
         })
         .catch(err => {
-          console.error('Insight response error: ' + err)
+          console.error('Insight response error: ' + err.toString().substr(0, 100))
           reject(err)
         })
     })
