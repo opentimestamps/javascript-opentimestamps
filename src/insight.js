@@ -121,12 +121,13 @@ class Insight {
 
 const publicInsightUrls = {}
 publicInsightUrls.bitcoin = [
-  'https://www.localbitcoinschain.com/api',
-  'https://search.bitaccess.co/insight-api',
+//  'https://www.localbitcoinschain.com/api',  // gives 502 - "lots of HTML code"
+//  'https://search.bitaccess.co/insight-api',   // gives 400 - "Block height out of range. Code:-8"
   'https://insight.bitpay.com/api',
   'https://btc-bitcore1.trezor.io/api',
   'https://btc-bitcore4.trezor.io/api',
-  'https://blockexplorer.com/api'
+  'https://blockexplorer.com/api',
+  'https://bitcore.schmoock.net/insight-api'
 ]
 publicInsightUrls.litecoin = [
   'https://ltc-bitcore1.trezor.io/api',
