@@ -40,7 +40,7 @@ Take the [js](https://opentimestamps.org/assets/javascripts/vendor/opentimestamp
 From this repo, install the dev library
 
 ```
-npm install --only=dev-essential
+npm install --only=dev
 ```
 
 then run the gulp process
