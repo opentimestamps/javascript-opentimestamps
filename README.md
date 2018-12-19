@@ -37,10 +37,11 @@ Take the [js](https://opentimestamps.org/assets/javascripts/vendor/opentimestamp
 
 ##### Build from source
 
-From this repo, install the dev library
+From this repo, install the dev library and plugin-error
 
 ```
 npm install --dev
+npm install plugin-error
 ```
 
 then run the gulp process
