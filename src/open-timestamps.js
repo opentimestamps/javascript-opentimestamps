@@ -380,7 +380,7 @@ module.exports = {
           return reject(err)
         }
       } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-        if (options) {
+        if (options && options.explorers) {
           liteVerify(options)
         } else {
           // Check for local bitcoin configuration
@@ -406,7 +406,7 @@ module.exports = {
         if (options) {
           options.chain = 'litecoin'
         } else {
-          options = {}
+        options = {}
           options.chain = 'litecoin'
         }
         liteVerify(options)
