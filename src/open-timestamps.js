@@ -246,9 +246,13 @@ module.exports = {
    * @exports OpenTimestamps/verify
    * @param {DetachedTimestampFile} detachedStamped - The detached of stamped file.
    * @param {DetachedTimestampFile} detachedOriginal - The detached of original file.
-   * @param {Object} options - The option arguments.
-   * @param {String[]} options.explorer.urls - array of explorer server urls.
-   * @param {number} options.explorer.timeout - timeout (in seconds) used for calls to explorer servers.
+
+   * @param {Object}   options - The option arguments.
+   * @param {Object[]} options.explorers: array of block explorer server objects
+   * @param {String}   options.explorers[].url: block explorer server url
+   * @param {String}   options.explorers[].type: block explorer server type: {insight|blockstream}
+   * @param {number}   options.timeout: timeout (in seconds) for the calls to explorer servers
+
    * @param {String[]} options.calendars - Override calendars in timestamp.
    * @param {UrlWhitelist} options.whitelist - Remote calendar whitelist.
    * @return {Promise<HashMap<String,Object>,Error>} if resolve return list of verified attestations indexed by chain.

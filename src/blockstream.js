@@ -47,13 +47,11 @@ class Blockstream extends ChainExplorer.ChainExplorer {
     return new Promise((resolve, reject) => {
         requestPromise(options)
           .then(body => {
-            // console.log('body ', body);
             if (!body) {
               console.error('Blockstream response error body ')
               reject(new Error('Blockstream response error body '))
               return
             }
-
             resolve(body)
           })
           .catch(err => {
@@ -73,7 +71,6 @@ class Blockstream extends ChainExplorer.ChainExplorer {
     return new Promise((resolve, reject) => {
         requestPromise(options)
           .then(body => {
-            // console.log('body ', body);
             if (!body) {
               console.error('Blockstream response error body ')
               return reject(new Error('Blockstream response error body '))

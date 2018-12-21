@@ -13,7 +13,7 @@ const Insight = require('./insight.js')
 const Blockstream = require('./blockstream.js')
 
 const publicExplorers = {}
-
+publicExplorers.timeout = 10
 publicExplorers.bitcoin = [
    { url: 'https://insight.bitpay.com/api',           type: 'insight' },
    { url: 'https://btc-bitcore1.trezor.io/api',       type: 'insight' },
@@ -24,7 +24,6 @@ publicExplorers.bitcoin = [
 
    { url: 'https://blockstream.info/api',             type: 'blockstream' }
 ]
-
 publicExplorers.litecoin = [
   { url: 'https://ltc-bitcore1.trezor.io/api', type: 'insight' },
   { url: 'https://insight.litecore.io/api',    type: 'insight' }
@@ -32,19 +31,17 @@ publicExplorers.litecoin = [
 
 class MultiExplorer {
   /** Constructor
-   * @param {Object} options - Options
-   * @param {String} options.chain: block explorer chain
+   * @param {Object}   options - The option arguments.
    * @param {Object[]} options.explorers: array of block explorer server objects
-   * @param {String} options.explorers[].type: block explorer server type: {insight|blockstream}
-   * @param {String} options.explorers[].url: block explorer server url
-   * @param {number} options.timeout: timeout(in seconds) used for calls to insight servers
+   * @param {String}   options.explorers[].url: block explorer server url
+   * @param {String}   options.explorers[].type: block explorer server type: {insight|blockstream}
+   * @param {number}   options.timeout: timeout (in seconds) for the calls to explorer servers
    */
   constructor (options) {
     this.explorers = []
 
-    // Sets requests timeout (default = 10s)
     const timeoutOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'timeout')
-    const timeout = timeoutOptionSet ? options.timeout : 10
+    const timeout = timeoutOptionSet ? options.timeout : publicExplorers[timeout]
 
     const chainOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'chain')
     const chain = chainOptionSet ? options.chain : 'bitcoin'

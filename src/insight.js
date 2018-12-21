@@ -14,7 +14,7 @@ const ChainExplorer = require('./chain-explorer.js')
 /** Class used to query Insight API */
 class Insight extends ChainExplorer.ChainExplorer {
   /**
-   * Create a ChainInsight.
+   * Create an Insight.
    * @param {int} timeout - timeout (in seconds) used for calls to insight servers
    */
   constructor (url, timeout) {
@@ -53,7 +53,6 @@ class Insight extends ChainExplorer.ChainExplorer {
               reject(new Error('Insight response error body '))
               return
             }
-
             resolve(body.blockHash)
           })
           .catch(err => {
@@ -73,7 +72,6 @@ class Insight extends ChainExplorer.ChainExplorer {
     return new Promise((resolve, reject) => {
         requestPromise(options)
           .then(body => {
-            // console.log('body ', body);
             if (!body) {
               console.error('Insight response error body ')
               return reject(new Error('Insight response error body '))
