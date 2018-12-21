@@ -15,7 +15,7 @@ const Utils = require('./utils.js')
 const Ops = require('./ops.js')
 const Calendar = require('./calendar.js')
 const Notary = require('./notary.js')
-const MultiExplorer = require('./multi-explorer.js')
+const ExplorerList = require('./explorer-list.js')
 const Merkle = require('./merkle.js')
 const Bitcoin = require('./bitcoin.js')
 
@@ -334,11 +334,13 @@ module.exports = {
   /** Verify an attestation.
    * @param {TimeAttestation} attestation - The attestation to verify.
    * @param {byte[]} msg - The digest to verify.
-   * @param {Object} options - The option arguments.
-   * @param {Object[]} options.explorer[] - array of explorer servers
-   * @param {String} options.explorer.url - chain explorer url
-   * @param {String} options.explorer.type - chain explorer type (insight or blockstream)
-   * @param {number} options.explorer.timeout - chain explorer timeout (in seconds)
+
+   * @param {Object}   options - The option arguments.
+   * @param {number}   options.timeout: timeout (in seconds) for the calls to explorer servers
+   * @param {Object[]} options.explorers: array of block explorer server objects
+   * @param {String}   options.explorers[].url: block explorer server url
+   * @param {String}   options.explorers[].type: block explorer server type: {insight|blockstream}
+
    * @return {Promise<Object,Error>} if resolve return verified attestations parameters
    *    chain: the chain type
    *    attestedTime: unix timestamp fo the block
@@ -348,7 +350,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       function liteVerify (options) {
 
-        const explorer = new MultiExplorer.MultiExplorer(options)
+        const explorer = new ExplorerList.ExplorerList(options)
         explorer.blockhash(attestation.height).then(blockHash => {
           console.log('Lite-client verification, assuming block ' + blockHash + ' is valid')
           explorer.block(blockHash).then(blockHeader => {
@@ -378,7 +380,7 @@ module.exports = {
           return reject(err)
         }
       } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-        if (options && options.explorers) {
+        if (options) {
           liteVerify(options)
         } else {
           // Check for local bitcoin configuration
@@ -396,13 +398,17 @@ module.exports = {
             })
           }).catch(() => {
             console.error('Could not connect to local Bitcoin node')
+            // bitcoin is the default, no need to specify it via options
             liteVerify()
           })
         }
       } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
-        options = {}
-        options.explorer = {}
-        options.explorer.chain = 'litecoin'
+        if (options) {
+          options.chain = 'litecoin'
+        } else {
+          options = {}
+          options.chain = 'litecoin'
+        }
         liteVerify(options)
       }
     })

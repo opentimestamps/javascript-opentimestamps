@@ -15,7 +15,8 @@ const Utils = require('./utils.js')
 class ChainExplorer {
   /**
    * Create a ChainExplorer.
-   * @param {int} timeout - timeout (in seconds) used for calls to explorer servers
+   * @param {String} url - blockchain explorer url
+   * @param {int} timeout - timeout (in seconds) for calls to the blockchain explorer
    */
   constructor (url, timeout) {
     this.timeout = timeout * 1000
@@ -41,7 +42,6 @@ class ChainExplorer {
       json: true,
       timeout: this.timeout
     }
-
     return this.parseBlockhash(options)
   }
 
@@ -52,7 +52,7 @@ class ChainExplorer {
    * @returns {string} The block hash
    */
   parseBlockhash (options) {
-	return ''
+    return ''
   }
 
   /**
@@ -73,7 +73,6 @@ class ChainExplorer {
       json: true,
       timeout: this.timeout
     }
-
     return this.parseBlockInfo(options)
   }
 
@@ -84,7 +83,7 @@ class ChainExplorer {
    * @returns {Object} The block information
    */
   parseBlockInfo (options) {
-	return {merkleroot: '', time: 0}
+    return {merkleroot: '', time: 0}
   }
 }
 

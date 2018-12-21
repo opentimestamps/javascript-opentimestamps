@@ -14,8 +14,9 @@ const ChainExplorer = require('./chain-explorer.js')
 /** Class used to query Blockstream API */
 class Blockstream extends ChainExplorer.ChainExplorer {
   /**
-   * Create a RemoteCalendar.
-   * @param {int} timeout - timeout (in seconds) used for calls to Blockstream server
+   * Create a Blockstream-type blockchain explorer.
+   * @param {String} url - Blockstream-type blockchain explorer url
+   * @param {int} timeout - timeout (in seconds) used for calls to Blockstream-type explorer
    */
   constructor (url, timeout) {
     super(url, timeout)

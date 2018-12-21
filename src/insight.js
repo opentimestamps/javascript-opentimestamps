@@ -14,14 +14,14 @@ const ChainExplorer = require('./chain-explorer.js')
 /** Class used to query Insight API */
 class Insight extends ChainExplorer.ChainExplorer {
   /**
-   * Create an Insight.
-   * @param {int} timeout - timeout (in seconds) used for calls to insight servers
+   * Create an Insight-type blockchain explorer.
+   * @param {String} url - Insight-type blockchain explorer url
+   * @param {int} timeout - timeout (in seconds) for calls to the Insight-type explorer
    */
   constructor (url, timeout) {
     super(url, timeout)
     this.urlBlockindex = url + '/block-index'
     this.urlBlock = url + '/block'
-
   }
 
   /**

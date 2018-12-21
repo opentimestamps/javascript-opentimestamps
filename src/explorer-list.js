@@ -1,8 +1,8 @@
 'use strict'
 
 /**
- * MultiExplorer module.
- * @module MultiExplorer
+ * ExplorerList module.
+ * @module ExplorerList
  * @author federicoon, fametrano
  * @license LPGL3
  */
@@ -12,9 +12,9 @@ const Utils = require('./utils.js')
 const Insight = require('./insight.js')
 const Blockstream = require('./blockstream.js')
 
-const publicExplorers = {}
-publicExplorers.timeout = 10
-publicExplorers.bitcoin = [
+const defaultExplorers = {}
+defaultExplorers.timeout = 10
+defaultExplorers.bitcoin = [
    { url: 'https://insight.bitpay.com/api',           type: 'insight' },
    { url: 'https://btc-bitcore1.trezor.io/api',       type: 'insight' },
    { url: 'https://btc-bitcore4.trezor.io/api',       type: 'insight' },
@@ -24,14 +24,15 @@ publicExplorers.bitcoin = [
 
    { url: 'https://blockstream.info/api',             type: 'blockstream' }
 ]
-publicExplorers.litecoin = [
+defaultExplorers.litecoin = [
   { url: 'https://ltc-bitcore1.trezor.io/api', type: 'insight' },
   { url: 'https://insight.litecore.io/api',    type: 'insight' }
 ]
 
-class MultiExplorer {
+class ExplorerList {
   /** Constructor
    * @param {Object}   options - The option arguments.
+   * @param {String}   options.chain: blockchain {bitcoin|litecoin|...}
    * @param {Object[]} options.explorers: array of block explorer server objects
    * @param {String}   options.explorers[].url: block explorer server url
    * @param {String}   options.explorers[].type: block explorer server type: {insight|blockstream}
@@ -40,15 +41,15 @@ class MultiExplorer {
   constructor (options) {
     this.explorers = []
 
-    const timeoutOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'timeout')
-    const timeout = timeoutOptionSet ? options.timeout : publicExplorers[timeout]
-
     const chainOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'chain')
     const chain = chainOptionSet ? options.chain : 'bitcoin'
 
+    const timeoutOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'timeout')
+    const timeout = timeoutOptionSet ? options.timeout : defaultExplorers[timeout]
+
     // We need at least 2 explorer servers (for confirmation)
     const explorersOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'explorers') && options.explorers.length > 1
-    const explorers = explorersOptionSet ? options.explorers : publicExplorers[chain]
+    const explorers = explorersOptionSet ? options.explorers : defaultExplorers[chain]
 
     explorers.forEach(explorer => {
       if (typeof (explorer.url) !== 'string') {
@@ -107,4 +108,4 @@ class MultiExplorer {
   }
 }
 
-module.exports = { MultiExplorer }
+module.exports = { ExplorerList }
