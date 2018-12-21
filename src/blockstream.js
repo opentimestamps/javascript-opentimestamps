@@ -1,9 +1,9 @@
 'use strict'
 
 /**
- * Insight module.
- * @module Insight
- * @author EternityWall
+ * Blockstream module.
+ * @module Blockstream
+ * @author federicoon, fametrano
  * @license LPGL3
  */
 
@@ -11,17 +11,16 @@ const requestPromise = require('request-promise')
 const Promise = require('promise')
 const ChainExplorer = require('./chain-explorer.js')
 
-/** Class used to query Insight API */
-class Insight extends ChainExplorer.ChainExplorer {
+/** Class used to query Blockstream API */
+class Blockstream extends ChainExplorer.ChainExplorer {
   /**
-   * Create a ChainInsight.
-   * @param {int} timeout - timeout (in seconds) used for calls to insight servers
+   * Create a RemoteCalendar.
+   * @param {int} timeout - timeout (in seconds) used for calls to Blockstream server
    */
   constructor (url, timeout) {
     super(url, timeout)
-    this.urlBlockindex = url + '/block-index'
+    this.urlBlockindex = url + '/block-height'
     this.urlBlock = url + '/block'
-
   }
 
   /**
@@ -48,16 +47,17 @@ class Insight extends ChainExplorer.ChainExplorer {
     return new Promise((resolve, reject) => {
         requestPromise(options)
           .then(body => {
-            if (body.size === 0) {
-              console.error('Insight response error body ')
-              reject(new Error('Insight response error body '))
+            // console.log('body ', body);
+            if (!body) {
+              console.error('Blockstream response error body ')
+              reject(new Error('Blockstream response error body '))
               return
             }
 
-            resolve(body.blockHash)
+            resolve(body)
           })
           .catch(err => {
-            console.error('Insight response error: ' + err.toString().substr(0, 100))
+            console.error('Blockstream response error: ' + err.toString().substr(0, 100))
             reject(err)
           })
       })
@@ -75,20 +75,20 @@ class Insight extends ChainExplorer.ChainExplorer {
           .then(body => {
             // console.log('body ', body);
             if (!body) {
-              console.error('Insight response error body ')
-              return reject(new Error('Insight response error body '))
+              console.error('Blockstream response error body ')
+              return reject(new Error('Blockstream response error body '))
             }
-            if (!body.merkleroot || !body.time) {
-              return reject(new Error('Insight response error body '))
+            if (!body.merkle_root || !body.timestamp) {
+              return reject(new Error('Blockstream response error body '))
             }
-            resolve({merkleroot: body.merkleroot, time: body.time})
+            resolve({merkleroot: body.merkle_root, time: body.timestamp})
           })
           .catch(err => {
-            console.error('Insight response error: ' + err.toString().substr(0, 100))
+            console.error('Blockstream response error: ' + err.toString().substr(0, 100))
             reject(err)
           })
       })
   }
 }
 
-module.exports = { Insight }
+module.exports = { Blockstream }
