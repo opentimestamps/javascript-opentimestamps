@@ -60,20 +60,4 @@ rm examples/incomplete.txt.ots.old && \
 echo ">> node ots-cli.js verify examples/bad-stamp.txt.ots" && \
 node ots-cli.js verify examples/bad-stamp.txt.ots | grep "Digest does not match merkleroot" && \
 
-# Test : litecoin info
-echo ">> node ots-cli.js info examples/hello-world.txt.ltc.ots" && \
-node ots-cli.js info examples/hello-world.txt.ltc.ots | grep "verify PendingAttestation('https://ltc.calendar.catallaxy.com')" && \
-
-# Test : litecoin verify
-echo ">> node ots-cli.js verify examples/hello-world.txt.ltc.ots" && \
-node ots-cli.js verify examples/hello-world.txt.ltc.ots | grep "Success! Litecoin block 1389221 attests existence as of" && \
-
-# Test : litecoin upgrade
-echo ">> node ots-cli.js upgrade examples/hello-world.txt.ltc.ots" && \
-cp examples/hello-world.txt.ltc.ots examples/hello-world.txt.ltc.ots.old && \
-node ots-cli.js upgrade examples/hello-world.txt.ltc.ots | grep "Got 1 attestation(s) from https://ltc.calendar.catallaxy.com" && \
-node ots-cli.js info examples/hello-world.txt.ltc.ots | grep "# Litecoin block merkle root 0cb6709c452f0eefebcc093c54d5cc77356f0c0dc16df6790c7b33f3e02070b1" && \
-cp examples/hello-world.txt.ltc.ots.old examples/hello-world.txt.ltc.ots && \
-rm examples/hello-world.txt.ltc.ots.old examples/hello-world.txt.ltc.ots.bak && \
-
 echo --- END TESTING ots-cli.js
