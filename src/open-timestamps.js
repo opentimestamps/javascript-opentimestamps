@@ -335,12 +335,16 @@ module.exports = {
    * @param {TimeAttestation} attestation - The attestation to verify.
    * @param {byte[]} msg - The digest to verify.
 
-   * @param {Object}   options - The option arguments.
-   * @param {number}   options.timeout: timeout (in seconds) for the calls to explorer servers
-   * @param {Object[]} options.explorers: array of block explorer server objects
-   * @param {String}   options.explorers[].url: block explorer server url
-   * @param {String}   options.explorers[].type: block explorer server type: {insight|blockstream}
-
+   * @param {Object} options - The option arguments.
+   * @param {Object} options.bitcoin - The options for bitcoin chain.
+   * @param {number} options.bitcoin.timeout - timeout (in seconds) used for calls to explorer servers
+   * @param {Object[]} options.bitcoin.explorers - array of bitcoin explorer servers
+   * @param {String} options.bitcoin.explorers[].url - explorer servers url
+   * @param {String} options.bitcoin.explorers[].class - explorer servers type: {Insight|Blockstream}
+   * @param {Object} options.litecoin - The options for litecoin chain.
+   * @param {number} options.litecoin.timeout - timeout (in seconds) used for calls to explorer servers
+   * @param {Object[]} options.litecoin.explorers - array of litecoin explorer servers
+   *    [...]
    * @return {Promise<Object,Error>} if resolve return verified attestations parameters
    *    chain: the chain type
    *    attestedTime: unix timestamp fo the block
@@ -383,7 +387,10 @@ module.exports = {
           return reject(err)
         }
       } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-        if (options && options.explorers) {
+      	const chain = 'bitcoin'
+        if (options && options.bitcoin) {
+          options = options.bitcoin
+          options.chain = chain
           liteVerify(options)
         } else {
           // Check for local bitcoin configuration
@@ -402,16 +409,16 @@ module.exports = {
           }).catch(() => {
             console.error('Could not connect to local Bitcoin node')
             // bitcoin is the default chain, but options might change something else
+            options = {}
+            options.chain = chain
             liteVerify(options)
           })
         }
       } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
-        if (options) {
-          options.chain = 'litecoin'
-        } else {
-        options = {}
-          options.chain = 'litecoin'
+        if (!options) {
+          options = {}
         }
+        options.chain = 'litecoin'
         liteVerify(options)
       }
     })
