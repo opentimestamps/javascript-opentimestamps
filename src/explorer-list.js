@@ -16,9 +16,6 @@ const defaultExplorers = {}
 defaultExplorers.bitcoin = [
   { url: 'https://blockstream.info/api',             type: 'blockstream' },
   { url: 'https://insight.bitpay.com/api',           type: 'insight' },
-  { url: 'https://btc-bitcore1.trezor.io/api',       type: 'insight' },
-  { url: 'https://btc-bitcore4.trezor.io/api',       type: 'insight' },
-  { url: 'https://insight.bitpay.com/api',           type: 'insight' },
   { url: 'https://blockexplorer.com/api',            type: 'insight' },
   { url: 'https://bitcore.schmoock.net/insight-api', type: 'insight' }
 ]
