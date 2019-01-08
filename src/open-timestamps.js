@@ -398,8 +398,8 @@ module.exports = {
             })
           }).catch(() => {
             console.error('Could not connect to local Bitcoin node')
-            // bitcoin is the default, no need to specify it via options
-            liteVerify()
+            // bitcoin is the default chain, but options might change something else
+            liteVerify(options)
           })
         }
       } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
