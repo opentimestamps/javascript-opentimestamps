@@ -406,12 +406,10 @@ module.exports = {
           })
         }
       } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
-        if (options) {
-          options.chain = 'litecoin'
-        } else {
-        options = {}
-          options.chain = 'litecoin'
+        if (!options) {
+          options = {}
         }
+        options.chain = 'litecoin'
         liteVerify(options)
       }
     })
