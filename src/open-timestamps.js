@@ -349,7 +349,10 @@ module.exports = {
   verifyAttestation (attestation, msg, options) {
     return new Promise((resolve, reject) => {
       function liteVerify (options) {
+        // there is no local node available or it is turned off
+        // resort to block explorers
 
+        const chain = options && options.chain ? options.chain : 'bitcoin'
         const explorer = new ExplorerList.ExplorerList(options)
         explorer.blockhash(attestation.height).then(blockHash => {
           console.log('Lite-client verification, assuming block ' + blockHash + ' is valid')
