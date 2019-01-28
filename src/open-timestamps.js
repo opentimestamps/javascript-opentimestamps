@@ -331,21 +331,34 @@ module.exports = {
     })
   },
 
-  /** Verify an attestation.
+/** Verify an attestation.
    * @param {TimeAttestation} attestation - The attestation to verify.
    * @param {byte[]} msg - The digest to verify.
-
    * @param {Object} options - The option arguments.
-   * @param {Object} options.bitcoin - The options for bitcoin chain.
-   * @param {number} options.bitcoin.timeout - timeout (in seconds) used for calls to explorer servers
-   * @param {Object[]} options.bitcoin.explorers - array of bitcoin explorer servers
-   * @param {String} options.bitcoin.explorers[].url - explorer servers url
-   * @param {String} options.bitcoin.explorers[].class - explorer servers type: {Insight|Blockstream}
-   * @param {Object} options.litecoin - The options for litecoin chain.
-   * @param {number} options.litecoin.timeout - timeout (in seconds) used for calls to explorer servers
-   * @param {Object[]} options.litecoin.explorers - array of litecoin explorer servers
-   *    [...]
-   * @return {Promise<Object,Error>} if resolve return verified attestations parameters
+   * @param {Object} options.X - The options for chain X.
+   * @param {number} options.X.timeout - timeout (in seconds) used for calls to explorer servers
+   * @param {Object[]} options.X.explorers - array of explorer servers for chain X
+   * @param {String} options.X.explorers[].url - explorer servers url for chain X
+   * @param {String} options.X.explorers[].class - explorer servers type: {insight|blockstream}
+   * 
+   * Example of options:
+   *
+   *	const options = {
+   *    bitcoin: {
+   *      explorers: [
+   *        {url: 'https://blockstream.info/api', type: 'blockstream'},
+   *        {url: 'https://blockexplorer.com/api', type: 'insight'}
+   *      ]
+   *    },
+   *    litecoin: {
+   *      explorers: [
+   *        {url: 'https://ltc-bitcore1.trezor.io/api', type: 'insight'},
+   *        {url: 'https://insight.litecore.io/api', type: 'insight'}
+   *      ]
+   *    }
+   *  }
+   * 
+   *   * @return {Promise<Object,Error>} if resolve return verified attestations parameters
    *    chain: the chain type
    *    attestedTime: unix timestamp fo the block
    *    height: block height of the attestation
