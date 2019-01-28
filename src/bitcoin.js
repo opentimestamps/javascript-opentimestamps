@@ -100,6 +100,21 @@ class BitcoinNode {
     return this.callRPC(params)
   }
 
+  getChain () {
+    return new Promise((resolve, reject) => {
+      const params = {
+        id: 'java',
+        method: 'getblockchaininfo',
+      }
+      this.callRPC(params).then(result => {
+        resolve(result.chain)
+      }).catch(err => {
+        console.error('getChain : ' + err)
+        reject(err)
+      })
+    })
+  }
+    
   getBlockHeader (height) {
     return new Promise((resolve, reject) => {
       const params = {

@@ -389,37 +389,52 @@ module.exports = {
       } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
       	const chain = 'bitcoin'
         if (options && options.bitcoin) {
-          options = options.bitcoin
-          options.chain = chain
-          liteVerify(options)
+          lite_options = options.bitcoin
+          lite_options.chain = chain
+          liteVerify(lite_options)
         } else {
           // Check for local bitcoin configuration
           Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
             const bitcoin = new Bitcoin.BitcoinNode(properties)
-            bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
-              // One Bitcoin attestation is enought
-              resolve({
-                attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
-                chain: 'bitcoin',
-                height: attestation.height
-              })
-            }).catch((err) => {
-              reject(new Notary.VerificationError('Bitcoin verification failed: ' + err.message))
-            })
+            bitcoin.getChain().then(localChain => {
+            	if (localChain !== 'main') {
+            		console.error('Local Bitcoin node not on Mainnet')
+            		lite_options = {}
+            		lite_options.chain = chain
+            		liteVerify(lite_options)
+            	} else {
+            		bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
+            			// One Bitcoin attestation is enought
+            			resolve({
+            				attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
+            				chain: chain,
+            				height: attestation.height
+            			})
+            		}).catch((err) => {
+            			reject(new Notary.VerificationError('Bitcoin verification failed: ' + err.message))
+            		})
+            	}
+            }).catch(err => {
+            	console.error('Could not detect local node\'s chain: ' + err.message)
+            	lite_options = {}
+            	lite_options.chain = chain
+            	liteVerify(lite_options)
+            })  
           }).catch(() => {
             console.error('Could not connect to local Bitcoin node')
-            // bitcoin is the default chain, but options might change something else
-            options = {}
-            options.chain = chain
-            liteVerify(options)
+            lite_options = {}
+            lite_options.chain = chain
+            liteVerify(lite_options)
           })
         }
       } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
-        if (!options) {
-          options = {}
+        if (options && options.litecoin) {
+          lite_options = options.litecoin
+        } else {
+          lite_options = {}
         }
-        options.chain = 'litecoin'
-        liteVerify(options)
+        lite_options.chain = 'litecoin'
+        liteVerify(lite_options)
       }
     })
   },
