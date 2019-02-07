@@ -114,7 +114,7 @@ class BitcoinNode {
       })
     })
   }
-    
+
   getBlockHeader (height) {
     return new Promise((resolve, reject) => {
       const params = {
