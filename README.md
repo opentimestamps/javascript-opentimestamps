@@ -312,7 +312,7 @@ OpenTimestamps.upgrade(detached).then((changed) => {
 
 PRs are welcome, before reviewing them we wait the travis build concludes successfully, so please check:
 
-*  All tests must pass. (Rarely test fails for networking issue, if you think it's your case ask the maintainers in the comments to relaunch the travis build)
+*  All tests must pass (`npm test`). (Rarely test fails for networking issue, if you think it's your case ask the maintainers in the comments to relaunch the travis build)
 *  [standard linter](https://github.com/standard/standard) is launched in the build process, any warning found by the linker break the build, so be sure to check warnings by launching `standard` before the commit, most simple errors could be automatically fixed with `standard --fix`
 
 
