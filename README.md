@@ -33,7 +33,7 @@ $ npm install -g javascript-opentimestamps
 
 ##### Get the "binaries"
 
-Take the [js](https://opentimestamps.org/assets/javascripts/vendor/opentimestamps.js) used by opentimestamps.org 
+Take the [js](https://opentimestamps.org/assets/javascripts/vendor/opentimestamps.min.js) used by opentimestamps.org 
 
 ##### Build from source
 
