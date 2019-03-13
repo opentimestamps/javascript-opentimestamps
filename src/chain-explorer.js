@@ -41,17 +41,14 @@ class ChainExplorer {
       json: true,
       timeout: this.timeout
     }
-    return this.parseBlockhash(options)
-  }
-
-  /**
-   * Retrieve the block hash by calling an explorer server.
-   * Default empty implementation: must be overridden by subclasses.
-   * @param {Object} options - The http request options.
-   * @returns {string} The block hash
-   */
-  parseBlockhash (options) {
-    return ''
+    return new Promise((resolve, reject) => {
+      requestPromise(options).then(body => {
+        resolve(body)
+      })
+      .catch(err => {
+        reject(err)
+      })
+    })
   }
 
   /**
@@ -71,17 +68,15 @@ class ChainExplorer {
       json: true,
       timeout: this.timeout
     }
-    return this.parseBlockInfo(options)
-  }
-
-  /**
-   * Retrieve the block information by calling an explorer server.
-   * Default empty implementation: must be overridden by subclasses.
-   * @param {Object} options - The http request options.
-   * @returns {Object} The block information
-   */
-  parseBlockInfo (options) {
-    return {merkleroot: '', time: 0}
+    return new Promise((resolve, reject) => {
+      requestPromise(options)
+        .then(body => {
+          resolve(body)
+        })
+        .catch(err => {
+          reject(err)
+        })
+    })
   }
 }
 
