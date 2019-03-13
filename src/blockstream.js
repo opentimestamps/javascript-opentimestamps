@@ -44,22 +44,22 @@ class Blockstream extends ChainExplorer.ChainExplorer {
    * @returns {Promise} A promise that returns {@link resolve} if resolved
    * and {@link reject} if rejected.
    */
-  parseBlockhash (options) {
+  blockhash (height) {
     return new Promise((resolve, reject) => {
-        requestPromise(options)
-          .then(body => {
-            if (!body) {
-              console.error('Blockstream response error body ')
-              reject(new Error('Blockstream response error body '))
-              return
-            }
-            resolve(body)
-          })
-          .catch(err => {
-            console.error('Blockstream response error: ' + err.toString().substr(0, 100))
-            reject(err)
-          })
+      super.blockhash(height)
+      .then(body => {
+        if (!body) {
+          console.error('Blockstream response error body ')
+          reject(new Error('Blockstream response error body '))
+          return
+        }
+        resolve(body)
       })
+      .catch(err => {
+        console.error('Blockstream response error: ' + err.toString().substr(0, 100))
+        reject(err)
+      })
+    })
   }
 
   /**
@@ -68,24 +68,24 @@ class Blockstream extends ChainExplorer.ChainExplorer {
    * @returns {Promise} A promise that returns {@link resolve} if resolved
    * and {@link reject} if rejected.
    */
-  parseBlockInfo (options) {
+  block (hash) {
     return new Promise((resolve, reject) => {
-        requestPromise(options)
-          .then(body => {
-            if (!body) {
-              console.error('Blockstream response error body ')
-              return reject(new Error('Blockstream response error body '))
-            }
-            if (!body.merkle_root || !body.timestamp) {
-              return reject(new Error('Blockstream response error body '))
-            }
-            resolve({merkleroot: body.merkle_root, time: body.timestamp})
-          })
-          .catch(err => {
-            console.error('Blockstream response error: ' + err.toString().substr(0, 100))
-            reject(err)
-          })
+      super.block (hash)
+      .then(body => {
+        if (!body) {
+          console.error('Blockstream response error body ')
+          return reject(new Error('Blockstream response error body '))
+        }
+        if (!body.merkle_root || !body.timestamp) {
+          return reject(new Error('Blockstream response error body '))
+        }
+        resolve({merkleroot: body.merkle_root, time: body.timestamp})
       })
+      .catch(err => {
+        console.error('Blockstream response error: ' + err.toString().substr(0, 100))
+        reject(err)
+      })
+    })
   }
 }
 
