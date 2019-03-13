@@ -5,3 +5,4 @@ sync.sh
 *.wif
 deploy.sh
 dist/
+/.project
