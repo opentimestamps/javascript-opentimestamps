@@ -174,16 +174,11 @@ test('OpenTimestamps.verify()', assert => {
 })
 
 test('OpenTimestamps.verify()', assert => {
-    // Test options with 2 insight urls
     const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(helloworld))
     const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts))
     const options = {
-        insight: {
-            urls: [
-                'https://insight.bitpay.com/api',
-                'https://btc-bitcore1.trezor.io/api',
-                'https://blockexplorer.com/api'
-            ]
+        esplora: {
+            url: 'https://blockstream.info/api'
         }
     }
     OpenTimestamps.verify(detachedOts, detached, options).then(result => {
@@ -197,7 +192,7 @@ test('OpenTimestamps.verify()', assert => {
 })
 
 test('OpenTimestamps.verify()', assert => {
-    // Test options with 2 bad insight urls (it should fail)
+    // Test options with a bad esplora url (it should fail)
     const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(helloworld))
     let detachedOts
     try {
@@ -208,15 +203,12 @@ test('OpenTimestamps.verify()', assert => {
         return
     }
     const options = {
-        insight: {
-            urls: [
-                'https://badinsight1.bitpay.com/api',
-                'https://badinsight2.bitpay.com/api'
-            ]
+        esplora: {
+            url: 'https://esplora.com'
         }
     }
     OpenTimestamps.verify(detachedOts, detached, options).then((result) => {
-        assert.fail('Unable to reach the server (bad insight url)')
+        assert.fail('Unable to reach the server (bad esplora url)')
         assert.end()
     }).catch((err) => {
         assert.true(err !== undefined)
@@ -224,33 +216,13 @@ test('OpenTimestamps.verify()', assert => {
     })
 })
 
-test('OpenTimestamps.verify()', assert => {
-    // Test options with 1 insight url (it should fallback to default list)
-    const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(helloworld))
-    const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts))
-    const options = {
-        insight: {
-            urls: [
-                'https://insight.bitpay.com/api'
-            ]
-        }
-    }
-    OpenTimestamps.verify(detachedOts, detached, options).then(result => {
-        assert.true(result !== undefined)
-        assert.deepEqual(result, {'bitcoin': {'timestamp': 1432827678, 'height': 358391}})
-        assert.end()
-    }).catch(err => {
-        assert.fail('err=' + err)
-        assert.end()
-    })
-})
 
 test('OpenTimestamps.verify()', assert => {
     // Test options with timeout of 20s
     const detached = DetachedTimestampFile.fromBytes(new Ops.OpSHA256(), new Context.StreamDeserialization(helloworld))
     const detachedOts = DetachedTimestampFile.deserialize(new Context.StreamDeserialization(helloworldOts))
     const options = {
-        insight: {timeout: 20}
+        esplora: { timeout: 20 }
     }
     OpenTimestamps.verify(detachedOts, detached, options).then(result => {
         assert.true(result !== undefined)

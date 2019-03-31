@@ -15,7 +15,7 @@ const Utils = require('./utils.js')
 const Ops = require('./ops.js')
 const Calendar = require('./calendar.js')
 const Notary = require('./notary.js')
-const Insight = require('./insight.js')
+const Esplora = require('./esplora.js')
 const Merkle = require('./merkle.js')
 const Bitcoin = require('./bitcoin.js')
 
@@ -247,8 +247,7 @@ module.exports = {
    * @param {DetachedTimestampFile} detachedStamped - The detached of stamped file.
    * @param {DetachedTimestampFile} detachedOriginal - The detached of original file.
    * @param {Object} options - The option arguments.
-   * @param {String[]} options.insight.urls - array of insight server urls.
-   * @param {number} options.insight.timeout - timeout (in seconds) used for calls to insight servers.
+   * @param {Object} options.esplora - The options for esplora explorer.
    * @param {String[]} options.calendars - Override calendars in timestamp.
    * @param {UrlWhitelist} options.whitelist - Remote calendar whitelist.
    * @return {Promise<HashMap<String,Object>,Error>} if resolve return list of verified attestations indexed by chain.
@@ -278,8 +277,7 @@ module.exports = {
   /** Verify a timestamp.
    * @param {Timestamp} timestamp - The timestamp.
    * @param {Object} options - The option arguments.
-   * @param {String[]} options.insight.urls - array of insight server urls
-   * @param {number} options.insight.timeout - timeout (in seconds) used for calls to insight servers
+   * @param {Object} options.esplora - The options for esplora explorer.
    * @return {Promise<HashMap<String,Object>,Error>} if resolve return list of verified attestations indexed by chain.
    *    timestamp: unix timestamp
    *    height: block height of the min attestation
@@ -331,32 +329,27 @@ module.exports = {
    * @param {TimeAttestation} attestation - The attestation to verify.
    * @param {byte[]} msg - The digest to verify.
    * @param {Object} options - The option arguments.
-   * @param {String[]} options.insight.urls - array of insight server urls
-   * @param {number} options.insight.timeout - timeout (in seconds) used for calls to insight servers
+   * @param {Object} options.esplora - The options for esplora explorer.
    * @return {Promise<Object,Error>} if resolve return verified attestations parameters
    *    chain: the chain type
    *    attestedTime: unix timestamp fo the block
    *    height: block height of the attestation
    */
-  verifyAttestation (attestation, msg, options) {
+  verifyAttestation (attestation, msg, options = {}) {
     return new Promise((resolve, reject) => {
-      function liteVerify (options) {
+      function liteVerify (options = {}) {
         // There is no local node available or is turned of
-        // Request to insight
-        const insightOptionSet = options && Object.prototype.hasOwnProperty.call(options, 'insight')
-        const insightOptions = insightOptionSet ? options.insight : null
-        const chain = insightOptionSet && options.insight.chain ? options.insight.chain : 'bitcoin'
-        const insight = new Insight.MultiInsight(insightOptions)
-        insight.blockhash(attestation.height).then(blockHash => {
+        // Request to esplora
+        options.chain = options.chain ? options.chain : 'bitcoin'
+        const esplora = new Esplora(options)
+        esplora.blockhash(attestation.height).then(blockHash => {
           console.log('Lite-client verification, assuming block ' + blockHash + ' is valid')
-          insight.block(blockHash).then(blockHeader => {
-            // One Bitcoin attestation is enough
-            resolve({attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader), 'chain': chain, 'height': attestation.height})
-          }).catch(err => {
-            reject(new Notary.VerificationError(chain + ' verification failed: ' + err.message))
-          })
-        }).catch(() => {
-          reject(new Notary.VerificationError(chain + ' block height ' + attestation.height + ' not found'))
+          return esplora.block(blockHash)
+        }).then(blockHeader => {
+          const attestedTime = attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader)
+          resolve({attestedTime: attestedTime, 'chain': options.chain, 'height': attestation.height})
+        }).catch(err => {
+          reject(new Notary.VerificationError(options.chain + ' verification failed: ' + err.message))
         })
       }
 
@@ -376,8 +369,8 @@ module.exports = {
           return reject(err)
         }
       } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-        if (options && options.insight && options.insight.urls) {
-          liteVerify(options)
+        if (options && options.esplora) {
+          liteVerify(options.esplora ? options.esplora : {})
         } else {
           // Check for local bitcoin configuration
           Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
@@ -394,14 +387,12 @@ module.exports = {
             })
           }).catch(() => {
             console.error('Could not connect to local Bitcoin node')
-            liteVerify()
+            liteVerify(options.esplora ? options.esplora : {})
           })
         }
       } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
-        options = {}
-        options.insight = {}
-        options.insight.chain = 'litecoin'
-        liteVerify(options)
+        console.error('Verification not available on Litecoin')
+        reject(new Notary.VerificationError('Verification not available on Litecoin'))
       }
     })
   },
