@@ -57,8 +57,15 @@ gulp.task('index', () => {
     }); */
 })
 
+gulp.task('default', gulp.series('clean', 'index', 'compress', done => { 
+    // default task code here
+    done()
+}));
+
+/*
 gulp.task('default', done => {
   runSequence('clean', 'index', 'compress', () => {
     done()
   })
 })
+*/
