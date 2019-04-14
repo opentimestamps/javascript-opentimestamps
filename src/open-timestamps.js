@@ -8,6 +8,7 @@
  */
 
 const Web3 = require('web3')
+const Promise = require('promise')
 const Context = require('./context.js')
 const DetachedTimestampFile = require('./detached-timestamp-file.js')
 const Timestamp = require('./timestamp.js')
@@ -106,63 +107,58 @@ module.exports = {
    * @param {String[]} options.privateCalendars - private calendar url list with secret key.
    * @return {Promise<void,Error>} if resolve modified detaches parameter.
    */
-  stamp (detaches, options) {
-    return new Promise((resolve, reject) => {
-      // Parse input detaches
-      let detachedList
-      if (detaches instanceof DetachedTimestampFile) {
-        detachedList = [detaches]
-      } else if (detaches instanceof Array) {
-        detachedList = detaches
-      } else {
-        return reject(new Error('Invalid input'))
-      }
+  stamp (detaches, options = {}) {
+    // Parse input detaches
+    let detachedList
+    if (detaches instanceof DetachedTimestampFile) {
+      detachedList = [detaches]
+    } else if (detaches instanceof Array) {
+      detachedList = detaches
+    } else {
+      return new Promise((resolve, reject) => { reject(new Error('Invalid input')) })
+    }
 
-      // Build markle tree
-      const merkleTip = this.makeMerkleTree(detachedList)
-      if (merkleTip === undefined) {
-        return reject(new Error('Invalid input'))
-      }
+    // Build markle tree
+    const merkleTip = this.makeMerkleTree(detachedList)
+    if (merkleTip === undefined) {
+      return new Promise((resolve, reject) => { reject(new Error('Invalid input')) })
+    }
 
-      // Parse options
-      if (!options) {
-        options = {}
+    if (options.privateCalendars && options.privateCalendars.size > 0) {
+      // Parse options : private calendars
+      options.calendars = []
+      if (!options.m || options.m === 0) {
+        options.m = options.privateCalendars.length
+      } else if (options.m < 0 || options.m > options.calendars.length) {
+        console.log('m cannot be greater than available calendar neither less or equal 0')
+        return new Promise((resolve, reject) => {
+          reject(new Error('m cannot be greater than available calendar neither less or equal 0'))
+        })
       }
-      if (options.privateCalendars && options.privateCalendars.size > 0) {
-        // Parse options : private calendars
-        options.calendars = []
-        if (!options.m || options.m === 0) {
-          options.m = options.privateCalendars.length
-        } else if (options.m < 0 || options.m > options.calendars.length) {
-          console.log('m cannot be greater than available calendar neither less or equal 0')
-          return reject(new Error('m cannot be greater than available calendar neither less or equal 0'))
-        }
-      } else {
-        // Parse options : public calendars
-        options.privateCalendars = []
-        if (!options.calendars || options.calendars.length === 0) {
-          options.calendars = Calendar.DEFAULT_AGGREGATORS
-        }
-        if (!options.m || options.m === 0) {
-          options.m = 1
-          if (options.calendars.length >= 2) {
-            options.m = 2
-          }
-        } else if (options.m < 0 || options.m > options.calendars.length) {
-          console.log('m cannot be greater than available calendar neither less or equal 0')
-          return reject(new Error('m cannot be greater than available calendar neither less or equal 0'))
-        }
+    } else {
+      // Parse options : public calendars
+      options.privateCalendars = []
+      if (!options.calendars || options.calendars.length === 0) {
+        options.calendars = Calendar.DEFAULT_AGGREGATORS
       }
+      if (!options.m || options.m === 0) {
+        options.m = 1
+        if (options.calendars.length >= 2) {
+          options.m = 2
+        }
+      } else if (options.m < 0 || options.m > options.calendars.length) {
+        console.log('m cannot be greater than available calendar neither less or equal 0')
+        return new Promise((resolve, reject) => {
+          reject(new Error('m cannot be greater than available calendar neither less or equal 0'))
+        })
+      }
+    }
 
-      // Build timestamp from the merkle root
-      this.createTimestamp(merkleTip, options.calendars, options.m, options.privateCalendars).then(timestamp => {
-        if (timestamp === undefined) {
-          return reject(new Error('Error on timestamp creation'))
-        }
-        resolve()
-      }).catch(err => {
-        reject(err)
-      })
+    // Build timestamp from the merkle root
+    return this.createTimestamp(merkleTip, options.calendars, options.m, options.privateCalendars).then(timestamp => {
+      if (timestamp === undefined) {
+        throw new Error('Error on timestamp creation')
+      }
     })
   },
 
@@ -192,8 +188,8 @@ module.exports = {
       })
     }
 
-    return new Promise((resolve, reject) => {
-      Promise.all(res.map(Utils.softFail)).then(results => {
+    return Promise.all(res.map(Utils.softFail))
+      .then(results => {
         // console.log('results=' + results);
         results
           .filter(r => !(r instanceof Error) && r !== undefined)
@@ -201,11 +197,8 @@ module.exports = {
             timestamp.merge(resultTimestamp)
           })
         // console.log(timestamp.strTree());
-        return resolve(timestamp)
-      }).catch(err => {
-        reject(err)
+        return timestamp
       })
-    })
   },
 
   /**
@@ -263,15 +256,8 @@ module.exports = {
       })
     }
 
-    const self = this
-    return new Promise((resolve, reject) => {
-      self.upgradeTimestamp(detachedStamped.timestamp, options).then(() => {
-        self.verifyTimestamp(detachedStamped.timestamp, options).then(results => {
-          return resolve(results)
-        }).catch(err => {
-          return reject(err)
-        })
-      })
+    return this.upgradeTimestamp(detachedStamped.timestamp, options).then(() => {
+      return this.verifyTimestamp(detachedStamped.timestamp, options)
     })
   },
 
@@ -303,27 +289,23 @@ module.exports = {
     }
 
     // verify all completed attestations
-    return new Promise((resolve, reject) => {
-      Promise.all(res.map(Utils.softFail)).then(results => {
-        // check bad attestations
-        const errors = results.filter(i => { if (i.constructor === Notary.VerificationError) return i; else return undefined })
-        if (errors.length > 0) {
-          return reject(errors[0])
-        }
+    return Promise.all(res.map(Utils.softFail)).then(results => {
+      // check bad attestations
+      const errors = results.filter(i => { if (i.constructor === Notary.VerificationError) return i; else return undefined })
+      if (errors.length > 0) {
+        throw errors[0]
+      }
 
-        // attestations grouped by chain and sorted to get the min height for each chain
-        var outputs = {}
-        const filtered = results.filter(i => { if (i instanceof Error) return undefined; else return i })
-        const groupByChain = groupBy(filtered, 'chain')
-        Object.keys(groupByChain).map(key => groupByChain[key]).forEach((items) => {
-          var item = items.sort(compare)[0]
-          outputs[item.chain] = { 'timestamp': item.attestedTime, 'height': item.height }
-        })
-
-        return resolve(outputs)
-      }).catch(err => {
-        reject(err)
+      // attestations grouped by chain and sorted to get the min height for each chain
+      var outputs = {}
+      const filtered = results.filter(i => { if (i instanceof Error) return undefined; else return i })
+      const groupByChain = groupBy(filtered, 'chain')
+      Object.keys(groupByChain).map(key => groupByChain[key]).forEach((items) => {
+        var item = items.sort(compare)[0]
+        outputs[item.chain] = { 'timestamp': item.attestedTime, 'height': item.height }
       })
+
+      return outputs
     })
   },
 
@@ -339,65 +321,60 @@ module.exports = {
    *    height: block height of the attestation
    */
   verifyAttestation (attestation, msg, options = {}) {
-    return new Promise((resolve, reject) => {
-      function liteVerify (options = {}) {
-        // There is no local node available or is turned of
-        // Request to esplora
-        options.chain = options.chain ? options.chain : 'bitcoin'
-        const esplora = new Esplora(options)
-        esplora.blockhash(attestation.height).then(blockHash => {
-          console.log('Lite-client verification, assuming block ' + blockHash + ' is valid')
-          return esplora.block(blockHash)
-        }).then(blockHeader => {
-          const attestedTime = attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader)
-          resolve({attestedTime: attestedTime, 'chain': options.chain, 'height': attestation.height})
-        }).catch(err => {
-          reject(new Notary.VerificationError(options.chain + ' verification failed: ' + err.message))
-        })
-      }
+    function liteVerify (options = {}) {
+      // There is no local node available or is turned of
+      // Request to esplora
+      options.chain = options.chain ? options.chain : 'bitcoin'
+      const esplora = new Esplora(options)
+      return esplora.blockhash(attestation.height).then(blockHash => {
+        console.log('Lite-client verification, assuming block ' + blockHash + ' is valid')
+        return esplora.block(blockHash)
+      }).then(blockHeader => {
+        const attestedTime = attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader)
+        return { attestedTime: attestedTime, 'chain': options.chain, 'height': attestation.height }
+      }).catch(err => {
+        throw new Notary.VerificationError(options.chain + ' verification failed: ' + err.message)
+      })
+    }
 
-      if (attestation instanceof Notary.PendingAttestation) {
-        return reject(new Error('PendingAttestation'))
-      } else if (attestation instanceof Notary.UnknownAttestation) {
-        return reject(new Error('UnknownAttestation'))
-      } else if (attestation instanceof Notary.EthereumBlockHeaderAttestation) {
-        try {
-          const web3 = new Web3()
-          web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'))
-          const block = web3.eth.getBlock(attestation.height)
-          const attestedTime = attestation.verifyAgainstBlockheader(msg, block)
-          // console.log("Success! Ethereum attests data existed as of " % time.strftime('%c %Z', time.localtime(attestedTime)))
-          return resolve(attestedTime)
-        } catch (err) {
-          return reject(err)
-        }
-      } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-        if (options.ignoreBitcoinNode) {
-          liteVerify(options.esplora ? options.esplora : {})
-        } else {
-          // Check for local bitcoin configuration
-          Bitcoin.BitcoinNode.readBitcoinConf().then(properties => {
-            const bitcoin = new Bitcoin.BitcoinNode(properties)
-            bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
-              // One Bitcoin attestation is enought
-              resolve({
-                attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
-                chain: 'bitcoin',
-                height: attestation.height
-              })
-            }).catch((err) => {
-              reject(new Notary.VerificationError('Bitcoin verification failed: ' + err.message))
-            })
-          }).catch(() => {
-            console.error('Could not connect to local Bitcoin node')
-            liteVerify(options.esplora ? options.esplora : {})
-          })
-        }
-      } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
-        console.error('Verification not available on Litecoin')
-        reject(new Notary.VerificationError('Verification not available on Litecoin'))
+    if (attestation instanceof Notary.PendingAttestation) {
+      return new Promise((resolve, reject) => { reject(new Error('PendingAttestation')) })
+    } else if (attestation instanceof Notary.UnknownAttestation) {
+      return new Promise((resolve, reject) => { reject(new Error('UnknownAttestation')) })
+    } else if (attestation instanceof Notary.EthereumBlockHeaderAttestation) {
+      const web3 = new Web3()
+      web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'))
+      return web3.eth.getBlock(attestation.height).then((block) => {
+        return attestation.verifyAgainstBlockheader(msg, block)
+        // console.log("Success! Ethereum attests data existed as of " % time.strftime('%c %Z', time.localtime(attestedTime)))
+      })
+    } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
+      if (options.ignoreBitcoinNode) {
+        return liteVerify(options.esplora ? options.esplora : {})
       }
-    })
+      // Check for local bitcoin configuration
+      return Bitcoin.BitcoinNode.readBitcoinConf()
+        .then(properties => {
+          const bitcoin = new Bitcoin.BitcoinNode(properties)
+          return bitcoin.getBlockHeader(attestation.height)
+        }).then(blockHeader => {
+          // One Bitcoin attestation is enought
+          return {
+            attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
+            chain: 'bitcoin',
+            height: attestation.height
+          }
+        }).catch((err) => {
+          if (err.message !== 'Invalid bitcoin.conf file') {
+            throw new Notary.VerificationError('Bitcoin verification failed: ' + err.message)
+          }
+          console.error('Could not connect to local Bitcoin node')
+          return liteVerify(options.esplora ? options.esplora : {})
+        })
+    } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
+      console.error('Verification not available on Litecoin')
+      return new Promise((resolve, reject) => { reject(new Error('LitecoinAttestation')) })
+    }
   },
 
   /** Upgrade a timestamp.
@@ -409,23 +386,11 @@ module.exports = {
    * @return {Promise<boolean,Error>} if resolve return True if the timestamp has changed, False otherwise.
    */
   upgrade (detached, options) {
-    return new Promise((resolve, reject) => {
-      // Upgrade timestamp
-      this.upgradeTimestamp(detached.timestamp, options).then(changed => {
-        if (changed) {
-          // console.log('Timestamp upgraded');
-        }
-
-        if (detached.timestamp.isTimestampComplete()) {
-          // console.log('Timestamp complete');
-        } else {
-          // console.log('Timestamp not complete');
-        }
-
-        resolve(changed)
-      }).catch(err => {
-        reject(err)
-      })
+    // Upgrade timestamp
+    return this.upgradeTimestamp(detached.timestamp, options).then(changed => {
+      // changed = true - Timestamp upgraded
+      // detached.timestamp.isTimestampComplete() - Timestamp complete
+      return changed
     })
   },
 
@@ -478,21 +443,20 @@ module.exports = {
       })
     })
 
-    return new Promise((resolve, reject) => {
-      Promise.all(promises.map(Utils.softFail)).then(results => {
-        let changed = false
+    return Promise.all(promises.map(Utils.softFail))
+      .then(results => {
+        var changed = false
         results.forEach(result => {
           if (result !== undefined && !(result instanceof Error)) {
             changed = true
             result.subStamp.merge(result.upgradedStamp)
           }
         })
-        resolve(changed)
+        return changed
       }).catch(err => {
         console.error(err)
-        reject(err)
+        throw err
       })
-    })
   },
 
   /** Merge attestations of a timestamp
@@ -503,38 +467,33 @@ module.exports = {
      * @return {Promise<boolean,Error>} if resolve return original and upgraded timestamp.
      */
   upgradeStamp (subStamp, calendar, commitment, existingAttestations) {
-    return new Promise((resolve, reject) => {
-      calendar.getTimestamp(commitment).then(upgradedStamp => {
-        // console.log(Timestamp.strTreeExtended(upgradedStamp, 0));
+    return calendar.getTimestamp(commitment).then(upgradedStamp => {
+      // console.log(Timestamp.strTreeExtended(upgradedStamp, 0));
+      // const atts_from_remote = get_attestations(upgradedStamp)
+      const attsFromRemote = upgradedStamp.getAttestations()
+      if (attsFromRemote.size > 0) {
+        // console.log(attsFromRemote.size + ' attestation(s) from ' + calendar.url);
+        console.log('Got 1 attestation(s) from ' + calendar.url)
+      }
 
-        // const atts_from_remote = get_attestations(upgradedStamp)
-        const attsFromRemote = upgradedStamp.getAttestations()
-        if (attsFromRemote.size > 0) {
-          // console.log(attsFromRemote.size + ' attestation(s) from ' + calendar.url);
-          console.log('Got 1 attestation(s) from ' + calendar.url)
-        }
+      // Set difference from remote attestations & existing attestations
+      const newAttestations = new Set([...attsFromRemote].filter(x => !existingAttestations.has(x)))
+      if (newAttestations.size > 0) {
+        // changed & found_new_attestations
+        // foundNewAttestations = true;
+        // console.log(attsFromRemote.size + ' attestation(s) from ' + calendar.url);
 
-        // Set difference from remote attestations & existing attestations
-        const newAttestations = new Set([...attsFromRemote].filter(x => !existingAttestations.has(x)))
-        if (newAttestations.size > 0) {
-          // changed & found_new_attestations
-          // foundNewAttestations = true;
-          // console.log(attsFromRemote.size + ' attestation(s) from ' + calendar.url);
-
-          // Set union of existingAttestations & newAttestations
-          existingAttestations = new Set([...existingAttestations, ...newAttestations])
-          resolve({subStamp, upgradedStamp})
-          // subStamp.merge(upgradedStamp);
-          // args.cache.merge(upgraded_stamp)
-          // sub_stamp.merge(upgraded_stamp)
-        } else {
-          resolve()
-        }
-      }).catch(err => {
-        console.log('Calendar ' + calendar.url + ': ' + err.message)
-        reject(err)
-      })
+        // Set union of existingAttestations & newAttestations
+        existingAttestations = new Set([...existingAttestations, ...newAttestations])
+        return { subStamp, upgradedStamp }
+        // subStamp.merge(upgradedStamp);
+        // args.cache.merge(upgraded_stamp)
+        // sub_stamp.merge(upgraded_stamp)
+      }
+      return {}
+    }).catch(err => {
+      console.log('Calendar ' + calendar.url + ': ' + err.message)
+      throw err
     })
   }
-
 }

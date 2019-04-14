@@ -51,7 +51,7 @@ class BitcoinNode {
       const file = home + dir
 
       const promise = new Promise((resolve, reject) => {
-        properties.parse(file, {path: true}, (error, obj) => {
+        properties.parse(file, { path: true }, (error, obj) => {
           if (error) {
             return reject(error)
           }
@@ -76,19 +76,17 @@ class BitcoinNode {
       promises.push(promise)
     })
 
-    return new Promise((resolve, reject) => {
-      Promise.all(promises.map(Utils.softFail)).then(results => {
-        if (results === undefined || results.length === 0) {
-          return reject(new Error('Invalid bitcoin.conf file'))
-        }
+    return Promise.all(promises.map(Utils.softFail)).then(results => {
+      if (results === undefined || results.length === 0) {
+        throw new Error('Invalid bitcoin.conf file')
+      }
 
-        results.forEach(prop => {
-          if (!(prop instanceof Error) && prop.rpcuser !== undefined && prop.rpcpassword !== undefined) {
-            return resolve(prop)
-          }
-        })
-        reject(new Error('Invalid bitcoin.conf file'))
-      })
+      for (var prop in results) {
+        if (!(prop instanceof Error) && prop.rpcuser !== undefined && prop.rpcpassword !== undefined) {
+          return prop
+        }
+      }
+      throw new Error('Invalid bitcoin.conf file')
     })
   }
 
@@ -101,30 +99,25 @@ class BitcoinNode {
   }
 
   getBlockHeader (height) {
-    return new Promise((resolve, reject) => {
-      const params = {
-        id: 'java',
-        method: 'getblockhash',
-        params: [height]
-      }
-      this.callRPC(params).then(result => {
+    const params = {
+      id: 'java',
+      method: 'getblockhash',
+      params: [height]
+    }
+    return this.callRPC(params)
+      .then(result => {
         const params = {
           id: 'java',
           method: 'getblockheader',
           params: [result]
         }
-        this.callRPC(params).then(result => {
-          const blockHeader = new BlockHeader(result.merkleroot, result.hash, result.time)
-          resolve(blockHeader)
-        }).catch(err => {
-          console.error('getBlockHeader : ' + err)
-          reject(err)
-        })
+        return this.callRPC(params)
+      }).then(result => {
+        return new BlockHeader(result.merkleroot, result.hash, result.time)
       }).catch(err => {
         console.error('getBlockHeader : ' + err)
-        reject(err)
+        throw err
       })
-    })
   }
 
   /**
@@ -145,22 +138,18 @@ class BitcoinNode {
       json: true,
       body: JSON.stringify(params)
     }
-    return new Promise((resolve, reject) => {
-      requestPromise(options)
-        .then(body => {
-          // console.log('body ', body);
-          if (body.length === 0) {
-            console.error('RPC response error body ')
-            reject(new Error('RPC response error body '))
-            return
-          }
-          resolve(body.result)
-        })
-        .catch(err => {
-          console.error('RPC response error: ' + err)
-          reject(err)
-        })
-    })
+    return requestPromise(options)
+      .then(body => {
+      // console.log('body ', body);
+        if (body.length === 0) {
+          console.error('RPC response error body ')
+          throw new Error('RPC response error body ')
+        }
+        return body.result
+      }).catch(err => {
+        console.error('RPC response error: ' + err)
+        throw err
+      })
   }
 }
 

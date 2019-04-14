@@ -8,7 +8,6 @@
  */
 
 const requestPromise = require('request-promise')
-const Promise = require('promise')
 const url = require('url')
 const minimatch = require('minimatch')
 require('./extend-error.js')
@@ -94,22 +93,17 @@ class RemoteCalendar {
       options.headers['x-signature'] = signature
     }
 
-    return new Promise((resolve, reject) => {
-      requestPromise(options)
-        .then(body => {
-          // console.log('body ', body);
-          if (body.size > 10000) {
-            return reject(new ExceededSizeError('Calendar response exceeded size limit'))
-          }
-
-          const ctx = new Context.StreamDeserialization(body)
-          const timestamp = Timestamp.deserialize(ctx, digest)
-          resolve(timestamp)
-        })
-        .catch(err => {
-          return reject(new URLError(err.error.toString()))
-        })
-    })
+    return requestPromise(options)
+      .then(body => {
+        if (body.size > 10000) {
+          throw new ExceededSizeError('Calendar response exceeded size limit')
+        }
+        const ctx = new Context.StreamDeserialization(body)
+        const timestamp = Timestamp.deserialize(ctx, digest)
+        return timestamp
+      }).catch(err => {
+        throw new URLError(err.error.toString())
+      })
   }
 
   /**
@@ -126,25 +120,20 @@ class RemoteCalendar {
       encoding: null
     }
 
-    return new Promise((resolve, reject) => {
-      requestPromise(options)
-        .then(body => {
-          // /console.log('body ', body);
-          if (body.size > 10000) {
-            return reject(new ExceededSizeError('Calendar response exceeded size limit'))
-          }
-          const ctx = new Context.StreamDeserialization(body)
-
-          const timestamp = Timestamp.deserialize(ctx, commitment)
-          return resolve(timestamp)
-        })
-        .catch(err => {
-          if (err.statusCode === 404) {
-            return reject(new CommitmentNotFoundError(err.error.toString()))
-          }
-          return reject(new Error(err.error.toString()))
-        })
-    })
+    return requestPromise(options)
+      .then(body => {
+        if (body.size > 10000) {
+          throw new ExceededSizeError('Calendar response exceeded size limit')
+        }
+        const ctx = new Context.StreamDeserialization(body)
+        const timestamp = Timestamp.deserialize(ctx, commitment)
+        return timestamp
+      }).catch(err => {
+        if (err.statusCode === 404) {
+          throw new CommitmentNotFoundError(err.error.toString())
+        }
+        throw new Error(err.error.toString())
+      })
   }
 }
 
@@ -180,9 +169,9 @@ class UrlWhitelist {
 
 const DEFAULT_CALENDAR_WHITELIST =
     new UrlWhitelist(['https://*.calendar.opentimestamps.org', // Run by Peter Todd
-    'https://*.calendar.eternitywall.com', // Run by Riccardo Casatta of Eternity Wall
-    'https://*.calendar.catallaxy.com' // Run by Vincent Cloutier of Catallaxy
-  ])
+      'https://*.calendar.eternitywall.com', // Run by Riccardo Casatta of Eternity Wall
+      'https://*.calendar.catallaxy.com' // Run by Vincent Cloutier of Catallaxy
+    ])
 
 const DEFAULT_AGGREGATORS =
     ['https://a.pool.opentimestamps.org',
