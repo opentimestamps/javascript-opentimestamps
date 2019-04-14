@@ -16,7 +16,6 @@ const PUBLIC_ESPLORA_URL = 'https://blockstream.info/api'
 
 /** Class used to query Esplora API */
 module.exports = class Esplora {
-
   /**
    * Create a Esplora.
    * @param {Object} options - Esplora options parameters
@@ -42,8 +41,7 @@ module.exports = class Esplora {
     }
     return requestPromise(options)
       .then(body => {
-        if (!body)
-          throw URLError('Empty body')
+        if (!body) { throw URLError('Empty body') }
         return body
       }).catch(err => {
         console.error('Response error: ' + err.toString().substr(0, 100))
@@ -67,12 +65,11 @@ module.exports = class Esplora {
     }
     return requestPromise(options)
       .then(body => {
-        if (!body)
-          throw URLError('Empty body')
+        if (!body) { throw URLError('Empty body') }
         if (!body.merkle_root || !body.timestamp) {
           throw URLError(body)
         }
-        return {merkleroot: body.merkle_root, time: body.timestamp}
+        return { merkleroot: body.merkle_root, time: body.timestamp }
       }).catch(err => {
         console.error('Response error: ' + err.toString().substr(0, 100))
         throw err

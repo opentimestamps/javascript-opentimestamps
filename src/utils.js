@@ -179,7 +179,7 @@ exports.readFilePromise = function (filename, mode) {
 
 exports.readSignatureFile = function (file) {
   return new Promise((resolve, reject) => {
-    properties.parse(file, {path: true, variables: false}, (error, obj) => {
+    properties.parse(file, { path: true, variables: false }, (error, obj) => {
       if (error) {
         return reject(error)
       }

@@ -29,30 +29,30 @@ let osdsp
 let osdspOts
 
 test('setup', assert => {
-  const incompleteOtsInfoPromise = rp({url: baseUrl + '/examples/incomplete.txt.ots.info', encoding: null})
-  const incompleteOtsPromise = rp({url: baseUrl + '/examples/incomplete.txt.ots', encoding: null})
-  const incompletePromise = rp({url: baseUrl + '/examples/incomplete.txt', encoding: null})
+  const incompleteOtsInfoPromise = rp({ url: baseUrl + '/examples/incomplete.txt.ots.info', encoding: null })
+  const incompleteOtsPromise = rp({ url: baseUrl + '/examples/incomplete.txt.ots', encoding: null })
+  const incompletePromise = rp({ url: baseUrl + '/examples/incomplete.txt', encoding: null })
 
-  const helloworldOtsPromise = rp({url: baseUrl + '/examples/hello-world.txt.ots', encoding: null})
-  const helloworldPromise = rp({url: baseUrl + '/examples/hello-world.txt', encoding: null})
+  const helloworldOtsPromise = rp({ url: baseUrl + '/examples/hello-world.txt.ots', encoding: null })
+  const helloworldPromise = rp({ url: baseUrl + '/examples/hello-world.txt', encoding: null })
 
-  const merkle2OtsPromise = rp({url: baseUrl + '/examples/merkle2.txt.ots', encoding: null})
-  const merkle2OtsInfoPromise = rp({url: baseUrl + '/examples/merkle2.txt.ots.info', encoding: null})
+  const merkle2OtsPromise = rp({ url: baseUrl + '/examples/merkle2.txt.ots', encoding: null })
+  const merkle2OtsInfoPromise = rp({ url: baseUrl + '/examples/merkle2.txt.ots.info', encoding: null })
 
-  const unknownPromise = rp({url: baseUrl + '/examples/unknown-notary.txt', encoding: null})
-  const unknownOtsPromise = rp({url: baseUrl + '/examples/unknown-notary.txt.ots', encoding: null})
+  const unknownPromise = rp({ url: baseUrl + '/examples/unknown-notary.txt', encoding: null })
+  const unknownOtsPromise = rp({ url: baseUrl + '/examples/unknown-notary.txt.ots', encoding: null })
 
-  const knownUnknownPromise = rp({url: baseUrl + '/examples/known-and-unknown-notary.txt', encoding: null})
-  const knownUnknownOtsPromise = rp({url: baseUrl + '/examples/known-and-unknown-notary.txt.ots', encoding: null})
+  const knownUnknownPromise = rp({ url: baseUrl + '/examples/known-and-unknown-notary.txt', encoding: null })
+  const knownUnknownOtsPromise = rp({ url: baseUrl + '/examples/known-and-unknown-notary.txt.ots', encoding: null })
 
-  const merkle3Promise = rp({url: baseUrl + '/examples/merkle3.txt', encoding: null})
-  const merkle3OtsPromise = rp({url: baseUrl + '/examples/merkle3.txt.ots', encoding: null})
+  const merkle3Promise = rp({ url: baseUrl + '/examples/merkle3.txt', encoding: null })
+  const merkle3OtsPromise = rp({ url: baseUrl + '/examples/merkle3.txt.ots', encoding: null })
 
-  const badStampPromise = rp({url: baseUrl + '/examples/bad-stamp.txt', encoding: null})
-  const badStampOtsPromise = rp({url: baseUrl + '/examples/bad-stamp.txt.ots', encoding: null})
+  const badStampPromise = rp({ url: baseUrl + '/examples/bad-stamp.txt', encoding: null })
+  const badStampOtsPromise = rp({ url: baseUrl + '/examples/bad-stamp.txt.ots', encoding: null })
 
-  const osdspPromise = rp({url: baseUrl + '/examples/osdsp.txt', encoding: null})
-  const osdspOtsPromise = rp({url: baseUrl + '/examples/osdsp.txt.ots', encoding: null})
+  const osdspPromise = rp({ url: baseUrl + '/examples/osdsp.txt', encoding: null })
+  const osdspOtsPromise = rp({ url: baseUrl + '/examples/osdsp.txt.ots', encoding: null })
 
   Promise.all([
     incompleteOtsInfoPromise, incompleteOtsPromise, incompletePromise,
