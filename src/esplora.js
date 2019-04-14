@@ -37,7 +37,8 @@ module.exports = class Esplora {
       url: this.url + '/block-height/' + height,
       method: 'GET',
       headers: { 'Accept': 'plain/text' },
-      timeout: this.timeout
+      timeout: this.timeout,
+      gzip: true
     }
     return requestPromise(options)
       .then(body => {
