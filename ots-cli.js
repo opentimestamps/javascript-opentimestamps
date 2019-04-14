@@ -89,6 +89,7 @@ const verifyCommand = program
   .option('-f, --file <file>', 'Specify target file explicitly (default: original file present in the same directory without .ots)')
   .option('-d, --digest <digest>', 'Verify a (hex-encoded) digest rather than a file')
   .option('-a, --algorithm <type>', 'Hash algorithm: sha1, sha256 (default), ripemd160')
+  .option('-i, --ignore-bitcoin-node', 'Ignore verification with bitcoin node, only with explorer')
   .description('Verify a timestamp')
   .action((file, options) => {
     isExecuted = true
@@ -104,6 +105,9 @@ const verifyCommand = program
       console.log('Create timestamp with the aid of a remote calendar.')
       console.log(title + ' stamp: ' + options.algorithm + ' unsupported ')
       return
+    }
+    if (!options.ignoreBitcoinNode) {
+      options.ignoreBitcoinNode = false
     }
     options = parseCommon(options)
     verify(file, options)

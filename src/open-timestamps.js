@@ -250,6 +250,7 @@ module.exports = {
    * @param {Object} options.esplora - The options for esplora explorer.
    * @param {String[]} options.calendars - Override calendars in timestamp.
    * @param {UrlWhitelist} options.whitelist - Remote calendar whitelist.
+   * @param {Boolean} options.ignore_bitcoin_node - Ignore verification with bitcoin node, only with explorer.
    * @return {Promise<HashMap<String,Object>,Error>} if resolve return list of verified attestations indexed by chain.
    */
   verify (detachedStamped, detachedOriginal, options) {
@@ -278,6 +279,7 @@ module.exports = {
    * @param {Timestamp} timestamp - The timestamp.
    * @param {Object} options - The option arguments.
    * @param {Object} options.esplora - The options for esplora explorer.
+   * @param {Boolean} options.ignore_bitcoin_node - Ignore verification with bitcoin node, only with explorer.
    * @return {Promise<HashMap<String,Object>,Error>} if resolve return list of verified attestations indexed by chain.
    *    timestamp: unix timestamp
    *    height: block height of the min attestation
@@ -330,6 +332,7 @@ module.exports = {
    * @param {byte[]} msg - The digest to verify.
    * @param {Object} options - The option arguments.
    * @param {Object} options.esplora - The options for esplora explorer.
+   * @param {Boolean]} options.ignore_bitcoin_node - Ignore verification with bitcoin node, only with explorer.
    * @return {Promise<Object,Error>} if resolve return verified attestations parameters
    *    chain: the chain type
    *    attestedTime: unix timestamp fo the block
@@ -369,7 +372,7 @@ module.exports = {
           return reject(err)
         }
       } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-        if (options && options.esplora) {
+        if (options.ignoreBitcoinNode) {
           liteVerify(options.esplora ? options.esplora : {})
         } else {
           // Check for local bitcoin configuration
