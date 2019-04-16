@@ -365,11 +365,11 @@ module.exports = {
             height: attestation.height
           }
         }).catch((err) => {
-          if (err.message !== 'Invalid bitcoin.conf file') {
-            throw new Notary.VerificationError('Bitcoin verification failed: ' + err.message)
+          if (err.message === 'Invalid bitcoin.conf file') {
+            console.error('Could not connect to local Bitcoin node')
+            return liteVerify(options.esplora ? options.esplora : {})
           }
-          console.error('Could not connect to local Bitcoin node')
-          return liteVerify(options.esplora ? options.esplora : {})
+          throw new Notary.VerificationError('Bitcoin verification failed: ' + err.message)
         })
     } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
       console.error('Verification not available on Litecoin')
