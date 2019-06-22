@@ -83,6 +83,7 @@ class RemoteCalendar {
       url: url.resolve(this.url, 'digest'),
       method: 'POST',
       headers: this.headers,
+      timeout: this.timeout,
       encoding: null,
       body: Buffer.from(digest)
     }
@@ -117,6 +118,7 @@ class RemoteCalendar {
       url: url.resolve(this.url, 'timestamp/') + Utils.bytesToHex(commitment),
       method: 'GET',
       headers: this.headers,
+      timeout: this.timeout,
       encoding: null
     }
 
