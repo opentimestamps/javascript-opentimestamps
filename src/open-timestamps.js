@@ -314,7 +314,7 @@ module.exports = {
    * @param {byte[]} msg - The digest to verify.
    * @param {Object} options - The option arguments.
    * @param {Object} options.esplora - The options for esplora explorer.
-   * @param {Boolean]} options.ignore_bitcoin_node - Ignore verification with bitcoin node, only with explorer.
+   * @param {Boolean} options.ignore_bitcoin_node - Ignore verification with bitcoin node, only with explorer.
    * @return {Promise<Object,Error>} if resolve return verified attestations parameters
    *    chain: the chain type
    *    attestedTime: unix timestamp fo the block
