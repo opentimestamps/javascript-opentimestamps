@@ -1,6 +1,6 @@
 {
   "name": "javascript-opentimestamps",
-  "version": "0.4.4-dev",
+  "version": "0.4.5",
   "description": "JS Porting of OpenTimestamps",
   "main": "open-timestamps.js",
   "dependencies": {
@@ -27,7 +27,7 @@
     "babelify": "^7.3.0",
     "browserify": "13.0.0",
     "faucet": "0.0.1",
-    "gulp": "^4.0.0",
+    "gulp": "^3.0.0",
     "gulp-append-prepend": "^1.0.4",
     "gulp-clean": "^0.3.2",
     "gulp-concat": "^2.6.1",
