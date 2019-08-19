@@ -40,6 +40,7 @@ const infoCommand = program
       console.log(infoCommand.helpInformation())
       return
     }
+    options = parseCommon(options)
     info(file, options)
   })
 
@@ -76,9 +77,11 @@ const stampCommand = program
     if (options.key) {
       Utils.readSignatureFile(options.key).then(hashmap => {
         options.privateCalendars = hashmap
+        options = parseCommon(options)
         stamp(files, options)
       })
     } else {
+      options = parseCommon(options)
       stamp(files, options)
     }
   })
@@ -126,6 +129,7 @@ const upgradeCommand = program
     }
     options = parseCommon(options)
     options.calendars = options.calendar
+    options = parseCommon(options)
     upgrade(file, options)
   })
 
