@@ -1,6 +1,6 @@
 {
-  "name": "javascript-opentimestamps",
-  "version": "0.4.5",
+  "name": "opentimestamps",
+  "version": "0.4.6",
   "description": "JS Porting of OpenTimestamps",
   "main": "open-timestamps.js",
   "dependencies": {
@@ -37,7 +37,7 @@
     "jsdoc": "^3.6.3",
     "pump": "^1.0.3",
     "run-sequence": "^1.2.2",
-    "standard": "^11.0.1",
+    "standard": "^13.1.0",
     "tap": "^12.7.0",
     "tap-parser": "~3.0.4",
     "tape": "^4.11.0",
