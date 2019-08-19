@@ -41,7 +41,7 @@
     "tap": "^12.6.1",
     "tap-parser": "~3.0.4",
     "tape": "^4.9.0",
-    "tape-run": "3.0.0",
+    "tape-run": "^3.0.0",
     "vinyl-source-stream": "^1.1.2"
   },
   "scripts": {

@@ -83,6 +83,7 @@ class StreamDeserializationContext {
     this.counter += l
     return Array.from(uint8Array)
   }
+
   readBool () {
     const b = this.read(1)[0]
     if (b === 0xff) {
@@ -92,6 +93,7 @@ class StreamDeserializationContext {
     }
     throw new DeserializationError('read_bool() expected 0xff or 0x00; got +' + b)
   }
+
   readVaruint () {
     let value = 0
     let shift = 0
@@ -103,12 +105,14 @@ class StreamDeserializationContext {
     } while (b & 0b10000000)
     return value
   }
+
   readBytes (expectedLength) {
     if (expectedLength === undefined) {
       expectedLength = this.readVarbytes()
     }
     return this.read(expectedLength)
   }
+
   readVarbytes (maxLen, minLen = 0) {
     const l = this.readVaruint()
     if (l > maxLen) {
@@ -118,18 +122,21 @@ class StreamDeserializationContext {
     }
     return this.read(l)
   }
+
   assertMagic (expectedMagic) {
     const actualMagic = this.read(expectedMagic.length)
     if (!Utils.arrEq(expectedMagic, actualMagic)) {
       throw new BadMagicError(expectedMagic, actualMagic)
     }
   }
+
   assertEof () {
     const excess = this.buffer[this.counter]
     if (excess !== undefined) {
       throw new TrailingGarbageError('Trailing garbage found after end of deserialized data')
     }
   }
+
   toString () {
     return this.buffer.toHex(0)
   }
@@ -141,10 +148,12 @@ class StreamSerializationContext {
     this.buffer = new Uint8Array(1024 * 4)
     this.length = 0
   }
+
   getOutput () {
     const output = this.buffer.slice(0, this.length)
     return output
   }
+
   getLenght () {
     return this.length
   }
@@ -176,6 +185,7 @@ class StreamSerializationContext {
       }
     }
   }
+
   writeByte (value) {
     if (this.length >= this.buffer.length) {
       const newLenght = this.length * 2
@@ -202,6 +212,7 @@ class StreamSerializationContext {
     this.writeVaruint(value.length)
     this.writeBytes(value)
   }
+
   toString () {
     return this.buffer.toHex(0)
   }

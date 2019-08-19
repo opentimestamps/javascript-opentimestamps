@@ -80,7 +80,7 @@ class RemoteCalendar {
    */
   submit (digest) {
     const options = {
-      url: url.resolve(this.url, 'digest'),
+      url: new url.URL('/digest', this.url),
       method: 'POST',
       headers: this.headers,
       timeout: this.timeout,
@@ -115,7 +115,7 @@ class RemoteCalendar {
    */
   getTimestamp (commitment) {
     const options = {
-      url: url.resolve(this.url, 'timestamp/') + Utils.bytesToHex(commitment),
+      url: new url.URL('timestamp/', this.url) + Utils.bytesToHex(commitment),
       method: 'GET',
       headers: this.headers,
       timeout: this.timeout,
