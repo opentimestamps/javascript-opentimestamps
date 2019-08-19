@@ -29,6 +29,8 @@ It has been developed as node modules for being used within Node environments al
 $ npm install -g opentimestamps
 ```
 
+**Note** up to version `0.4.5` the name of the lib was `javascript-opentimestamps`, from version `0.4.6` on npm is just `opentimestamps`.
+
 #### Browser
 
 ##### Get the "binaries"
