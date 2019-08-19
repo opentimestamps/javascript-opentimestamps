@@ -8,7 +8,6 @@
  */
 
 const requestPromise = require('request-promise')
-const url = require('url')
 const minimatch = require('minimatch')
 require('./extend-error.js')
 /*
@@ -80,7 +79,7 @@ class RemoteCalendar {
    */
   submit (digest) {
     const options = {
-      url: url.resolve(this.url, 'digest'),
+      url: new URL('/digest', this.url),
       method: 'POST',
       headers: this.headers,
       timeout: this.timeout,
@@ -115,7 +114,7 @@ class RemoteCalendar {
    */
   getTimestamp (commitment) {
     const options = {
-      url: url.resolve(this.url, 'timestamp/') + Utils.bytesToHex(commitment),
+      url: new URL('/timestamp/' + Utils.bytesToHex(commitment), this.url),
       method: 'GET',
       headers: this.headers,
       timeout: this.timeout,

@@ -23,9 +23,11 @@ class BlockHeader {
   getMerkleroot () {
     return this.merkleroot
   }
+
   getHash () {
     return this.hash
   }
+
   getTime () {
     return this.time
   }

@@ -127,10 +127,12 @@ class OpBinary extends Op {
       return new (_SUBCLS_BY_TAG.get(tag))(arg)
     }
   }
+
   serialize (ctx) {
     super.serialize(ctx)
     ctx.writeVarbytes(this.arg)
   }
+
   toString () {
     return this._TAG_NAME() + ' ' + Utils.bytesToHex(this.arg)
   }
@@ -149,18 +151,23 @@ class OpAppend extends OpBinary {
       this.arg = arg_
     }
   }
+
   _TAG () {
     return 0xf0
   }
+
   _TAG_NAME () {
     return 'append'
   }
+
   call (msg) {
     return msg.concat(this.arg)
   }
+
   static deserializeFromTag (ctx, tag) {
     return super.deserializeFromTag(ctx, tag)
   }
+
   equals (another) {
     return (another instanceof OpAppend) && Utils.arrEq(this.arg, another.arg)
   }
@@ -179,18 +186,23 @@ class OpPrepend extends OpBinary {
       this.arg = arg_
     }
   }
+
   _TAG () {
     return 0xf1
   }
+
   _TAG_NAME () {
     return 'prepend'
   }
+
   call (msg) {
     return this.arg.concat(msg)
   }
+
   static deserializeFromTag (ctx, tag) {
     return super.deserializeFromTag(ctx, tag)
   }
+
   equals (another) {
     return (another instanceof OpPrepend) && Utils.arrEq(this.arg, another.arg)
   }
@@ -207,6 +219,7 @@ class OpUnary extends Op {
     }
     console.error('Unknown operation tag: ', Utils.bytesToHex([tag]))
   }
+
   toString () {
     return this._TAG_NAME()
   }
@@ -220,18 +233,22 @@ class OpReverse extends OpUnary {
   _TAG () {
     return 0xf2
   }
+
   _TAG_NAME () {
     return 'reverse'
   }
+
   call (msg) {
     if (msg.length === 0) {
       console.error('Can\'t reverse an empty message')
     }
     return msg.reverse()
   }
+
   static deserializeFromTag (ctx, tag) {
     return super.deserializeFromTag(ctx, tag)
   }
+
   equals (another) {
     return (another instanceof OpReverse) && Utils.arrEq(this.arg, another.arg)
   }
@@ -245,20 +262,25 @@ class OpHexlify extends OpUnary {
   _TAG () {
     return 0xf3
   }
+
   _TAG_NAME () {
     return 'hexlify'
   }
+
   _MAX_MSG_LENGTH () {
     return OpUnary._MAX_RESULT_LENGTH() // 2
   }
+
   call (msg) {
     if (msg.length === 0) {
       console.error('Can\'t hexlify an empty message')
     }
   }
+
   static deserializeFromTag (ctx, tag) {
     return super.deserializeFromTag(ctx, tag)
   }
+
   equals (another) {
     return (another instanceof OpHexlify) && Utils.arrEq(this.arg, another.arg)
   }
@@ -334,21 +356,27 @@ class OpSHA1 extends CryptOp {
   _TAG () {
     return 0x02
   }
+
   _TAG_NAME () {
     return 'sha1'
   }
+
   _HASHLIB_NAME () {
     return 'sha1'
   }
+
   _DIGEST_LENGTH () {
     return 20
   }
+
   static deserializeFromTag (ctx, tag) {
     return super.deserializeFromTag(ctx, tag)
   }
+
   call (msg) {
     return super.call(this, msg)
   }
+
   equals (another) {
     return another instanceof OpSHA1
   }
@@ -364,21 +392,27 @@ class OpRIPEMD160 extends CryptOp {
   _TAG () {
     return 0x03
   }
+
   _TAG_NAME () {
     return 'ripemd160'
   }
+
   _HASHLIB_NAME () {
     return 'ripemd160'
   }
+
   _DIGEST_LENGTH () {
     return 20
   }
+
   static deserializeFromTag (ctx, tag) {
     return super.deserializeFromTag(ctx, tag)
   }
+
   call (msg) {
     return super.call(this, msg)
   }
+
   equals (another) {
     return another instanceof OpRIPEMD160
   }
@@ -394,18 +428,23 @@ class OpSHA256 extends CryptOp {
   _TAG () {
     return 0x08
   }
+
   _TAG_NAME () {
     return 'sha256'
   }
+
   _HASHLIB_NAME () {
     return 'sha256'
   }
+
   _DIGEST_LENGTH () {
     return 32
   }
+
   static deserializeFromTag (ctx, tag) {
     return super.deserializeFromTag(ctx, tag)
   }
+
   call (msg) {
     return super.call(this, msg)
   }
@@ -425,18 +464,23 @@ class OpKeccak256 extends CryptOp {
   _TAG () {
     return 0x67
   }
+
   _TAG_NAME () {
     return 'keccak256'
   }
+
   _HASHLIB_NAME () {
     return 'keccak256'
   }
+
   _DIGEST_LENGTH () {
     return 32
   }
+
   static deserializeFromTag (ctx, tag) {
     return super.deserializeFromTag(ctx, tag)
   }
+
   call (msg) {
     return super.call(this, msg)
   }

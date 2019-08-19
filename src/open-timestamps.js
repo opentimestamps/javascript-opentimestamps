@@ -302,7 +302,7 @@ module.exports = {
       const groupByChain = groupBy(filtered, 'chain')
       Object.keys(groupByChain).map(key => groupByChain[key]).forEach((items) => {
         var item = items.sort(compare)[0]
-        outputs[item.chain] = { 'timestamp': item.attestedTime, 'height': item.height }
+        outputs[item.chain] = { timestamp: item.attestedTime, height: item.height }
       })
 
       return outputs
@@ -331,7 +331,7 @@ module.exports = {
         return esplora.block(blockHash)
       }).then(blockHeader => {
         const attestedTime = attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader)
-        return { attestedTime: attestedTime, 'chain': options.chain, 'height': attestation.height }
+        return { attestedTime: attestedTime, chain: options.chain, height: attestation.height }
       }).catch(err => {
         throw new Notary.VerificationError(options.chain + ' verification failed: ' + err.message)
       })

@@ -1,9 +1,7 @@
 language: node_js
 node_js:
   - "node"
-  - "7"
-  - "6"
-  - "6.1"
+  - "10.16.2"  
 addons:
   apt:
     packages:

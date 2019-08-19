@@ -36,7 +36,7 @@ module.exports = class Esplora {
     const options = {
       url: this.url + '/block-height/' + height,
       method: 'GET',
-      headers: { 'Accept': 'plain/text' },
+      headers: { Accept: 'plain/text' },
       timeout: this.timeout,
       gzip: true
     }
@@ -59,7 +59,7 @@ module.exports = class Esplora {
     const options = {
       url: this.url + '/block/' + hash,
       method: 'GET',
-      headers: { 'Accept': 'application/json' },
+      headers: { Accept: 'application/json' },
       json: true,
       timeout: this.timeout,
       gzip: true
