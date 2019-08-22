@@ -127,7 +127,6 @@ const upgradeCommand = program
       console.log(upgradeCommand.helpInformation())
       return
     }
-    options = parseCommon(options)
     options.calendars = options.calendar
     options = parseCommon(options)
     upgrade(file, options)
