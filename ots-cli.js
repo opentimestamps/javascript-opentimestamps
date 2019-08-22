@@ -26,7 +26,7 @@ function collect (val, memo) {
 program
   .version(require('./package.json').version)
   .option('-v, --verbose', 'Be more verbose.')
-  .option('-l, --whitelist', 'Add a calendar to the whitelist.')
+  .option('-l, --whitelist <url>', 'Add a calendar to the whitelist.', collect, [])
   .option('--no-default-whitelist', 'Do not load the default remote calendar whitelist; ' +
         'contact only calendars that have been manually added with --whitelist')
 
@@ -40,6 +40,7 @@ const infoCommand = program
       console.log(infoCommand.helpInformation())
       return
     }
+    options = parseCommon(options)
     info(file, options)
   })
 
@@ -76,9 +77,11 @@ const stampCommand = program
     if (options.key) {
       Utils.readSignatureFile(options.key).then(hashmap => {
         options.privateCalendars = hashmap
+        options = parseCommon(options)
         stamp(files, options)
       })
     } else {
+      options = parseCommon(options)
       stamp(files, options)
     }
   })
@@ -124,8 +127,8 @@ const upgradeCommand = program
       console.log(upgradeCommand.helpInformation())
       return
     }
-    options = parseCommon(options)
     options.calendars = options.calendar
+    options = parseCommon(options)
     upgrade(file, options)
   })
 
@@ -138,13 +141,18 @@ if (!isExecuted) {
 // FUNCTIONS
 function parseCommon (options) {
   var whitelist = new Calendar.UrlWhitelist()
-  if (!options.no_default_whitelist) {
+  if (options.parent.defaultWhitelist) {
     whitelist = Calendar.DEFAULT_CALENDAR_WHITELIST
   }
-  whitelist.urls.forEach(url => {
+  options.parent.whitelist.forEach(url => {
     whitelist.add(url)
   })
   options.whitelist = whitelist
+
+  if (options.parent.verbose) {
+    options.verbose = true
+  }
+
   return options
 }
 
