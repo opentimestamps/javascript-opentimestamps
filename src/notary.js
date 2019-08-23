@@ -47,8 +47,6 @@ class TimeAttestation {
       return BitcoinBlockHeaderAttestation.deserialize(ctxPayload)
     } else if (Utils.arrEq(tag, new LitecoinBlockHeaderAttestation()._TAG()) === true) {
       return LitecoinBlockHeaderAttestation.deserialize(ctxPayload)
-    } else if (Utils.arrEq(tag, new EthereumBlockHeaderAttestation()._TAG()) === true) {
-      return EthereumBlockHeaderAttestation.deserialize(ctxPayload)
     }
     return UnknownAttestation.deserialize(ctxPayload, tag)
   }
@@ -318,62 +316,11 @@ class LitecoinBlockHeaderAttestation extends TimeAttestation {
   }
 }
 
-class EthereumBlockHeaderAttestation extends TimeAttestation {
-  _TAG () {
-    return [0x30, 0xfe, 0x80, 0x87, 0xb5, 0xc7, 0xea, 0xd7]
-  }
-
-  constructor (height_) {
-    super()
-    this.height = height_
-  }
-
-  static deserialize (ctxPayload) {
-    const height = ctxPayload.readVaruint()
-    return new EthereumBlockHeaderAttestation(height)
-  }
-
-  serializePayload (ctx) {
-    ctx.writeVaruint(this.height)
-  }
-
-  toString () {
-    return 'EthereumBlockHeaderAttestation(' + parseInt(Utils.bytesToHex([this.height]), 16) + ')'
-  }
-
-  /*
-    Verify attestation against a block header
-    Returns the block time on success; raises VerificationError on failure.
-    */
-  verifyAgainstBlockheader (digest, block) {
-    if (digest.length !== 32) {
-      throw new VerificationError('Expected digest with length 32 bytes; got ' + digest.length + ' bytes')
-    } else if (digest !== Utils.hexToBytes(block.transactionsRoot)) {
-      throw new VerificationError('Digest does not match merkleroot')
-    }
-    return block.timestamp
-  }
-
-  equals (another) {
-    return (another instanceof EthereumBlockHeaderAttestation) &&
-            (Utils.arrEq(this._TAG(), another._TAG())) &&
-            (this.height === another.height)
-  }
-
-  compareTo (other) {
-    if (other instanceof BitcoinBlockHeaderAttestation) {
-      return this.height - other.height
-    }
-    return super.compareTo(other)
-  }
-}
-
 module.exports = {
   VerificationError,
   TimeAttestation,
   UnknownAttestation,
   PendingAttestation,
   BitcoinBlockHeaderAttestation,
-  LitecoinBlockHeaderAttestation,
-  EthereumBlockHeaderAttestation
+  LitecoinBlockHeaderAttestation
 }

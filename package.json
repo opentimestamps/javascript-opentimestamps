@@ -15,8 +15,7 @@
     "properties": "^1.2.1",
     "randomstring": "^1.1.5",
     "request": "^2.85.0",
-    "request-promise": "^4.2.2",
-    "web3": "^0.18.2"
+    "request-promise": "^4.2.2"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

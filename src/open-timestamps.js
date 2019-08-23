@@ -7,7 +7,6 @@
  * @license LPGL3
  */
 
-const Web3 = require('web3')
 const Promise = require('promise')
 const Context = require('./context.js')
 const DetachedTimestampFile = require('./detached-timestamp-file.js')
@@ -341,13 +340,6 @@ module.exports = {
       return new Promise((resolve, reject) => { reject(new Error('PendingAttestation')) })
     } else if (attestation instanceof Notary.UnknownAttestation) {
       return new Promise((resolve, reject) => { reject(new Error('UnknownAttestation')) })
-    } else if (attestation instanceof Notary.EthereumBlockHeaderAttestation) {
-      const web3 = new Web3()
-      web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'))
-      return web3.eth.getBlock(attestation.height).then((block) => {
-        return attestation.verifyAgainstBlockheader(msg, block)
-        // console.log("Success! Ethereum attests data existed as of " % time.strftime('%c %Z', time.localtime(attestedTime)))
-      })
     } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
       if (options.ignoreBitcoinNode) {
         return liteVerify(options.esplora ? options.esplora : {})
