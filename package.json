@@ -9,7 +9,6 @@
     "bytebuffer": "^5.0.1",
     "commander": "^2.20.0",
     "fs": "0.0.1-security",
-    "keccak": "^1.4.0",
     "minimatch": "^3.0.4",
     "moment-timezone": "^0.5.26",
     "promise": "^7.3.1",
