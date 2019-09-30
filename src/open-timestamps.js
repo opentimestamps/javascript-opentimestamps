@@ -19,6 +19,7 @@ const Notary = require('./notary.js')
 const Esplora = require('./esplora.js')
 const Merkle = require('./merkle.js')
 const Bitcoin = require('./bitcoin.js')
+const debug = require('debug')('opentimestamps')
 
 module.exports = {
 
@@ -176,7 +177,7 @@ module.exports = {
       calendars.forEach(calendar => {
         const remote = new Calendar.RemoteCalendar(calendar)
         res.push(remote.submit(timestamp.msg))
-        console.log('Submitting to remote calendar ' + calendar)
+        debug('Submitting to remote calendar ' + calendar)
       })
     }
     if (privateCalendars) {

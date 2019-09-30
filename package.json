@@ -8,6 +8,7 @@
     "bitcore-message": "^1.0.4",
     "bytebuffer": "^5.0.1",
     "commander": "^2.20.0",
+    "debug": "^4.1.1",
     "fs": "0.0.1-security",
     "keccak": "^1.4.0",
     "minimatch": "^3.0.4",
