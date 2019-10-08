@@ -98,6 +98,21 @@ module.exports = {
   },
 
   /**
+   * Prune a timestamp dropping the redundant data included in the ots receipt, storing only the linear proof from the file hash to the best attestation. 
+  */
+  prune(detaches, options = {}) {
+    let prunable = false
+
+    if(detaches.timestamp.getAttestations().length <= 1) { return } 
+    detaches.timestamp.getAttestations().forEach(subStamp => {
+      if(! subStamp instanceof Notary.PendingAttestation ) {
+        prunable = true;
+      }
+    })
+    console.log(prunable)
+  },
+
+  /**
    * Create timestamp with the aid of a remote calendar for one or multiple files.
    * @exports OpenTimestamps/stamp
    * @param {DetachedTimestampFile[]} detaches - The array of detached file to stamp; input/output parameter.
