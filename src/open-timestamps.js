@@ -110,6 +110,8 @@ module.exports = {
       }
     })
     console.log(prunable)
+    detaches.timestamp.attestations =  detaches.timestamp.attestations.filter(item => item === Notary.PendingAttestation)
+    console.log(detaches.timestamp)
   },
 
   /**
