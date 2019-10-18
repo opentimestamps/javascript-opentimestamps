@@ -219,8 +219,14 @@ function prune(argsFileOts,options) {
       }
     }
     // Opentimestamps prune
-    const prunePromise = OpenTimestamps.prune(detachedOts, options)
-    process.exit(1)
+    OpenTimestamps.prune(detachedOts, options)
+      .then(function(results){
+        fs.renameSync(argsFileOts,argsFileOts+".bak")
+        fs.writeFile(argsFileOts, Buffer.from(detachedOts.serializeToBytes()), 'binary',err =>{})
+        console.log("Recepit Pruned")
+      }).catch(err => {
+        console.log("Is not possible to prune due to " + err)
+      })
   }).catch(err => {
     if (err.code === 'ENOENT') {
       console.error('File not found \'' + err.path + '\'')

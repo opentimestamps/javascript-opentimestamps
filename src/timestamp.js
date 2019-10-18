@@ -84,6 +84,16 @@ class Timestamp {
     return self
   }
 
+  delAttestation(clone_to_del) {
+    console.log("Recieved " + clone_to_del)
+    console.log(this.attestations)
+    var index = this.attestations.indexOf(clone_to_del)
+    console.log("I'm going to delete " + index)
+    this.attestations.splice(index,1)
+    console.log("Done!  " +  this.attestations)
+  }
+
+
   /**
    * Create a Serialize object.
    * @param {StreamSerializationContext} ctx - The stream serialization context.
