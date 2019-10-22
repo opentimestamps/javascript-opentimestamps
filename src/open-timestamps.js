@@ -97,42 +97,64 @@ module.exports = {
     return JSON.stringify(json)
   },
 
+  
+  pruneTree(timestamp) {
+    let prun = timestamp.attestations.length == 0
+    let changed = false
 
-  discard_attestation(timestamp) {
+    for(const element of timestamp.ops) {
+      var result = this.pruneTree(element[1])
+      var stamp_prunable = result.prunable
+      var stamp_changed = result.change
+      changed = changed || stamp_changed || stamp_prunable
+      if(stamp_prunable) {
+        timestamp.ops.delete(element[0])
+      } else {
+        prun = false
+      }
+    }
+    return {prunable : prun, change: changed}
+
+  },
+
+  discard_attestation(timestamp, saveOnly) {
     timestamp.getAttestations().forEach(opStamp => {
-      if(opStamp instanceof Notary.PendingAttestation ) {
+      if(!(opStamp instanceof Notary.BitcoinBlockHeaderAttestation && opStamp.height == saveOnly) ) {
         timestamp.attestations.splice(timestamp.attestations.indexOf(opStamp),1)
       }
     })
-
-    timestamp.ops.forEach(opStamp => {
-      this.discard_attestation(opStamp)
-    })
+    var iter =  timestamp.ops.values()
+    let res = iter.next()
+    while (!res.done) {
+      this.discard_attestation(res.value)
+      res = iter.next()
+    }
   },
   /**
    * Prune a timestamp dropping the redundant data included in the ots receipt, storing only the linear proof from the file hash to the best attestation. 
   */
   prune(detaches, options = {}) {
     let prunable = false
+    let maxHead = 0;
 
     if(detaches.timestamp.getAttestations().length <= 1) { 
       return new Promise((resolve, reject) => { reject(new Error('Just one attestation founded')) })
     } 
     detaches.timestamp.getAttestations().forEach(subStamp => {
-      if(!(subStamp instanceof Notary.PendingAttestation)) {
+      if(subStamp instanceof Notary.BitcoinBlockHeaderAttestation) {
         prunable = true;
-      } /*else if(! subStamp instanceof Notary.BitcoinBlockHeaderAttestation) {
-        return new Promise((resolve, reject) => { reject(new Error('No Bitcoin transaction founded')) })
-      }*/
+        maxHead = (maxHead < subStamp.height)? subStamp.height : maxHead 
+      }
     })
-    console.log(detaches.timestamp.strTree())
+    console.log(maxHead)
     if(prunable) {
-      this.discard_attestation(detaches.timestamp)
+      this.discard_attestation(detaches.timestamp, maxHead)
+      this.pruneTree(detaches.timestamp)
       console.log(detaches.timestamp.strTree())
       process.exit(1)
       return new Promise((resolve, reject) => { resolve(detaches) })
     } else {
-      return new Promise((resolve, reject) => { reject(new Error('No changes')) })
+      return new Promise((resolve, reject) => { reject(new Error('There are no Bitcoin Attestation in the file')) })
     }
   
   },
