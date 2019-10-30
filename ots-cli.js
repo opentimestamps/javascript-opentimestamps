@@ -44,18 +44,18 @@ const infoCommand = program
     info(file, options)
   })
 
-  const pruneCommand = program
+const pruneCommand = program
   .command('prune [FILE_OTS]')
   .alias('p')
   .description('Prune timestamp.')
   .action((file, options) => {
     isExecuted = true
     if (!file) {
-      console.log(prugneCommand.helpInformation())
+      console.log(pruneCommand.helpInformation())
       return
     }
     options = parseCommon(options)
-    prune(file,options)
+    prune(file, options)
   })
 
 const stampCommand = program
@@ -199,7 +199,7 @@ function info (argsFileOts, options) {
   })
 }
 
-function prune(argsFileOts,options) {
+function prune (argsFileOts, options) {
   const files = []
   files.push(Utils.readFilePromise(argsFileOts, null))
   Promise.all(files).then(values => {
@@ -220,12 +220,13 @@ function prune(argsFileOts,options) {
     }
     // Opentimestamps prune
     OpenTimestamps.prune(detachedOts, options)
-      .then(function(results){
-        fs.renameSync(argsFileOts,argsFileOts+".bak")
-        fs.writeFile(argsFileOts, Buffer.from(detachedOts.serializeToBytes()), 'binary',err =>{})
-        console.log("Recepit Pruned")
+      .then(function (results) {
+        // Backup the file and create the new receipt
+        fs.renameSync(argsFileOts, argsFileOts + '.bak')
+        fs.writeFile(argsFileOts, Buffer.from(detachedOts.serializeToBytes()), 'binary', err => { if (err) { console.log('Error in serialization') } })
+        console.log('Recepit Pruned')
       }).catch(err => {
-        console.log("Is not possible to prune due to " + err)
+        console.log('Is not possible to prune due to ' + err)
       })
   }).catch(err => {
     if (err.code === 'ENOENT') {

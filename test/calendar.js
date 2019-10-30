@@ -1,6 +1,7 @@
 const test = require('tape')
 const Calendar = require('../src/calendar.js')
 const Utils = require('../src/utils.js')
+const { URL } = require('url')
 
 test('Calendar.privateSubmit()', assert => {
   const digest = Array.from(Utils.randBytes(32))
