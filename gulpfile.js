@@ -44,7 +44,7 @@ gulp.task('index', () => {
   }
   return gulp.src('./')
     .pipe(exec('./node_modules/browserify/bin/cmd.js --standalone "OpenTimestamps" index.js > ./dist/opentimestamps.es6.js', options))
-    .pipe(exec('./node_modules/babel-cli/bin/babel.js ./dist/opentimestamps.es6.js -o ./dist/opentimestamps.js', options))
+    .pipe(exec('./node_modules/.bin/babel ./dist/opentimestamps.es6.js -o ./dist/opentimestamps.js', options))
     .pipe(exec.reporter(reportOptions))
 
     /* NOTE: babelify run babel with .babelrc file, but doesn't convert the code
