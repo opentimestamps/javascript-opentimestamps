@@ -5,7 +5,6 @@
   "main": "open-timestamps.js",
   "dependencies": {
     "bitcore-lib": "^0.13.7",
-    "bitcore-message": "^1.0.4",
     "bytebuffer": "^5.0.1",
     "commander": "^2.20.0",
     "fs": "0.0.1-security",
