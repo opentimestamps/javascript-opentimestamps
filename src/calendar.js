@@ -10,13 +10,7 @@
 const requestPromise = require('request-promise')
 const minimatch = require('minimatch')
 require('./extend-error.js')
-/*
-const bitcoin = require('bitcoinjs-lib') // v2.x.x
-const bitcoinMessage = require('bitcoinjs-message');
-*/
-delete global._bitcore
-const bitcore = require('bitcore-lib')
-const Message = require('bitcore-message')
+
 const Utils = require('./utils.js')
 const Context = require('./context.js')
 const Timestamp = require('./timestamp.js')
@@ -41,22 +35,6 @@ class RemoteCalendar {
     if (!process.browser) { // only in node.js
       this.headers['User-Agent'] = 'javascript-opentimestamps'
     }
-  }
-
-  /**
-   * Set private key.
-   * @param key The private key.
-   */
-  setKey (key) {
-    this.key = key
-  }
-
-  /**
-  * Get private key.
-  * @return The private key.
-  */
-  getKey () {
-    return this.key
   }
 
   /**
@@ -85,12 +63,6 @@ class RemoteCalendar {
       timeout: this.timeout,
       encoding: null,
       body: Buffer.from(digest)
-    }
-    if (this.key !== undefined) {
-      const privateKey = bitcore.PrivateKey.fromWIF(this.key)
-      const message = Utils.bytesToHex(digest)
-      const signature = Message(message).sign(privateKey)
-      options.headers['x-signature'] = signature
     }
 
     return requestPromise(options)

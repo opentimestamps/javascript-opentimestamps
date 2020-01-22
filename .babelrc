@@ -1,18 +1,21 @@
 // with options
 {
   "presets": [
-    [ "env", {
-      "browsers": [
+    [ "@babel/preset-env", {
+      "targets": [
         "last 2 versions",
         "ie >= 9",
         "safari >= 8",
         "firefox >= 40",
         "chrome >= 40",
-        "chromium >= 40"
+        "electron >= 6"
         ],
       "modules": false,
       "debug": true,
-      "useBuiltIns": true
+      "useBuiltIns": "entry"
     }]
+  ],
+  "plugins": [
+    "@babel/plugin-transform-classes"
   ]
 }

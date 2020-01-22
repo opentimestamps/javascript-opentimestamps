@@ -166,7 +166,6 @@ module.exports = {
    * @param {timestamp} timestamp - The timestamp.
    * @param {String[]} calendars - Public calendar url list.
    * @param {number} m - At least M calendars replied.
-   * @param {String[]} privateCalendars - Private calendar url list with secret key.
    * @return {Promise<Timestamp,Error>} if resolve return new timestamp.
    */
   createTimestamp (timestamp, calendars, m, privateCalendars) {
@@ -174,14 +173,6 @@ module.exports = {
     if (calendars) {
       calendars.forEach(calendar => {
         const remote = new Calendar.RemoteCalendar(calendar)
-        res.push(remote.submit(timestamp.msg))
-        console.log('Submitting to remote calendar ' + calendar)
-      })
-    }
-    if (privateCalendars) {
-      privateCalendars.forEach((key, calendar) => {
-        const remote = new Calendar.RemoteCalendar(calendar)
-        remote.setKey(key)
         res.push(remote.submit(timestamp.msg))
         console.log('Submitting to remote calendar ' + calendar)
       })
