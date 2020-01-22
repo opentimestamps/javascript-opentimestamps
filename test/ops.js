@@ -2,14 +2,6 @@ const test = require('tape')
 const Ops = require('../src/ops.js')
 const Utils = require('../src/utils.js')
 
-test('Ops.Keccak256()', assert => {
-  const result = new Ops.OpKeccak256().call(Utils.hexToBytes(''))
-  assert.equals('c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470', Utils.bytesToHex(result))
-  const result2 = new Ops.OpKeccak256().call(Utils.hexToBytes('80'))
-  assert.equals('56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421', Utils.bytesToHex(result2))
-  assert.end()
-})
-
 test('Ops.Sha1()', assert => {
   const result = new Ops.OpSHA1().call(Utils.hexToBytes('0a'))
   assert.equals('adc83b19e793491b1c6ea0fd8b46cd9f32e592fc', Utils.bytesToHex(result))

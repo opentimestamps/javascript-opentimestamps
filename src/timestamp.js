@@ -243,10 +243,6 @@ class Timestamp {
           item.type = 'LitecoinBlockHeaderAttestation'
           item.param = attestation.height
           item.merkle = Utils.bytesToHex(this.msg.reverse())
-        } else if (attestation instanceof Notary.EthereumBlockHeaderAttestation) {
-          item.type = 'EthereumBlockHeaderAttestation'
-          item.param = attestation.height
-          item.merkle = Utils.bytesToHex(this.msg.reverse())
         }
         json.attestations.push(item)
       })
@@ -426,8 +422,6 @@ class Timestamp {
     let found = false
     this.allAttestations().forEach(attestation => {
       if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
-        found = true
-      } else if (attestation instanceof Notary.EthereumBlockHeaderAttestation) {
         found = true
       } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
         found = true

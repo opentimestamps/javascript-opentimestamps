@@ -27,7 +27,6 @@ echo ">> node ots-cli.js stamp -a sha1 -d ${SHA1}" && node ots-cli.js stamp -a s
 # Test: info attestations
 echo ">> node ots-cli.js info examples/incomplete.txt.ots" && (node ots-cli.js info examples/incomplete.txt.ots | grep "PendingAttestation") && \
 echo ">> node ots-cli.js info examples/hello-world.txt.ots" && (node ots-cli.js info examples/hello-world.txt.ots | grep "BitcoinBlockHeaderAttestation") && \
-echo ">> node ots-cli.js info examples/hello-world.txt.eth.ots" && (node ots-cli.js info examples/hello-world.txt.eth.ots | grep "EthereumBlockHeaderAttestation") && \
 echo ">> node ots-cli.js info examples/unknown-notary.txt.ots" && (node ots-cli.js info examples/unknown-notary.txt.ots | grep "UnknownAttestation") && \
 
 # Test: upgrade examples/incomplete.txt and check double upgrade
