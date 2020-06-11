@@ -206,7 +206,7 @@ Const `file` created from the hex representation of the file `examples/incomplet
 Sometimes you don't want to timestamp a file or you already have the sha256 hash of what you want to timestamp. For example, if you want to timestamp the file `examples/incomplete.txt` and you already have its hash you can do this:
 
 ```js
-const hash = Buffer.from('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9');
+const hash = Buffer.from('05c4f616a8e5310d19d938cfd769864d7f4ccdc2ca8b479b10af83564b097af9','hex');
 detached = DetachedTimestampFile.fromHash(new Ops.OpSHA256(), hash);
 ```
 
