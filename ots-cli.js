@@ -93,6 +93,7 @@ const verifyCommand = program
   .option('-d, --digest <digest>', 'Verify a (hex-encoded) digest rather than a file')
   .option('-a, --algorithm <type>', 'Hash algorithm: sha1, sha256 (default), ripemd160')
   .option('-i, --ignore-bitcoin-node', 'Ignore verification with bitcoin node, only with explorer')
+  .option('-t, --timeout <int>', 'Adjust the request timeout (default: 1000), only with explorer')
   .description('Verify a timestamp')
   .action((file, options) => {
     isExecuted = true
@@ -106,11 +107,16 @@ const verifyCommand = program
       options.algorithm = options.algorithm.toLowerCase()
     } else {
       console.log('Create timestamp with the aid of a remote calendar.')
-      console.log(title + ' stamp: ' + options.algorithm + ' unsupported ')
+      console.log(title + ' verify: ' + options.algorithm + ' unsupported ')
       return
     }
     if (!options.ignoreBitcoinNode) {
       options.ignoreBitcoinNode = false
+    }
+    if (parseInt(options.timeout) < 0){
+      console.log('Timeout value should be greater than zero.')
+      console.log(title + ' verify: ' + options.timeout + ' negative value ')
+      return   
     }
     options = parseCommon(options)
     verify(file, options)
