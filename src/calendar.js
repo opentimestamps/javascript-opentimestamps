@@ -7,6 +7,7 @@
  * @license LPGL3
  */
 
+const URL = require('url').URL
 const requestPromise = require('request-promise')
 const minimatch = require('minimatch')
 require('./extend-error.js')
