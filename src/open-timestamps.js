@@ -311,7 +311,7 @@ module.exports = {
    *    height: block height of the attestation
    */
   verifyAttestation (attestation, msg, options = {}) {
-    function liteVerify (options = {}) {
+    function liteVerify () {
       // There is no local node available or is turned of
       // Request to esplora
       options.chain = options.chain ? options.chain : 'bitcoin'
