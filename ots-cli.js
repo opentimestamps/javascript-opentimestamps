@@ -113,10 +113,10 @@ const verifyCommand = program
     if (!options.ignoreBitcoinNode) {
       options.ignoreBitcoinNode = false
     }
-    if (parseInt(options.timeout) < 0){
+    if (parseInt(options.timeout) < 0) {
       console.log('Timeout value should be greater than zero.')
       console.log(title + ' verify: ' + options.timeout + ' negative value ')
-      return   
+      return
     }
     options = parseCommon(options)
     verify(file, options)
