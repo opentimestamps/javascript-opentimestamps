@@ -7,10 +7,14 @@
  * @license LPGL3
  */
 
-const URL = require('url').URL
 const requestPromise = require('request-promise')
 const minimatch = require('minimatch')
 require('./extend-error.js')
+if (URL === undefined) {
+  /* eslint no-global-assign: "error" */
+  /* global URL:writable */
+  URL = require('url').URL
+}
 
 const Utils = require('./utils.js')
 const Context = require('./context.js')
