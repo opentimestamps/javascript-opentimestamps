@@ -233,6 +233,7 @@ module.exports = {
    * @param {Object} options.esplora - The options for esplora explorer.
    * @param {String[]} options.calendars - Override calendars in timestamp.
    * @param {UrlWhitelist} options.whitelist - Remote calendar whitelist.
+   * @param {Number} options.timeout - Override timeout (default: 1000).
    * @param {Boolean} options.ignoreBitcoinNode - Ignore verification with bitcoin node, only with explorer.
    * @return {Promise<HashMap<String,Object>,Error>} if resolve return list of verified attestations indexed by chain.
    */
@@ -255,6 +256,7 @@ module.exports = {
    * @param {Timestamp} timestamp - The timestamp.
    * @param {Object} options - The option arguments.
    * @param {Object} options.esplora - The options for esplora explorer.
+   * @param {Number} options.timeout - Override timeout (default: 1000).
    * @param {Boolean} options.ignoreBitcoinNode - Ignore verification with bitcoin node, only with explorer.
    * @return {Promise<HashMap<String,Object>,Error>} if resolve return list of verified attestations indexed by chain.
    *    timestamp: unix timestamp
@@ -304,6 +306,7 @@ module.exports = {
    * @param {byte[]} msg - The digest to verify.
    * @param {Object} options - The option arguments.
    * @param {Object} options.esplora - The options for esplora explorer.
+   * @param {Number} options.timeout - Override timeout (default: 1000).
    * @param {Boolean} options.ignoreBitcoinNode - Ignore verification with bitcoin node, only with explorer.
    * @return {Promise<Object,Error>} if resolve return verified attestations parameters
    *    chain: the chain type
