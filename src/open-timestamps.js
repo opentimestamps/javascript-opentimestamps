@@ -311,7 +311,7 @@ module.exports = {
    *    height: block height of the attestation
    */
   verifyAttestation (attestation, msg, options = {}) {
-    function liteVerify (options = {}) {
+    function liteVerify () {
       // There is no local node available or is turned of
       // Request to esplora
       options.chain = options.chain ? options.chain : 'bitcoin'
@@ -333,7 +333,7 @@ module.exports = {
       return new Promise((resolve, reject) => { reject(new Error('UnknownAttestation')) })
     } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
       if (options.ignoreBitcoinNode) {
-        return liteVerify(options.esplora ? options.esplora : {})
+        return liteVerify()
       }
       // Check for local bitcoin configuration
       return Bitcoin.BitcoinNode.readBitcoinConf()
@@ -350,7 +350,7 @@ module.exports = {
         }).catch((err) => {
           if (err.message === 'Invalid bitcoin.conf file') {
             console.error('Could not connect to local Bitcoin node')
-            return liteVerify(options.esplora ? options.esplora : {})
+            return liteVerify()
           }
           throw new Notary.VerificationError('Bitcoin verification failed: ' + err.message)
         })
