@@ -42,7 +42,7 @@
     "vinyl-source-stream": "^1.1.2"
   },
   "scripts": {
-    "test": "./test/ots-cli.sh && tap test/*.js && standard ots-cli.js ./src/*.js && browserify test/*.js | tape-run",
+    "test": "./test/ots-cli.sh && tap test/*.js && standard ots-cli.js ./src/*.js",
     "test-verify": "./test/ots-cli.sh && tap 'test/debug/verify.js' test/*.js && standard ots-cli.js ./src/*.js && browserify test/*.js | tape-run",
     "jsdoc": "jsdoc -c conf.json -R README.md src/",
     "dist": "gulp"
