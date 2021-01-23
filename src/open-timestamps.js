@@ -289,11 +289,11 @@ module.exports = {
       }
 
       // attestations grouped by chain and sorted to get the min height for each chain
-      var outputs = {}
+      const outputs = {}
       const filtered = results.filter(i => { if (i instanceof Error) return undefined; else return i })
       const groupByChain = groupBy(filtered, 'chain')
       Object.keys(groupByChain).map(key => groupByChain[key]).forEach((items) => {
-        var item = items.sort(compare)[0]
+        const item = items.sort(compare)[0]
         outputs[item.chain] = { timestamp: item.attestedTime, height: item.height }
       })
 
@@ -407,7 +407,7 @@ module.exports = {
           if (subStamp.isTimestampComplete()) {
             return
           }
-          var calendars = []
+          let calendars = []
           if (options.calendars && options.calendars.length > 0) {
             calendars = options.calendars.slice()
             console.log('Attestation URI ' + attestation.uri + ' overridden by user-specified remote calendar(s)')
@@ -431,7 +431,7 @@ module.exports = {
 
     return Promise.all(promises.map(Utils.softFail))
       .then(results => {
-        var changed = false
+        let changed = false
         results.forEach(result => {
           if (result !== undefined && !(result instanceof Error)) {
             changed = true
