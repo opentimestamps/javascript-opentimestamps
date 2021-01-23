@@ -49,7 +49,6 @@ const stampCommand = program
   .alias('s')
   .option('-c, --calendar [url]', 'Create timestamp with the aid of a remote calendar. May be specified multiple times', collect, [])
   .option('-m <int>', 'Commitments are sent to remote calendars in the event of timeout the timestamp is considered done if at least M calendars replied')
-  .option('-k, --key <file>', 'Signature key file of private remote calendars')
   .option('-d, --digest <digest>', 'Verify a (hex-encoded) digest rather than a file')
   .option('-a, --algorithm <type>', 'Hash algorithm: sha1, sha256 (default), ripemd160')
   .description('Create timestamp with the aid of a remote calendar, the output receipt will be saved with .ots')
@@ -73,17 +72,8 @@ const stampCommand = program
       console.log(title + ' stamp: ' + options.algorithm + ' unsupported ')
       return
     }
-
-    if (options.key) {
-      Utils.readSignatureFile(options.key).then(hashmap => {
-        options.privateCalendars = hashmap
-        options = parseCommon(options)
-        stamp(files, options)
-      })
-    } else {
-      options = parseCommon(options)
-      stamp(files, options)
-    }
+    options = parseCommon(options)
+    stamp(files, options)
   })
 
 const verifyCommand = program

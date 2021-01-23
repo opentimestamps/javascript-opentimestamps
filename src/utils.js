@@ -9,7 +9,6 @@
 
 const crypto = require('crypto')
 const fs = require('fs')
-const properties = require('properties')
 
 /**
  * Convert a hex string to a byte array
@@ -173,26 +172,6 @@ exports.readFilePromise = function (filename, mode) {
       } else {
         resolve(buffer)
       }
-    })
-  })
-}
-
-exports.readSignatureFile = function (file) {
-  return new Promise((resolve, reject) => {
-    properties.parse(file, { path: true, variables: false }, (error, obj) => {
-      if (error) {
-        return reject(error)
-      }
-      if (obj === undefined || obj.length === 0) {
-        return reject(new Error('File empty'))
-      }
-      const map = new Map()
-      Object.entries(obj).forEach(item => {
-        const calendar = 'https://' + item[0]
-        const wif = item[1]
-        map.set(calendar, wif)
-      })
-      return resolve(map)
     })
   })
 }
