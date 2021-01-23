@@ -103,7 +103,6 @@ module.exports = {
    * @param {Object} options - The option arguments.
    * @param {String[]} options.calendars - public calendar url list.
    * @param {number} options.m - at least M calendars replied.
-   * @param {String[]} options.privateCalendars - private calendar url list with secret key.
    * @return {Promise<void,Error>} if resolve modified detaches parameter.
    */
   stamp (detaches, options = {}) {
@@ -123,38 +122,24 @@ module.exports = {
       return new Promise((resolve, reject) => { reject(new Error('Invalid input')) })
     }
 
-    if (options.privateCalendars && options.privateCalendars.size > 0) {
-      // Parse options : private calendars
-      options.calendars = []
-      if (!options.m || options.m === 0) {
-        options.m = options.privateCalendars.length
-      } else if (options.m < 0 || options.m > options.calendars.length) {
-        console.log('m cannot be greater than available calendar neither less or equal 0')
-        return new Promise((resolve, reject) => {
-          reject(new Error('m cannot be greater than available calendar neither less or equal 0'))
-        })
+    // Parse options : public calendars
+    if (!options.calendars || options.calendars.length === 0) {
+      options.calendars = Calendar.DEFAULT_AGGREGATORS
+    }
+    if (!options.m || options.m === 0) {
+      options.m = 1
+      if (options.calendars.length >= 2) {
+        options.m = 2
       }
-    } else {
-      // Parse options : public calendars
-      options.privateCalendars = []
-      if (!options.calendars || options.calendars.length === 0) {
-        options.calendars = Calendar.DEFAULT_AGGREGATORS
-      }
-      if (!options.m || options.m === 0) {
-        options.m = 1
-        if (options.calendars.length >= 2) {
-          options.m = 2
-        }
-      } else if (options.m < 0 || options.m > options.calendars.length) {
-        console.log('m cannot be greater than available calendar neither less or equal 0')
-        return new Promise((resolve, reject) => {
-          reject(new Error('m cannot be greater than available calendar neither less or equal 0'))
-        })
-      }
+    } else if (options.m < 0 || options.m > options.calendars.length) {
+      console.log('m cannot be greater than available calendar neither less or equal 0')
+      return new Promise((resolve, reject) => {
+        reject(new Error('m cannot be greater than available calendar neither less or equal 0'))
+      })
     }
 
     // Build timestamp from the merkle root
-    return this.createTimestamp(merkleTip, options.calendars, options.m, options.privateCalendars).then(timestamp => {
+    return this.createTimestamp(merkleTip, options.calendars, options.m).then(timestamp => {
       if (timestamp === undefined) {
         throw new Error('Error on timestamp creation')
       }
@@ -168,7 +153,7 @@ module.exports = {
    * @param {number} m - At least M calendars replied.
    * @return {Promise<Timestamp,Error>} if resolve return new timestamp.
    */
-  createTimestamp (timestamp, calendars, m, privateCalendars) {
+  createTimestamp (timestamp, calendars, m) {
     const res = []
     if (calendars) {
       calendars.forEach(calendar => {
