@@ -83,7 +83,7 @@ class BitcoinNode {
         throw new Error('Invalid bitcoin.conf file')
       }
 
-      for (var prop in results) {
+      for (const prop in results) {
         if (!(prop instanceof Error) && results[prop].rpcuser !== undefined && results[prop].rpcpassword !== undefined) {
           return results[prop]
         }

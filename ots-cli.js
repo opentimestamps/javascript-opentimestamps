@@ -146,7 +146,7 @@ if (!isExecuted) {
 
 // FUNCTIONS
 function parseCommon (options) {
-  var whitelist = new Calendar.UrlWhitelist()
+  let whitelist = new Calendar.UrlWhitelist()
   if (options.parent.defaultWhitelist) {
     whitelist = Calendar.DEFAULT_CALENDAR_WHITELIST
   }
@@ -331,8 +331,8 @@ function verify (argsFileOts, options) {
 
     verifyPromise.then(results => {
       if (results) {
-        Object.keys(results).map(chain => {
-          var date = moment(results[chain].timestamp * 1000).tz(moment.tz.guess()).format('YYYY-MM-DD z')
+        Object.keys(results).forEach(chain => {
+          const date = moment(results[chain].timestamp * 1000).tz(moment.tz.guess()).format('YYYY-MM-DD z')
           console.log('Success! ' + chain[0].toUpperCase() + chain.slice(1) + ' block ' + results[chain].height + ' attests existence as of ' + date)
         })
       }
