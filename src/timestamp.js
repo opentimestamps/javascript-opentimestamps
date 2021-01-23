@@ -238,11 +238,11 @@ class Timestamp {
         } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
           item.type = 'BitcoinBlockHeaderAttestation'
           item.param = attestation.height
-          item.merkle = Utils.bytesToHex(this.msg.reverse())
+          item.merkle = Utils.bytesToHex(this.msg.slice().reverse())
         } else if (attestation instanceof Notary.LitecoinBlockHeaderAttestation) {
           item.type = 'LitecoinBlockHeaderAttestation'
           item.param = attestation.height
-          item.merkle = Utils.bytesToHex(this.msg.reverse())
+          item.merkle = Utils.bytesToHex(this.msg.slice().reverse())
         }
         json.attestations.push(item)
       })
@@ -252,7 +252,7 @@ class Timestamp {
     try {
       bitcore.Transaction(Utils.bytesToHex(this.msg))
       json.tx = new Ops.OpSHA256().call(new Ops.OpSHA256().call(this.msg))
-      json.tx = Utils.bytesToHex(json.tx.reverse())
+      json.tx = Utils.bytesToHex(json.tx.slice().reverse())
     } catch (err) {
     }
 
@@ -272,7 +272,7 @@ class Timestamp {
         try {
           bitcore.Transaction(Utils.bytesToHex(timestamp.msg))
           item.tx = new Ops.OpSHA256().call(new Ops.OpSHA256().call(timestamp.msg))
-          item.tx = Utils.bytesToHex(item.tx.reverse())
+          item.tx = Utils.bytesToHex(item.tx.slice().reverse())
         } catch (err) {
         }
         json.ops.push(item)
