@@ -1,5 +1,5 @@
-var util = require('util')
-var assert = require('assert')
+const util = require('util')
+const assert = require('assert')
 
 /**
  * Add extend() method to Error type
@@ -14,7 +14,7 @@ Error.extend = function (subTypeName, errorCode /* optional */) {
 
   // define new error type
 
-  var SubType = function (message) {
+  const SubType = function (message) {
     // handle constructor call without 'new'
     if (!(this instanceof SubType)) {
       return new SubType(message)
