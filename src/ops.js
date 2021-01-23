@@ -241,7 +241,7 @@ class OpReverse extends OpUnary {
     if (msg.length === 0) {
       console.error('Can\'t reverse an empty message')
     }
-    return msg.reverse()
+    return msg.slice().reverse()
   }
 
   static deserializeFromTag (ctx, tag) {

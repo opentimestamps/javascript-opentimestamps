@@ -323,7 +323,7 @@ module.exports = {
         console.log('Lite-client verification, assuming block ' + blockHash + ' is valid')
         return esplora.block(blockHash)
       }).then(blockHeader => {
-        const attestedTime = attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader)
+        const attestedTime = attestation.verifyAgainstBlockheader(msg.slice().reverse(), blockHeader)
         return { attestedTime: attestedTime, chain: options.chain, height: attestation.height }
       }).catch(err => {
         throw new Notary.VerificationError(options.chain + ' verification failed: ' + err.message)
@@ -346,7 +346,7 @@ module.exports = {
         }).then(blockHeader => {
           // One Bitcoin attestation is enought
           return {
-            attestedTime: attestation.verifyAgainstBlockheader(msg.reverse(), blockHeader),
+            attestedTime: attestation.verifyAgainstBlockheader(msg.slice().reverse(), blockHeader),
             chain: 'bitcoin',
             height: attestation.height
           }
