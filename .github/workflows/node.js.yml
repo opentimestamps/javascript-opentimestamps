@@ -28,3 +28,9 @@ jobs:
     - run: npm install --also=dev
     - run: npm test
     - run: gulp
+    - name: Upload lib
+      uses: actions/upload-artifact@v2
+      with:
+        name: opentimestamps.min.js
+        path: dist/opentimestamps.min.js
+
