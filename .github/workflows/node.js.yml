@@ -26,7 +26,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm install --also=dev
-    - run: npm test
+    - run: sudo apt-get install xvfb
+    - run: xvfb-run --auto-servernum npm test
     - run: gulp
     - name: Upload lib
       uses: actions/upload-artifact@v2
