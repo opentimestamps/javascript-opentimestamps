@@ -1,0 +1,35 @@
+
+name: Test and upload artifact opentimestamps.min.js
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.23.1]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm install --also=dev
+    - run: sudo apt-get install xvfb
+    - run: xvfb-run --auto-servernum npm test
+    - run: gulp
+    - name: Upload lib
+      uses: actions/upload-artifact@v2
+      with:
+        name: opentimestamps.min.js
+        path: dist/opentimestamps.min.js
+
