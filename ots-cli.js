@@ -44,6 +44,20 @@ const infoCommand = program
     info(file, options)
   })
 
+const pruneCommand = program
+  .command('prune [FILE_OTS]')
+  .alias('p')
+  .description('Prune timestamp.')
+  .action((file, options) => {
+    isExecuted = true
+    if (!file) {
+      console.log(pruneCommand.helpInformation())
+      return
+    }
+    options = parseCommon(options)
+    prune(file, options)
+  })
+
 const stampCommand = program
   .command('stamp [FILE...]')
   .alias('s')
@@ -171,6 +185,45 @@ function info (argsFileOts, options) {
         throw err
       }
     }
+  }).catch(err => {
+    if (err.code === 'ENOENT') {
+      console.error('File not found \'' + err.path + '\'')
+    } else {
+      console.error(err.message)
+    }
+    process.exit(1)
+  })
+}
+
+function prune (argsFileOts, options) {
+  const files = []
+  files.push(Utils.readFilePromise(argsFileOts, null))
+  Promise.all(files).then(values => {
+    const fileOts = values[0]
+
+    // Read ots file and check hash function
+    let detachedOts
+    try {
+      detachedOts = DetachedTimestampFile.deserialize(fileOts)
+    } catch (err) {
+      if (err instanceof Context.BadMagicError) {
+        throw new Error('Error! ' + argsFileOts + ' is not a timestamp file.')
+      } else if (err instanceof Context.DeserializationError) {
+        throw new Error('Invalid timestamp file ' + argsFileOts)
+      } else {
+        throw err
+      }
+    }
+    // Opentimestamps prune
+    OpenTimestamps.prune(detachedOts, options)
+      .then(function (results) {
+        // Backup the file and create the new receipt
+        fs.renameSync(argsFileOts, argsFileOts + '.bak')
+        fs.writeFile(argsFileOts, Buffer.from(detachedOts.serializeToBytes()), 'binary', err => { if (err) { console.log('Error in serialization') } })
+        console.log('Recepit Pruned')
+      }).catch(err => {
+        console.log('Is not possible to prune due to ' + err)
+      })
   }).catch(err => {
     if (err.code === 'ENOENT') {
       console.error('File not found \'' + err.path + '\'')
