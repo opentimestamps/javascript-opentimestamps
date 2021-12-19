@@ -48,7 +48,7 @@ npm install --dev
 then run the gulp process
 
 ```
-gulp
+npx gulp
 ```
 
 include the result `/dist/opentimestamps.min.js` in your page
