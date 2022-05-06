@@ -96,6 +96,71 @@ module.exports = {
     return JSON.stringify(json)
   },
 
+  /*
+  * Delete all the dead branches
+  */
+  pruneTree (timestamp) {
+    let prun = timestamp.attestations.length === 0
+    let changed = false
+
+    for (const element of timestamp.ops) {
+      var result = this.pruneTree(element[1])
+      var stampPrunable = result.prunable
+      var stampChanged = result.change
+      changed = changed || stampChanged || stampPrunable
+      if (stampPrunable) {
+        timestamp.ops.delete(element[0])
+      } else {
+        prun = false
+      }
+    }
+    return { prunable: prun, change: changed }
+  },
+
+  /*
+  * Delete all the leaves which didn't match the height passed
+  */
+  discard_attestation (timestamp, heightToKeep) {
+    timestamp.getAttestations().forEach(opStamp => {
+      if (!(opStamp instanceof Notary.BitcoinBlockHeaderAttestation && opStamp.height === heightToKeep)) {
+        timestamp.attestations.splice(timestamp.attestations.indexOf(opStamp), 1)
+      }
+    })
+    var iter = timestamp.ops.values()
+    let res = iter.next()
+    while (!res.done) {
+      this.discard_attestation(res.value)
+      res = iter.next()
+    }
+  },
+  /**
+   * Prune a timestamp dropping the redundant data included in the ots receipt, storing only the linear proof from the file hash to the best attestation.
+   * @exports OpenTimestamps/prune
+   * @param {DetachedTimestampFile[]} detaches - The array of detached file to stamp; input/output parameter.
+   * @param {Object} options - The option arguments. Not used yet
+  */
+  prune (detaches, options = {}) {
+    let prunable = false
+    let maxHead = 0
+
+    if (detaches.timestamp.getAttestations().length <= 1) {
+      return new Promise((resolve, reject) => { reject(new Error('Just one attestation founded')) })
+    }
+    detaches.timestamp.getAttestations().forEach(subStamp => {
+      if (subStamp instanceof Notary.BitcoinBlockHeaderAttestation) {
+        prunable = true
+        maxHead = (maxHead < subStamp.height) ? subStamp.height : maxHead
+      }
+    })
+    if (prunable) {
+      this.discard_attestation(detaches.timestamp, maxHead)
+      this.pruneTree(detaches.timestamp)
+      return new Promise((resolve, reject) => { resolve(detaches) })
+    } else {
+      return new Promise((resolve, reject) => { reject(new Error('There are no Bitcoin Attestation in the file')) })
+    }
+  },
+
   /**
    * Create timestamp with the aid of a remote calendar for one or multiple files.
    * @exports OpenTimestamps/stamp

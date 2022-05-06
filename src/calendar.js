@@ -19,6 +19,7 @@ if (URL === undefined) {
 const Utils = require('./utils.js')
 const Context = require('./context.js')
 const Timestamp = require('./timestamp.js')
+const { URL } = require('url')
 
 /* Errors */
 const CommitmentNotFoundError = Error.extend('CommitmentNotFoundError')
