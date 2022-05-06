@@ -154,7 +154,7 @@ class StreamSerializationContext {
     return output
   }
 
-  getLenght () {
+  getLength () {
     return this.length
   }
 
