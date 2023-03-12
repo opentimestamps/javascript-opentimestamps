@@ -2,7 +2,6 @@
   "name": "opentimestamps",
   "version": "0.4.9",
   "description": "JS Porting of OpenTimestamps",
-  "main": "open-timestamps.js",
   "dependencies": {
     "bitcore-lib": "^8.14.4",
     "bytebuffer": "^5.0.1",
